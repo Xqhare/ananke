@@ -31,7 +31,7 @@ impl List {
     pub fn print_all(list: List) {
         let mut stupid_tracker = 0;
         for task in list.tasks {
-            println!("{stupid_tracker}");
+            println!("Task: -- {stupid_tracker}");
             task.debug_print();
             stupid_tracker += 1;
         }
