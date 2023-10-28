@@ -14,7 +14,8 @@ fn main() {
 
 fn read_file() {
     let path: &str = "./todo-test.txt";
-    list::List::open(path);
+    let todo_list: list::List = list::List::open(path);
+    list::List::print_all(todo_list)
     /* if let Ok(lines) = read_lines(path) {
         for line in lines {
             if let Ok(task) = line {
