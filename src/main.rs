@@ -1,5 +1,6 @@
 use std::env;
 
+mod gui;
 mod list;
 mod task;
 
@@ -10,6 +11,7 @@ const NAME: &str = env!("CARGO_PKG_NAME");
 fn main() {
     println!("Welcome to {NAME} by {AUTHOR}, v. {VERSION}");
     read_file();
+    gui::main();
 }
 
 fn read_file() {
