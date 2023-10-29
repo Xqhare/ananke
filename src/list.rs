@@ -24,6 +24,10 @@ impl List {
         }
         return List{tasks: output};
     }
+    pub fn return_all_tasks(&self) -> Vec<Task> {
+        let output = self.tasks.clone();
+        return output;
+    }
     fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
         let file = File::open(filename)?;
         Ok(io::BufReader::new(file).lines())
