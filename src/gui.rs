@@ -1,3 +1,6 @@
+use core::time;
+use std::thread;
+
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
 use crate::list::List;
@@ -31,7 +34,9 @@ struct TaskWidget {
 //
 // I no longer think that it has to do with mutability; the gui is just reading it again and again?
 // -> After a quick println debugging session: yes. It is constantly being read. How tf do i fix
-// this.
+// this. -> How do I set the application state?
+// => As I understand only in the TaskWidget struct, where I could store a Vec of tasks... if I'm
+// right that is.
 
 impl Default for TaskWidget {
     fn default() -> Self {
@@ -63,6 +68,7 @@ impl TaskWidget {
                     ui.checkbox(&mut checked, text);
                     let mut task_text: String = task.copy_task();
                     ui.text_edit_singleline(&mut task.copy_task());
+                    
                     println!("test {task_text}")
                     });
             }
