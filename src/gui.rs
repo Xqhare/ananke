@@ -25,6 +25,13 @@ struct TaskWidget {
 // I hate both approaches equally. The only way to make it not jank would have to start with a
 // propper save implementation, that could be copied from sesaht.
 // Making the data in tasks mutable however is proving to be tricky.
+//
+// Saving or copying everything into the TaskWidet struct seems to be a better idea, and more
+// practical. Hopefully.
+//
+// I no longer think that it has to do with mutability; the gui is just reading it again and again?
+// -> After a quick println debugging session: yes. It is constantly being read. How tf do i fix
+// this.
 
 impl Default for TaskWidget {
     fn default() -> Self {
@@ -34,8 +41,8 @@ impl Default for TaskWidget {
     }
 }
 
-impl App for TaskWidget {
-    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
+impl TaskWidget {
+    fn testing(&self, ctx: &eframe::egui::Context) {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             ui.heading(format!("{NAME} "));
             ui.label(format!("by {AUTHOR}, v. {VERSION}"));
@@ -55,12 +62,21 @@ impl App for TaskWidget {
                     let text = "Completed";
                     ui.checkbox(&mut checked, text);
                     let mut task_text: String = task.copy_task();
-                    ui.text_edit_singleline(&mut task_text);
+                    ui.text_edit_singleline(&mut task.copy_task());
+                    println!("test {task_text}")
                     });
             }
             ui.separator();
         });
     }
+}
+
+impl App for TaskWidget {
+    // THIS IS THE MAIN LOOP
+    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
+        self.testing(ctx);
+    }
+    
 }
 
 pub fn main() {
