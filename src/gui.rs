@@ -1,16 +1,21 @@
-use core::time;
-use std::thread;
-
+use std::io;
+use std::path::Path;
+use std::io::{BufReader, BufRead};
+use std::fs::File;
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
-use crate::list::List;
+use crate::{list::List, task::Task};
 
 const PADDING: f32 = 4.0;
 const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const NAME: &str = env!("CARGO_PKG_NAME");
+
+// TaskWidget is really the App itself
 struct TaskWidget {
     tasks: List,
+    test_tasks: Vec<Task>,
+    test_strings: Vec<String>,
 }
 
 /* impl TaskWidget {
@@ -37,19 +42,36 @@ struct TaskWidget {
 // this. -> How do I set the application state?
 // => As I understand only in the TaskWidget struct, where I could store a Vec of tasks... if I'm
 // right that is.
+    
+
 
 impl Default for TaskWidget {
     fn default() -> Self {
         let path: &str = "./todo-test.txt";
         let todo_list = List::open(path);
-        return TaskWidget{ tasks: todo_list};
+        let file_lines = Self::read_lines(path);
+        let mut output: Vec<Task> = Vec::new();
+        let mut test_str_out: Vec<String> = Vec::new();
+        if let Ok(lines) = file_lines {
+            
+            for line in lines {
+                if let Ok(task) = line {
+                    let made_task: Task = Task::new(task);
+                    test_str_out.push(made_task.task.clone());
+                    output.push(made_task);
+                }
+            }
+        
+        }
+        return TaskWidget{ tasks: todo_list, test_tasks: output, test_strings: test_str_out};
     }
+    
 }
 
 impl TaskWidget {
     fn testing(&self, ctx: &eframe::egui::Context) {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
-            ui.heading(format!("{NAME} "));
+            ui.heading(format!("{NAME}"));
             ui.label(format!("by {AUTHOR}, v. {VERSION}"));
             for mut task in self.tasks.return_all_tasks() {
                 ui.add_space(PADDING);
@@ -75,12 +97,47 @@ impl TaskWidget {
             ui.separator();
         });
     }
+    fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
+        let file = File::open(filename)?;
+        Ok(BufReader::new(file).lines())
+    }
+    fn test_impl(&mut self, ctx: &eframe::egui::Context) {
+        CentralPanel::default().show(ctx, |ui: &mut Ui| {
+            ui.heading(format!("{NAME}"));
+            ui.label(format!("by {AUTHOR}, v. {VERSION}"));
+            let mut test_counter = 0;
+            for entry in &self.test_tasks {
+                ui.add_space(PADDING);
+                ui.separator();
+                ui.horizontal(|ui| {
+                    
+                    ui.separator();
+                    let mut checked = match entry.completed {
+                        Some(answer) => match answer {
+                            true => true,
+                            _ => false,
+                        }
+                        _ => false,
+                    };
+                    let text = "Completed";
+                    ui.checkbox(&mut checked, text);
+                    let mut task_text: &str = entry.task.as_str();
+                    ui.text_edit_singleline(&mut task_text);
+                    // CODE BELOW WORKS!!!!!!
+                    // --> Accessing the member of thhe vec in the Widget struct explicity
+                    ui.text_edit_singleline(&mut self.test_strings[test_counter]); 
+                    println!("test {task_text}");
+                    test_counter += 1;
+                    });
+            }
+        });
+    }
 }
 
 impl App for TaskWidget {
     // THIS IS THE MAIN LOOP
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
-        self.testing(ctx);
+        self.test_impl(ctx);
     }
     
 }
