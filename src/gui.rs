@@ -5,19 +5,17 @@ use std::fs::File;
 use eframe::egui::{Grid, ScrollArea};
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
-use crate::{list::List, task::Task};
+use crate::task::Task;
 
-const PADDING: f32 = 4.0;
 const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const NAME: &str = env!("CARGO_PKG_NAME");
 
 // TaskWidget is really the App itself
 struct TaskWidget {
-    tasks_list: List,
     tasks_vec: Vec<Task>,
     completed_vec : Vec<bool>,
-    priority_vec: Vec<Option<String>>,
+    priority_vec: Vec<String>,
     complete_date_vec: Vec<Option<String>>,
     create_date_vec: Vec<Option<String>>,
     task_text: Vec<String>,
@@ -51,16 +49,15 @@ struct TaskWidget {
 // => As I understand only in the TaskWidget struct, where I could store a Vec of tasks... if I'm
 // right that is.
     
-
+// Soo egui reaaaly doesn't like options... wich isn't a problem now that i know what wreaked havok
 
 impl Default for TaskWidget {
     fn default() -> Self {
         let path: &str = "./todo-test.txt";
-        let todo_list = List::open(path);
         let file_lines = Self::read_lines(path);
         let mut output: Vec<Task> = Vec::new();
         let mut completed: Vec<bool> = Vec::new();
-        let mut priority: Vec<Option<String>> = Vec::new();
+        let mut priority: Vec<String> = Vec::new();
         let mut complete_date: Vec<Option<String>> = Vec::new();
         let mut creation_date: Vec<Option<String>> = Vec::new();
         let mut task_str_out: Vec<String> = Vec::new();
@@ -85,14 +82,14 @@ impl Default for TaskWidget {
                     completed.push(completed_out);
                     // Extracting priority
                     let priority_out = match made_task.priority {
-                        Some(ref prio) => Option::from(prio.clone()),
-                        _ => Option::default(),
+                        Some(ref prio) => prio.clone(),
+                        _ => String::new(),
                     };
                     priority.push(priority_out);
                     // Extracting completion date
                     let completion_out = match made_task.complete_date {
                         Some(ref date) => Option::from(date.clone()),
-                        _ => Option::default(),
+                        _ => Option::from(String::from("")),
                     };
                     complete_date.push(completion_out);
                     // Extracting creation date
@@ -127,7 +124,7 @@ impl Default for TaskWidget {
             }
         
         }
-        return TaskWidget{ tasks_list: todo_list, tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags };
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags };
     }
     
 }
@@ -165,10 +162,7 @@ impl TaskWidget {
                         ui.checkbox(&mut self.completed_vec[counter], text);
                         // Priority implementation
                         // variable input fields are very versitile!
-                        ui.text_edit_singleline(&mut match self.priority_vec[counter] {
-                            Some(ref prio) => prio.clone(),
-                            _ => String::new(),
-                        });
+                        ui.text_edit_singleline(&mut self.priority_vec[counter]);
                         ui.text_edit_multiline(&mut self.task_text[counter]);
                         // CODE BELOW WORKS!!!!!!
                         // --> Accessing the member of thhe vec in the Widget struct explicity
