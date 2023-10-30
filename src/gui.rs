@@ -2,6 +2,7 @@ use std::io;
 use std::path::Path;
 use std::io::{BufReader, BufRead};
 use std::fs::File;
+use eframe::egui::{Grid, ScrollArea};
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
 use crate::{list::List, task::Task};
@@ -138,31 +139,47 @@ impl TaskWidget {
     }
     fn task_panel(&mut self, ctx: &eframe::egui::Context) {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
-            ui.heading(format!("{NAME}"));
-            ui.label(format!("by {AUTHOR}, v. {VERSION}"));
-            let mut test_counter = 0;
-            for entry in &self.tasks_vec {
-                ui.add_space(PADDING);
-                ui.separator();
-                ui.horizontal(|ui| {
-                    ui.separator();
-
-                    let text = "Completed";
-                    // The to be changed struct member HAS TO BE INSIDE the ui call! Got it!
-                    ui.checkbox(&mut self.completed_vec[test_counter], text);
-                    // Priority implementation
-                    ui.text_edit_singleline(&mut match self.priority_vec[test_counter] {
-                        Some(ref prio) => prio.clone(),
-                        _ => String::new(),
-                    });
-                    // CODE BELOW WORKS!!!!!!
-                    // --> Accessing the member of thhe vec in the Widget struct explicity
-                    ui.text_edit_singleline(&mut self.task_text[test_counter]); 
-                    let tester = &self.task_text[test_counter];
-                    println!("test {tester}");
-                    test_counter += 1;
-                    });
-            }
+            ScrollArea::vertical().show(ui, |ui| {
+                ui.heading(format!("{NAME} - todo.txt editor"));
+                ui.label(format!("by {AUTHOR}, v. {VERSION}"));
+                let mut counter = 0;
+                let vec_strings = vec!["Completed".to_string(), "Priority".to_string(), "Task".to_string()];
+                let temp = ui.separator();
+                let _a_grid = Grid::new(temp.id).striped(true).show(ui, |ui| {
+                    // Drawing the collum names
+                    for mut name in vec_strings {
+                        if name.contains("Task") {
+                            // 40 whitespace padding - let's just call it 'oldschool' ok?
+                            let right_pad = "                                       ";
+                            let left_pad = right_pad;
+                            name.insert_str(0, left_pad);
+                            name.push_str(right_pad);
+                        }
+                        ui.label(name);
+                    }
+                    ui.end_row();
+                    for _entry in &self.tasks_vec {
+                        let text = "Done!";
+                        // The to be changed struct member HAS TO BE INSIDE the ui call! Got it!
+                        // workaround:
+                        ui.checkbox(&mut self.completed_vec[counter], text);
+                        // Priority implementation
+                        // variable input fields are very versitile!
+                        ui.text_edit_singleline(&mut match self.priority_vec[counter] {
+                            Some(ref prio) => prio.clone(),
+                            _ => String::new(),
+                        });
+                        ui.text_edit_multiline(&mut self.task_text[counter]);
+                        // CODE BELOW WORKS!!!!!!
+                        // --> Accessing the member of thhe vec in the Widget struct explicity
+                        // ui.text_edit_singleline(&mut self.task_text[counter]); 
+                        // let tester = &self.task_text[counter];
+                        // println!("test {tester}");
+                        counter += 1;
+                        ui.end_row();
+                    };
+                });
+            });
         });
     }
 }

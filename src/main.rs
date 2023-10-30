@@ -9,7 +9,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 const NAME: &str = env!("CARGO_PKG_NAME");
 
 fn main() {
-    println!("Welcome to {NAME} by {AUTHOR}, v. {VERSION}");
+    // println!("Welcome to {NAME} by {AUTHOR}, v. {VERSION}");
     // read_file();
     gui::main();
 }
