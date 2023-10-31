@@ -27,22 +27,22 @@ struct TaskWidget {
     priority_vec: Vec<String>,
     /// Vector containing the completion date of every task in order, containing a empty String in
     /// case there isn't a completion date.
-    complete_date_vec: Vec<Option<String>>,
+    complete_date_vec: Vec<String>,
     /// Vector containing the creation date of every task in order, containing a empty String in
     /// case there isn't a creation date.
-    create_date_vec: Vec<Option<String>>,
+    create_date_vec: Vec<String>,
     /// Vector containing the main text of every task in order. As this is the minimum of required content of
     /// a task in the todo.txt format, there will never be an empty string inside.
     task_text: Vec<String>,
     /// Vector containing the vector of project tags, of every task in order, containing a empty String in
     /// case there aren't any project tags.
-    project_tags_vec: Vec<Option<Vec<String>>>,
+    project_tags_vec: Vec<Vec<String>>,
     /// Vector containing the vector of context tags, of every task in order, containing a empty String in
     /// case there aren't any context tags.
-    context_tags_vec: Vec<Option<Vec<String>>>,
+    context_tags_vec: Vec<Vec<String>>,
     /// Vector containing the vector of special tags, of every task in order, containing a empty String in
     /// case there aren't any context tags.
-    special_tags_vec: Vec<Option<Vec<String>>>,
+    special_tags_vec: Vec<Vec<String>>,
 }
 
 /* impl TaskWidget {
@@ -89,12 +89,12 @@ impl Default for TaskWidget {
         let mut output: Vec<Task> = Vec::new();
         let mut completed: Vec<bool> = Vec::new();
         let mut priority: Vec<String> = Vec::new();
-        let mut complete_date: Vec<Option<String>> = Vec::new();
-        let mut creation_date: Vec<Option<String>> = Vec::new();
+        let mut complete_date: Vec<String> = Vec::new();
+        let mut creation_date: Vec<String> = Vec::new();
         let mut task_str_out: Vec<String> = Vec::new();
-        let mut project_tags: Vec<Option<Vec<String>>> = Vec::new();
-        let mut context_tags: Vec<Option<Vec<String>>> = Vec::new();
-        let mut special_tags: Vec<Option<Vec<String>>> = Vec::new();
+        let mut project_tags: Vec<Vec<String>> = Vec::new();
+        let mut context_tags: Vec<Vec<String>> = Vec::new();
+        let mut special_tags: Vec<Vec<String>> = Vec::new();
         if let Ok(lines) = file_lines {
             
             for line in lines {
@@ -119,34 +119,34 @@ impl Default for TaskWidget {
                     priority.push(priority_out);
                     // Extracting completion date
                     let completion_out = match made_task.complete_date {
-                        Some(ref date) => Option::from(date.clone()),
-                        _ => Option::from(String::from("")),
+                        Some(ref date) => date.clone(),
+                        _ => String::new(),
                     };
                     complete_date.push(completion_out);
                     // Extracting creation date
                     let creation_out = match made_task.create_date {
-                        Some(ref date) => Option::from(date.clone()),
-                        _ => Option::default(),
+                        Some(ref date) => date.clone(),
+                        _ => String::new(),
                     };
                     creation_date.push(creation_out);
                     // Extracting main text
                     task_str_out.push(made_task.task.clone());
                     // Extracting project tags
                     let project_out = match made_task.project_tags {
-                        Some(ref tags) => Option::from(tags.clone()),
-                        _ => Option::default(),
+                        Some(ref tags) => tags.clone(),
+                        _ => vec![String::new()],
                     };
                     project_tags.push(project_out);
                     // Extracting context tags
                     let context_out = match made_task.context_tags {
-                        Some(ref tags) => Option::from(tags.clone()),
-                        _ => Option::default(),
+                        Some(ref tags) => tags.clone(),
+                        _ => vec![String::new()],
                     };
                     context_tags.push(context_out);
                     // Extracting special tags
                     let special_out = match made_task.special_tags {
-                        Some(ref tags) => Option::from(tags.clone()),
-                        _ => Option::default(),
+                        Some(ref tags) => tags.clone(),
+                        _ => vec![String::new()],
                     };
                     special_tags.push(special_out);
                     // pushing interrogated Task out
@@ -168,6 +168,7 @@ impl TaskWidget {
         let file = File::open(filename)?;
         Ok(BufReader::new(file).lines())
     }
+    
     /// This gui function creates the main window with the title, author, version
     fn task_panel(&mut self, ctx: &eframe::egui::Context) {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
@@ -176,17 +177,32 @@ impl TaskWidget {
                 ui.label(format!("by {AUTHOR}, v. {VERSION}"));
                 ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
                 let mut counter = 0;
-                let vec_strings = vec!["Completed".to_string(), "Priority".to_string(), "Task".to_string()];
+                let vec_strings = vec!["Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
                 let temp = ui.separator();
                 let _a_grid = Grid::new(temp.id).striped(true).show(ui, |ui| {
                     // Drawing the collum names
                     for mut name in vec_strings {
+                        // The 2 whitespace in the Project  Tags is on purpose! - As well
+                        // as in the other Tags too!
+                        if name.contains("Project  Tags") {
+                            // 9 whitespace padding
+                            let padded_name = Self::left_and_rightpad(12, name.clone());
+                            name = padded_name;
+                        }
+                        if name.contains("Context  Tags") {
+                            // 9 whitespace padding
+                            let padded_name = Self::left_and_rightpad(12, name.clone());
+                            name = padded_name;
+                        }
+                        if name.contains("Special  Tags") {
+                            // 9 whitespace padding
+                            let padded_name = Self::left_and_rightpad(12, name.clone());
+                            name = padded_name;
+                        }
                         if name.contains("Task") {
-                            // 40 whitespace padding - let's just call it 'oldschool' ok?
-                            let right_pad = "                                       ";
-                            let left_pad = right_pad;
-                            name.insert_str(0, left_pad);
-                            name.push_str(right_pad);
+                            // 40 whitespace padding
+                            let padded_name = Self::left_and_rightpad(40, name.clone());
+                            name = padded_name;
                         }
                         ui.label(name);
                     }
@@ -194,23 +210,37 @@ impl TaskWidget {
                     for _entry in &self.tasks_vec {
                         let text = "Done!";
                         // The to be changed struct member HAS TO BE INSIDE the ui call! Got it!
-                        // workaround:
                         ui.checkbox(&mut self.completed_vec[counter], text);
+                        // completion and creation dates
+                        ui.text_edit_singleline(&mut self.complete_date_vec[counter]);
+                        ui.text_edit_singleline(&mut self.create_date_vec[counter]);
                         // Priority implementation
                         // variable input fields are very versitile!
                         ui.text_edit_singleline(&mut self.priority_vec[counter]);
                         ui.text_edit_multiline(&mut self.task_text[counter]);
-                        // CODE BELOW WORKS!!!!!!
-                        // --> Accessing the member of thhe vec in the Widget struct explicity
-                        // ui.text_edit_singleline(&mut self.task_text[counter]); 
-                        // let tester = &self.task_text[counter];
-                        // println!("test {tester}");
+                        // Da tags!!
+                        ui.text_edit_multiline(&mut self.project_tags_vec[counter].clone().into_iter().map(|element| element + " ").collect::<String>());
+                        ui.text_edit_multiline(&mut self.context_tags_vec[counter].clone().into_iter().map(|element| element + " ").collect::<String>());
+                        ui.text_edit_multiline(&mut self.special_tags_vec[counter].clone().into_iter().map(|element| element + " ").collect::<String>());
+                        // End of task; -> advance counter by one and end the row
                         counter += 1;
                         ui.end_row();
                     };
                 });
             });
         });
+    }
+    /// This helper function padds a String with `x` amount of whitespace.
+    fn left_and_rightpad(padding: u16, input_string: String) -> String {
+        let mut right_pad = String::new();
+        for _ in 0..padding {
+            right_pad.push_str(" ");
+        }
+        let left_pad = right_pad.clone();
+        let mut output = input_string.clone();
+        output.insert_str(0, &left_pad);
+        output.push_str(&right_pad);
+        return output;
     }
 }
 
