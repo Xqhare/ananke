@@ -2,7 +2,8 @@ use std::io;
 use std::path::Path;
 use std::io::{BufReader, BufRead};
 use std::fs::File;
-use eframe::egui::{Grid, ScrollArea, TopBottomPanel};
+use eframe::egui::{Grid, ScrollArea, TopBottomPanel, Button};
+use eframe::epaint::{Color32, Vec2};
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
 use crate::task::Task;
@@ -168,7 +169,6 @@ impl TaskWidget {
         let file = File::open(filename)?;
         Ok(BufReader::new(file).lines())
     }
-    
     /// This gui function creates the main window with the title, author, version
     fn task_panel(&mut self, ctx: &eframe::egui::Context) {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
@@ -176,26 +176,41 @@ impl TaskWidget {
                 ui.heading(format!("Ananke - todo.txt editor"));
                 ui.label(format!("by {AUTHOR}, v. {VERSION}"));
                 ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
+                ui.horizontal(|ui| {
+                    ui.menu_button("File", |ui| {
+                        if ui.button("Save").clicked() {
+                            println!("ACTUAL SAVE OUT");
+                        };
+                        if ui.button("Choose file location").clicked() {
+                            println!("FILE LOCATION!");
+                        }
+                    });
+                    ui.menu_button("Task", |ui| {
+                        if ui.button("New").clicked() {
+                            println!("NEW TASK");
+                        }
+                    });
+                });
                 let mut counter = 0;
                 let vec_strings = vec!["Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
-                let temp = ui.separator();
-                let _a_grid = Grid::new(temp.id).striped(true).show(ui, |ui| {
+                let task_list_seperator = ui.separator();
+                let _a_grid = Grid::new(task_list_seperator.id).striped(true).show(ui, |ui| {
                     // Drawing the collum names
                     for mut name in vec_strings {
                         // The 2 whitespace in the Project  Tags is on purpose! - As well
                         // as in the other Tags too!
                         if name.contains("Project  Tags") {
-                            // 9 whitespace padding
+                            // 12 whitespace padding
                             let padded_name = Self::left_and_rightpad(12, name.clone());
                             name = padded_name;
                         }
                         if name.contains("Context  Tags") {
-                            // 9 whitespace padding
+                            // 12 whitespace padding
                             let padded_name = Self::left_and_rightpad(12, name.clone());
                             name = padded_name;
                         }
                         if name.contains("Special  Tags") {
-                            // 9 whitespace padding
+                            // 12 whitespace padding
                             let padded_name = Self::left_and_rightpad(12, name.clone());
                             name = padded_name;
                         }
@@ -227,6 +242,18 @@ impl TaskWidget {
                         ui.end_row();
                     };
                 });
+                // There should be a save button at the top; Quit could be only handled
+                // with window close?
+                /* let _save_quit_bottom_seperator = ui.separator();
+                ui.horizontal(|ui: &mut Ui| {
+                    if ui.add(Button::new("Save test1").fill(Color32::from_rgb(6, 143, 15))).clicked() {
+                        println!("SAVE OUT 1")
+                    };
+
+                    if ui.button("Save").clicked() {
+                        println!("SAVE OUT");
+                    }
+                }); */
             });
         });
     }
@@ -265,7 +292,11 @@ impl App for TaskWidget {
 /// From here `update()` from `impl App for TaskWidget`
 pub fn main() {
     let app_name = "Ananke";
-    let native_options = NativeOptions::default();
+    let size: Vec2<> = Vec2::from((1050.0, 800.0));
+    let mut native_options = NativeOptions::default();
+    {
+        native_options.min_window_size = Option::from(size);
+    }
     // the _cc is incredibly important, I don't know why
     run_native(app_name, native_options, Box::new(|_cc| {
         Box::<TaskWidget>::default()
