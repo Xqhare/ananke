@@ -7,7 +7,7 @@ Built on a solid foundation of cutting-edge technologies, rust; Ananke is design
 
 The name Ananke is derived from the Greek goddess of necessity and inevitability. In Greek mythology, Ananke is the embodiement of fate, destiny and the natural order of things. She is also associated with the importance of fulfilling one's obligations.
 
-The choice of the name Ananke for a Todo app is symbolic of the app's focus on hhelping users to achieve their goals. Just as the forces of nature cannot be denied, so too can the power of a well-managed Todo list to help users to achieve their objectives.
+The choice of the name Ananke for a Todo app is symbolic of the app's focus on helping users to achieve their goals. Just as the forces of nature cannot be denied, so too can the power of a well-managed Todo list to help users to achieve their objectives.
 
 Ananke is a reminder that every task added to a Todo list is a step towards a larger goal. By completing tasks, users are able to gradually but surely achieve their desired outcomes.
 
