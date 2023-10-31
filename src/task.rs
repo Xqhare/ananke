@@ -1,17 +1,5 @@
 use unicode_segmentation::UnicodeSegmentation;
 
-#[derive(Debug, Clone)]
-pub struct Task {
-    pub completed: Option<bool>,
-    pub priority: Option<String>,
-    pub complete_date: Option<String>,
-    pub create_date: Option<String>,
-    pub task: String,
-    pub project_tags: Option<Vec<String>>,
-    pub context_tags: Option<Vec<String>>,
-    pub special_tags: Option<Vec<String>>,
-}
-
 // To deconstruct a todo.txt task:
 // Each task is on one line
 // whitespace splits the elements
@@ -37,8 +25,34 @@ pub struct Task {
 // - due:YYYY-MM-DD
 // - pri:A
 // - created:YYYY-MM-DD
-// test
+
+/// The struct that decodes and sorts the todo.txt input.
+/// The fields are in format order.
+/// This struct doesn't panik if supplied with an any-length String.
+#[derive(Debug, Clone)]
+pub struct Task {
+    /// Task completion
+    pub completed: Option<bool>,
+    /// Task priority if set
+    pub priority: Option<String>,
+    /// Task completion date if set
+    pub complete_date: Option<String>,
+    /// Task creation date if set - Has to be set if completion date is to be set.
+    pub create_date: Option<String>,
+    /// Main task text
+    pub task: String,
+    /// Task project tags as a vector, if any present
+    pub project_tags: Option<Vec<String>>,
+    /// Task context tags as a vector, if any present
+    pub context_tags: Option<Vec<String>>,
+    /// Task special tags as a vector, if any present
+    pub special_tags: Option<Vec<String>>,
+}
+
+/// In the Implementation, there is only the `new()` function for decoding
 impl Task {
+    /// This function decodes a line of todo.txt formatted text and returns the Task struct for
+    /// interrigation
     pub fn new(task_to_decode: String) -> Self {
 
         let mut completed = Option::from(false);
