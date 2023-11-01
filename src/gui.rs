@@ -2,11 +2,12 @@ use std::io;
 use std::path::Path;
 use std::io::{BufReader, BufRead};
 use std::fs::File;
-use eframe::egui::{Grid, ScrollArea};
-use eframe::epaint::{Color32, Vec2};
+use eframe::egui::{Grid, ScrollArea, Frame, Window, Area};
+use eframe::emath::Align2;
+use eframe::epaint::Vec2;
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
-use crate::task::TaskDecoder;
+use crate::task::{TaskDecoder, self};
 
 /// The author of the package.
 const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
@@ -18,6 +19,7 @@ const NAME: &str = env!("CARGO_PKG_NAME");
 // TaskWidget is really the App itself
 
 /// `TaskWidget` contains the App state, and can be thought of like the root of the entire App.
+#[derive(Clone)]
 pub struct TaskWidget {
     /// A vector of `Task`, primarily used for itteration. May be removed in the future.
     pub tasks_vec: Vec<TaskDecoder>,
@@ -185,27 +187,38 @@ impl TaskWidget {
         Ok(BufReader::new(file).lines())
     }
     /// This gui function creates the main window with the title, author, version
-    fn task_panel(&mut self, ctx: &eframe::egui::Context) {
+    fn task_panel(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
+            ui.horizontal(|ui| {
+                ui.menu_button("File", |ui| {
+                    if ui.button("Save").clicked() {
+                        let _temp = task::TaskEncoder::encode_taskwidget(self.clone());
+                    };
+                    if ui.button("Choose file location").clicked() {
+                        println!("FILE LOCATION!");
+                    }
+                });
+                ui.menu_button("Task", |ui| {
+                    if ui.button("New").clicked() {
+                        println!("NEW TASK");
+                    }
+                });
+                ui.menu_button("Help", |ui| {
+                    if ui.button("Quit").clicked() {
+                        frame.close()
+                    }
+                    if ui.button("About").clicked() {
+                        output = true;
+                    }
+                });
+                
+            });
+            ui.separator();
             ScrollArea::vertical().show(ui, |ui| {
                 ui.heading(format!("Ananke - todo.txt editor"));
                 ui.label(format!("by {AUTHOR}, v. {VERSION}"));
                 ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
-                ui.horizontal(|ui| {
-                    ui.menu_button("File", |ui| {
-                        if ui.button("Save").clicked() {
-                            println!("ACTUAL SAVE OUT");
-                        };
-                        if ui.button("Choose file location").clicked() {
-                            println!("FILE LOCATION!");
-                        }
-                    });
-                    ui.menu_button("Task", |ui| {
-                        if ui.button("New").clicked() {
-                            println!("NEW TASK");
-                        }
-                    });
-                });
+                
                 let mut counter = 0;
                 let vec_strings = vec!["Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
                 let task_list_seperator = ui.separator();
@@ -296,8 +309,8 @@ impl App for TaskWidget {
     /// think).
     ///
     /// It takes over after being indirectly called in `gui.rs::main()`.
-    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
-        self.task_panel(ctx);
+    fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
+        self.task_panel(ctx, frame);
     }
     
 }
