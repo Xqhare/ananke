@@ -2,11 +2,11 @@ use std::io;
 use std::path::Path;
 use std::io::{BufReader, BufRead};
 use std::fs::File;
-use eframe::egui::{Grid, ScrollArea, TopBottomPanel, Button};
+use eframe::egui::{Grid, ScrollArea};
 use eframe::epaint::{Color32, Vec2};
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
-use crate::task::Task;
+use crate::task::TaskDecoder;
 
 /// The author of the package.
 const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
@@ -18,32 +18,32 @@ const NAME: &str = env!("CARGO_PKG_NAME");
 // TaskWidget is really the App itself
 
 /// `TaskWidget` contains the App state, and can be thought of like the root of the entire App.
-struct TaskWidget {
+pub struct TaskWidget {
     /// A vector of `Task`, primarily used for itteration. May be removed in the future.
-    tasks_vec: Vec<Task>,
+    pub tasks_vec: Vec<TaskDecoder>,
     /// Vector containing the completed state of every task in order.
-    completed_vec : Vec<bool>,
+    pub completed_vec : Vec<bool>,
     /// Vector containing the priority state of every task in order, containing a empty String in
     /// case there isn't a priority state.
-    priority_vec: Vec<String>,
+    pub priority_vec: Vec<String>,
     /// Vector containing the completion date of every task in order, containing a empty String in
     /// case there isn't a completion date.
-    complete_date_vec: Vec<String>,
+    pub complete_date_vec: Vec<String>,
     /// Vector containing the creation date of every task in order, containing a empty String in
     /// case there isn't a creation date.
-    create_date_vec: Vec<String>,
+    pub create_date_vec: Vec<String>,
     /// Vector containing the main text of every task in order. As this is the minimum of required content of
     /// a task in the todo.txt format, there will never be an empty string inside.
-    task_text: Vec<String>,
+    pub task_text: Vec<String>,
     /// Vector containing the vector of project tags, of every task in order, containing a empty String in
     /// case there aren't any project tags.
-    project_tags_vec: Vec<Vec<String>>,
+    pub project_tags_vec: Vec<String>,
     /// Vector containing the vector of context tags, of every task in order, containing a empty String in
     /// case there aren't any context tags.
-    context_tags_vec: Vec<Vec<String>>,
+    pub context_tags_vec: Vec<String>,
     /// Vector containing the vector of special tags, of every task in order, containing a empty String in
     /// case there aren't any context tags.
-    special_tags_vec: Vec<Vec<String>>,
+    pub special_tags_vec: Vec<String>,
 }
 
 /* impl TaskWidget {
@@ -87,21 +87,21 @@ impl Default for TaskWidget {
     fn default() -> Self {
         let path: &str = "./todo-test.txt";
         let file_lines = Self::read_lines(path);
-        let mut output: Vec<Task> = Vec::new();
+        let mut output: Vec<TaskDecoder> = Vec::new();
         let mut completed: Vec<bool> = Vec::new();
         let mut priority: Vec<String> = Vec::new();
         let mut complete_date: Vec<String> = Vec::new();
         let mut creation_date: Vec<String> = Vec::new();
         let mut task_str_out: Vec<String> = Vec::new();
-        let mut project_tags: Vec<Vec<String>> = Vec::new();
-        let mut context_tags: Vec<Vec<String>> = Vec::new();
-        let mut special_tags: Vec<Vec<String>> = Vec::new();
+        let mut project_tags: Vec<String> = Vec::new();
+        let mut context_tags: Vec<String> = Vec::new();
+        let mut special_tags: Vec<String> = Vec::new();
         if let Ok(lines) = file_lines {
             
             for line in lines {
                 if let Ok(task) = line {
                     // Setting up individual tasks for interrigation
-                    let made_task: Task = Task::new(task);
+                    let made_task: TaskDecoder = TaskDecoder::new(task);
                     // Extracting gui state from data
                     // Extracting completion status
                     let completed_out = match made_task.completed {
@@ -133,21 +133,36 @@ impl Default for TaskWidget {
                     // Extracting main text
                     task_str_out.push(made_task.task.clone());
                     // Extracting project tags
-                    let project_out = match made_task.project_tags {
-                        Some(ref tags) => tags.clone(),
-                        _ => vec![String::new()],
+                    let mut project_out: String = String::new();
+                    match made_task.project_tags {
+                        Some(ref tags) => {
+                            for tag in tags {
+                                project_out.push_str(&tag);
+                            }
+                        },
+                        _ => project_out.push_str(""),
                     };
                     project_tags.push(project_out);
                     // Extracting context tags
-                    let context_out = match made_task.context_tags {
-                        Some(ref tags) => tags.clone(),
-                        _ => vec![String::new()],
+                    let mut context_out = String::new();
+                    match made_task.context_tags {
+                        Some(ref tags) => {
+                            for tag in tags {
+                                context_out.push_str(&tag);
+                            }
+                        },
+                        _ => context_out.push_str(""),
                     };
                     context_tags.push(context_out);
                     // Extracting special tags
-                    let special_out = match made_task.special_tags {
-                        Some(ref tags) => tags.clone(),
-                        _ => vec![String::new()],
+                    let mut special_out = String::new();
+                    match made_task.special_tags {
+                        Some(ref tags) => {
+                            for tag in tags {
+                                special_out.push_str(&tag);
+                            }
+                        },
+                        _ => special_out.push_str(""),
                     };
                     special_tags.push(special_out);
                     // pushing interrogated Task out
@@ -234,9 +249,9 @@ impl TaskWidget {
                         ui.text_edit_singleline(&mut self.priority_vec[counter]);
                         ui.text_edit_multiline(&mut self.task_text[counter]);
                         // Da tags!!
-                        ui.text_edit_multiline(&mut self.project_tags_vec[counter].clone().into_iter().map(|element| element + " ").collect::<String>());
-                        ui.text_edit_multiline(&mut self.context_tags_vec[counter].clone().into_iter().map(|element| element + " ").collect::<String>());
-                        ui.text_edit_multiline(&mut self.special_tags_vec[counter].clone().into_iter().map(|element| element + " ").collect::<String>());
+                        ui.text_edit_multiline(&mut self.project_tags_vec[counter]);
+                        ui.text_edit_multiline(&mut self.context_tags_vec[counter]);
+                        ui.text_edit_multiline(&mut self.special_tags_vec[counter]);
                         // End of task; -> advance counter by one and end the row
                         counter += 1;
                         ui.end_row();
