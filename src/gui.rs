@@ -47,7 +47,9 @@ pub struct TaskWidget {
     /// case there aren't any context tags.
     pub special_tags_vec: Vec<String>,
     /// Workaround to show different content in window
-    pub about_window: bool,
+    about_window: bool,
+    /// Workaround to show different content in window
+    welcome_window: bool,
 }
 
 /* impl TaskWidget {
@@ -175,8 +177,7 @@ impl Default for TaskWidget {
             }
         
         }
-        let workaround = false;
-        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, about_window: workaround };
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, about_window: false, welcome_window: true };
     }
     
 }
@@ -189,14 +190,10 @@ impl TaskWidget {
         let file = File::open(filename)?;
         Ok(BufReader::new(file).lines())
     }
-    fn tester(ctx: &eframe::egui::Context) {
-        Window::new("Ananke - About").show(ctx, |ui|{
-            ui.label("anananan")
-        });
-    }
     /// This gui function creates the main window with the title, author, version
     fn task_panel(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
+            
             ui.horizontal(|ui| {
                 ui.menu_button("File", |ui| {
                     if ui.button("Save").clicked() {
@@ -215,18 +212,41 @@ impl TaskWidget {
                     if ui.button("Quit").clicked() {
                         frame.close()
                     }
-                    if ui.button("About").clicked() {
-                        self.about_window = true;
+                    // The most I have learned about buttons so far.
+                    let test_button = ui.button("About");
+                    if test_button.clicked() {
+                        // The switch of welcome window is here to reduce lag / flickering in
+                    // rendering
+                    if self.about_window == false {
+                            self.about_window = true;
+                            self.welcome_window = false;
+                        } else {
+                            self.about_window = false;
+                            self.welcome_window = true;
+                        };
+                    }
+                    // Legacy, here to remind myself of how it could be done.
+                    if test_button.secondary_clicked() {
+                        self.about_window = false;
                     }
                 });
                 
             });
             ui.separator();
             ScrollArea::vertical().show(ui, |ui| {
-                ui.heading(format!("Ananke - todo.txt editor"));
-                ui.label(format!("by {AUTHOR}, v. {VERSION}"));
-                ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
-                
+                if self.welcome_window {
+                    ui.heading(format!("Ananke - todo.txt editor"));
+                    ui.label(format!("by {AUTHOR}, v. {VERSION}"));
+                    ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
+                }
+                if self.about_window {
+                    ui.heading("About Ananke");
+                    ui.label("Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience.
+Built on a solid foundation of cutting-edge technologies, rust.");
+                    ui.label("Ananke decodes your todo.txt, makes it look pretty and searchable, as well as creates new tasks, and updates finished ones.");
+                    ui.heading("About the format todo.txt");
+                    ui.label("The todo.txt format is a plain text format file for managing tasks. It is at it's core really only a .txt file named todo. It contains one task per line, and each task line can contain infomation like: A priority letter (A-Z) first, then the Inception (Creation) and Completion dates in (YYYY-MM-DD format), Project Tags (preceeded by the + sign), Context Tags (preceeded by the @ sign), and finally Special tags that only follow the [keyTag:AnyContentYouWantToBeSearchableWithTheKeyTag].");
+                }
                 let mut counter = 0;
                 let vec_strings = vec!["Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
                 let task_list_seperator = ui.separator();
@@ -319,9 +339,6 @@ impl App for TaskWidget {
     /// It takes over after being indirectly called in `gui.rs::main()`.
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         self.task_panel(ctx, frame);
-        if self.about_window {
-            Self::tester(ctx)
-        }
     }
     
 }
