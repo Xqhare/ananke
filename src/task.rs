@@ -1,5 +1,7 @@
 use unicode_segmentation::UnicodeSegmentation;
 
+use crate::gui::TaskWidget;
+
 // To deconstruct a todo.txt task:
 // Each task is on one line
 // whitespace splits the elements
@@ -30,7 +32,7 @@ use unicode_segmentation::UnicodeSegmentation;
 /// The fields are in format order.
 /// This struct doesn't panik if supplied with an any-length String.
 #[derive(Debug, Clone)]
-pub struct Task {
+pub struct TaskDecoder {
     /// Task completion
     pub completed: Option<bool>,
     /// Task priority if set
@@ -50,9 +52,9 @@ pub struct Task {
 }
 
 /// In the Implementation, there is only the `new()` function for decoding
-impl Task {
+impl TaskDecoder {
     /// This function decodes a line of todo.txt formatted text and returns the Task struct for
-    /// interrigation
+    /// interrigation and doesn't panik if supplied with a 0 length string.
     pub fn new(task_to_decode: String) -> Self {
 
         let mut completed = Option::from(false);
@@ -117,6 +119,105 @@ impl Task {
             complete_date = reset_var;
         }
 
-        return Task{completed, priority, complete_date, create_date, task, project_tags, context_tags, special_tags};
+        return TaskDecoder{completed, priority, complete_date, create_date, task, project_tags, context_tags, special_tags};
+    }
+}
+
+#[derive(Clone)]
+struct Task {
+    row: String,
+}
+
+impl Task {
+    fn new(input: String) -> Self {
+        Self { row: input }
+    }
+}
+
+#[derive(Clone)]
+pub struct TaskEncoder {
+    rows: Vec<Task>,
+}
+
+/// This implements the encoding to real todo.txt formatted output for the save-file, from the Appstate within `TaskWidget`.
+impl TaskEncoder {
+    /// Can be thought of as the `default()` for `TaskEncoder`.
+    fn encode_taskwidget(widget: TaskWidget) -> Self {
+        let mut completed_tasks: Vec<TaskDecoder> = Vec::new();
+        let mut output: Vec<Task> = Vec::new();
+        for entry in widget.tasks_vec {
+            // format demands completed tasks to be put last
+            if entry.completed == Some(false) || entry.completed == None {
+                let encoded_single_task: String = Self::encode_single_taks(entry);
+                let task_out = Task::new(encoded_single_task);
+                output.push(task_out);
+            } else {
+                completed_tasks.push(entry);
+            }
+            // advancing counter as last step
+        }
+        if completed_tasks.len() > 0 {
+            for entry in completed_tasks{
+                let encoded_single_task: String = Self::encode_single_taks(entry);
+                let task_out = Task::new(encoded_single_task);
+                output.push(task_out);
+            }
+        }
+        Self { rows: output }
+    }
+    fn encode_single_taks(input_task: TaskDecoder) -> String {
+        let mut output: String = String::new();
+        let str_spacer: &str = " ";
+        // completion first - Spacing built in
+        let completion = match input_task.completed {
+            Some(true) => String::from("x "),
+            _ => String::new(),
+        };
+        output.push_str(&completion);
+        // priroity
+        let priority = match input_task.priority {
+            Some(prio) => {
+                if prio.graphemes(true).count() <= 1 {
+                    let upper_prio = prio.to_ascii_uppercase();
+                    let mut prio_out = format!("({upper_prio})");
+                    prio_out.push_str(str_spacer);
+                    prio_out
+                } else if prio.graphemes(true).count() > 1 {
+                    let shortend_prio = prio.graphemes(true).take(1).last().unwrap();
+                    let upper_prio = shortend_prio.to_ascii_uppercase();
+                    let mut prio_out = format!("({upper_prio})");
+                    prio_out.push_str(str_spacer);
+                    prio_out
+                // This really is only a failsafe - And it makes the LSP shut up.
+                } else {
+                    String::new()
+                }
+                
+            },
+            None => String::new(),
+        };
+        output.push_str(&priority);
+        // completion and creation date
+        let completion_date = match input_task.complete_date {
+            Some(date) => {
+                let mut out = date.clone();
+                out.push_str(str_spacer);
+                out
+            },
+            None => String::new(),
+        };
+        output.push_str(&completion_date);
+        let creation_date = match input_task.create_date {
+            Some(date) => {
+                let mut out = date.clone();
+                out.push_str(str_spacer);
+                out
+            },
+            None => String::new(),
+        };
+        output.push_str(&creation_date);
+        
+
+        return output;
     }
 }
