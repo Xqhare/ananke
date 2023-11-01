@@ -1,4 +1,4 @@
-# Ananke
+# Ananke: Ananke Never Abandons Needs Known Early
 
 Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience.
 Built on a solid foundation of cutting-edge technologies, rust; Ananke is designed to be scalable, maintainable, blazingly-fast, modular, comprehensive, agile and focused.
@@ -12,6 +12,8 @@ The choice of the name Ananke for a Todo app is symbolic of the app's focus on h
 Ananke is a reminder that every task added to a Todo list is a step towards a larger goal. By completing tasks, users are able to gradually but surely achieve their desired outcomes.
 
 In a world that is often chaotic and unpredicatble, Ananke offers a sense of order and control. By using Ananke, users can take charge of their own destenies and achieve their goals.
+
+It is also the reverse acronym: Ananke Never Abandons Needs Known Early.
 
 ## Features
 - Support for the todo.txt format
