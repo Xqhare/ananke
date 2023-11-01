@@ -2,8 +2,7 @@ use std::io;
 use std::path::Path;
 use std::io::{BufReader, BufRead};
 use std::fs::File;
-use eframe::egui::{Grid, ScrollArea, Frame, Window, Area};
-use eframe::emath::Align2;
+use eframe::egui::{Grid, ScrollArea};
 use eframe::epaint::Vec2;
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
