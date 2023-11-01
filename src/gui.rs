@@ -47,9 +47,9 @@ pub struct TaskWidget {
     /// case there aren't any context tags.
     pub special_tags_vec: Vec<String>,
     /// Workaround to show different content in window
-    about_window: bool,
+    main_panel_about_text: bool,
     /// Workaround to show different content in window
-    welcome_window: bool,
+    main_panel_welcome_text: bool,
 }
 
 /* impl TaskWidget {
@@ -177,7 +177,7 @@ impl Default for TaskWidget {
             }
         
         }
-        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, about_window: false, welcome_window: true };
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, main_panel_about_text: false, main_panel_welcome_text: true };
     }
     
 }
@@ -190,8 +190,8 @@ impl TaskWidget {
         let file = File::open(filename)?;
         Ok(BufReader::new(file).lines())
     }
-    /// This gui function creates the main window with the title, author, version
-    fn task_panel(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
+    /// This gui function  creates the main window with the title, author, version. 
+    fn main_panel(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             
             ui.horizontal(|ui| {
@@ -217,29 +217,29 @@ impl TaskWidget {
                     if test_button.clicked() {
                         // The switch of welcome window is here to reduce lag / flickering in
                     // rendering
-                    if self.about_window == false {
-                            self.about_window = true;
-                            self.welcome_window = false;
+                    if self.main_panel_about_text == false {
+                            self.main_panel_about_text = true;
+                            self.main_panel_welcome_text = false;
                         } else {
-                            self.about_window = false;
-                            self.welcome_window = true;
+                            self.main_panel_about_text = false;
+                            self.main_panel_welcome_text = true;
                         };
                     }
                     // Legacy, here to remind myself of how it could be done.
                     if test_button.secondary_clicked() {
-                        self.about_window = false;
+                        self.main_panel_about_text = false;
                     }
                 });
                 
             });
             ui.separator();
             ScrollArea::vertical().show(ui, |ui| {
-                if self.welcome_window {
+                if self.main_panel_welcome_text {
                     ui.heading(format!("Ananke - todo.txt editor"));
                     ui.label(format!("by {AUTHOR}, v. {VERSION}"));
                     ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
                 }
-                if self.about_window {
+                if self.main_panel_about_text {
                     ui.heading("About Ananke");
                     ui.label("Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience.
 Built on a solid foundation of cutting-edge technologies, rust.");
@@ -337,10 +337,10 @@ impl App for TaskWidget {
     // THIS IS THE MAIN LOOP
     /// This function is the main loop of ananke, being called as often as possible (60 times/sec I
     /// think).
-    ///
+    /// It should be thought of as the rectangle that the app renders in.
     /// It takes over after being indirectly called in `gui.rs::main()`.
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
-        self.task_panel(ctx, frame);
+        self.main_panel(ctx, frame);
     }
     
 }
