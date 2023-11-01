@@ -190,8 +190,8 @@ impl TaskWidget {
         Ok(BufReader::new(file).lines())
     }
     fn tester(ctx: &eframe::egui::Context) {
-        Area::new("testarea").show(ctx, |ui| {
-            ui.label("whooo");
+        Window::new("Ananke - About").show(ctx, |ui|{
+            ui.label("anananan")
         });
     }
     /// This gui function creates the main window with the title, author, version
