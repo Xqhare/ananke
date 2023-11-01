@@ -46,6 +46,8 @@ pub struct TaskWidget {
     /// Vector containing the vector of special tags, of every task in order, containing a empty String in
     /// case there aren't any context tags.
     pub special_tags_vec: Vec<String>,
+    /// Workaround to show different content in window
+    pub about_window: bool,
 }
 
 /* impl TaskWidget {
@@ -173,7 +175,8 @@ impl Default for TaskWidget {
             }
         
         }
-        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags };
+        let workaround = false;
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, about_window: workaround };
     }
     
 }
@@ -185,6 +188,11 @@ impl TaskWidget {
     fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
         let file = File::open(filename)?;
         Ok(BufReader::new(file).lines())
+    }
+    fn tester(ctx: &eframe::egui::Context) {
+        Area::new("testarea").show(ctx, |ui| {
+            ui.label("whooo");
+        });
     }
     /// This gui function creates the main window with the title, author, version
     fn task_panel(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
@@ -208,7 +216,7 @@ impl TaskWidget {
                         frame.close()
                     }
                     if ui.button("About").clicked() {
-                        output = true;
+                        self.about_window = true;
                     }
                 });
                 
@@ -311,6 +319,9 @@ impl App for TaskWidget {
     /// It takes over after being indirectly called in `gui.rs::main()`.
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         self.task_panel(ctx, frame);
+        if self.about_window {
+            Self::tester(ctx)
+        }
     }
     
 }
