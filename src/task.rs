@@ -142,81 +142,85 @@ pub struct TaskEncoder {
 /// This implements the encoding to real todo.txt formatted output for the save-file, from the Appstate within `TaskWidget`.
 impl TaskEncoder {
     /// Can be thought of as the `default()` for `TaskEncoder`.
-    fn encode_taskwidget(widget: TaskWidget) -> Self {
-        let mut completed_tasks: Vec<TaskDecoder> = Vec::new();
+    pub fn encode_taskwidget(widget: TaskWidget) -> Self {
+        let mut completed_tasks: Vec<Task> = Vec::new();
         let mut output: Vec<Task> = Vec::new();
-        for entry in widget.tasks_vec {
+        let mut counter: usize = 0;
+        for _entry in widget.tasks_vec.clone() {
             // format demands completed tasks to be put last
-            if entry.completed == Some(false) || entry.completed == None {
-                let encoded_single_task: String = Self::encode_single_taks(entry);
+            if widget.completed_vec[counter] == false {
+                let encoded_single_task: String = Self::encode_single_taks(widget.clone(), counter);
+                println!("{:?}", encoded_single_task);
                 let task_out = Task::new(encoded_single_task);
                 output.push(task_out);
             } else {
-                completed_tasks.push(entry);
+                let encoded_single_task: String = Self::encode_single_taks(widget.clone(), counter);
+                println!("{:?}", encoded_single_task);
+                let task_out = Task::new(encoded_single_task);
+                completed_tasks.push(task_out);
             }
             // advancing counter as last step
+            counter += 1;
         }
         if completed_tasks.len() > 0 {
             for entry in completed_tasks{
-                let encoded_single_task: String = Self::encode_single_taks(entry);
-                let task_out = Task::new(encoded_single_task);
-                output.push(task_out);
+                output.push(entry);
             }
         }
         Self { rows: output }
     }
-    fn encode_single_taks(input_task: TaskDecoder) -> String {
+    fn encode_single_taks(input_task: TaskWidget, position: usize) -> String {
         let mut output: String = String::new();
         let str_spacer: &str = " ";
         // completion first - Spacing built in
-        let completion = match input_task.completed {
-            Some(true) => String::from("x "),
+        let completion = match input_task.completed_vec[position.clone()] {
+            true => String::from("x "),
             _ => String::new(),
         };
         output.push_str(&completion);
-        // priroity
-        let priority = match input_task.priority {
-            Some(prio) => {
-                if prio.graphemes(true).count() <= 1 {
-                    let upper_prio = prio.to_ascii_uppercase();
-                    let mut prio_out = format!("({upper_prio})");
+        // priority
+        let temp_prio = input_task.priority_vec[position.clone()].clone();
+        let priority = if temp_prio.graphemes(true).count() <= 1 {
+                    let prio = temp_prio.to_ascii_uppercase();
+                    let mut prio_out = format!("({prio})");
                     prio_out.push_str(str_spacer);
                     prio_out
-                } else if prio.graphemes(true).count() > 1 {
+                } else if input_task.priority_vec[position].graphemes(true).count() > 1 {
+                    let prio = temp_prio.to_ascii_uppercase();
                     let shortend_prio = prio.graphemes(true).take(1).last().unwrap();
-                    let upper_prio = shortend_prio.to_ascii_uppercase();
-                    let mut prio_out = format!("({upper_prio})");
+                    let mut prio_out = format!("({shortend_prio})");
                     prio_out.push_str(str_spacer);
                     prio_out
                 // This really is only a failsafe - And it makes the LSP shut up.
                 } else {
                     String::new()
-                }
-                
-            },
-            None => String::new(),
         };
         output.push_str(&priority);
         // completion and creation date
-        let completion_date = match input_task.complete_date {
-            Some(date) => {
-                let mut out = date.clone();
-                out.push_str(str_spacer);
-                out
-            },
-            None => String::new(),
+        let completion_date = if input_task.complete_date_vec[position].graphemes(true).count() > 0 {
+            let mut out = input_task.complete_date_vec[position].clone();
+            out.push_str(str_spacer);
+            out
+        } else {
+            let out = String::new();
+            out
         };
         output.push_str(&completion_date);
-        let creation_date = match input_task.create_date {
-            Some(date) => {
-                let mut out = date.clone();
-                out.push_str(str_spacer);
-                out
-            },
-            None => String::new(),
+        let creation_date = if input_task.create_date_vec[position].graphemes(true).count() > 0 {
+            let mut out = input_task.create_date_vec[position].clone();
+            out.push_str(str_spacer);
+            out
+        } else {
+            let out = String::new();
+            out
         };
         output.push_str(&creation_date);
-        
+        // Main text of task
+        let mut task_text = input_task.task_text[position].clone();
+        task_text.push_str(str_spacer);
+        output.push_str(&task_text);
+        // Da tags! Project - Context - Special
+        let project_tag = input_task.project_tags_vec[position].clone();
 
         return output;
     }
