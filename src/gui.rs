@@ -51,14 +51,6 @@ pub struct TaskWidget {
     main_panel_welcome_text: bool,
 }
 
-/* impl TaskWidget {
-    fn new() -> TaskWidget {
-        let path: &str = "./todo-test.txt";
-        let todo_list: List = List::open(path);
-        return TaskWidget{ tasks: todo_list};
-    }
-} */
-
 // I need to be able to mutate the data in task.rs... I'm thinking about, to work around the
 // truncation problem at saving, to delete and save new anyway, so more jank is no real deal
 // breaker; BUT the only way I currently see is to clone the data inside task.rs, then display it,
@@ -143,6 +135,7 @@ impl Default for TaskWidget {
                         Some(ref tags) => {
                             for tag in tags {
                                 project_out.push_str(&tag);
+                                project_out.push_str(" ");
                             }
                         },
                         _ => project_out.push_str(""),
@@ -154,6 +147,7 @@ impl Default for TaskWidget {
                         Some(ref tags) => {
                             for tag in tags {
                                 context_out.push_str(&tag);
+                                context_out.push_str(" ");
                             }
                         },
                         _ => context_out.push_str(""),
@@ -165,6 +159,7 @@ impl Default for TaskWidget {
                         Some(ref tags) => {
                             for tag in tags {
                                 special_out.push_str(&tag);
+                                special_out.push_str(" ");
                             }
                         },
                         _ => special_out.push_str(""),
@@ -205,6 +200,9 @@ impl TaskWidget {
                 ui.menu_button("Task", |ui| {
                     if ui.button("New").clicked() {
                         println!("NEW TASK");
+                    }
+                    if ui.button("Delete").clicked() {
+                        println!("DELETE TASK");
                     }
                 });
                 ui.menu_button("Help", |ui| {
@@ -299,18 +297,6 @@ Built on a solid foundation of cutting-edge technologies, rust.");
                         ui.end_row();
                     };
                 });
-                // There should be a save button at the top; Quit could be only handled
-                // with window close?
-                /* let _save_quit_bottom_seperator = ui.separator();
-                ui.horizontal(|ui: &mut Ui| {
-                    if ui.add(Button::new("Save test1").fill(Color32::from_rgb(6, 143, 15))).clicked() {
-                        println!("SAVE OUT 1")
-                    };
-
-                    if ui.button("Save").clicked() {
-                        println!("SAVE OUT");
-                    }
-                }); */
             });
         });
     }

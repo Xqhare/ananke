@@ -150,12 +150,10 @@ impl TaskEncoder {
             // format demands completed tasks to be put last
             if widget.completed_vec[counter] == false {
                 let encoded_single_task: String = Self::encode_single_taks(widget.clone(), counter);
-                println!("{:?}", encoded_single_task);
                 let task_out = Task::new(encoded_single_task);
                 output.push(task_out);
             } else {
                 let encoded_single_task: String = Self::encode_single_taks(widget.clone(), counter);
-                println!("{:?}", encoded_single_task);
                 let task_out = Task::new(encoded_single_task);
                 completed_tasks.push(task_out);
             }
@@ -166,6 +164,9 @@ impl TaskEncoder {
             for entry in completed_tasks{
                 output.push(entry);
             }
+        }
+        for entry in &output {
+            println!("{:?}", entry.row);
         }
         Self { rows: output }
     }
@@ -220,8 +221,18 @@ impl TaskEncoder {
         task_text.push_str(str_spacer);
         output.push_str(&task_text);
         // Da tags! Project - Context - Special
-        let project_tag = input_task.project_tags_vec[position].clone();
-
-        return output;
+        let mut project_tag = input_task.project_tags_vec[position].clone();
+        project_tag.push_str(str_spacer);
+        output.push_str(&project_tag);
+        let mut context_tag = input_task.context_tags_vec[position].clone();
+        context_tag.push_str(str_spacer);
+        output.push_str(&context_tag);
+        let mut special_tag = input_task.special_tags_vec[position].clone();
+        special_tag.push_str(str_spacer);
+        output.push_str(&special_tag);
+        
+        // Workaround to remove double spaces and trailing whitespace
+        let final_out = output.replace("  ", " ").trim_end().to_string();
+        return final_out;
     }
 }
