@@ -1,3 +1,5 @@
+use std::{io::{Error, Write}, fs};
+
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::gui::TaskWidget;
@@ -74,6 +76,8 @@ impl TaskDecoder {
             } else if item.starts_with("(") && item.ends_with(")") && item[..].graphemes(true).count() == 3 {
                 let output = item.replace("(", "").replace(")", "").to_uppercase();
                 priority = Option::Some(output)
+            } else if  item.starts_with("(") && item.ends_with(")") && item[..].graphemes(true).count() == 2 {
+                priority = Option::None
             // If three blocks of anything are split by `-` I'll just assume its a date.
             } else if item.split("-").count() == 3 && !item.contains(":") {
                 // First date incountered
@@ -165,11 +169,14 @@ impl TaskEncoder {
                 output.push(entry);
             }
         }
+        // Debug / Sanity printout
         for entry in &output {
             println!("{:?}", entry.row);
         }
         Self { rows: output }
     }
+    /// Takes in the `TaskWidget` (Appstate) and a `position`, and returns the finished encoded string of the task
+    /// at `position`.
     fn encode_single_taks(input_task: TaskWidget, position: usize) -> String {
         let mut output: String = String::new();
         let str_spacer: &str = " ";
@@ -234,5 +241,14 @@ impl TaskEncoder {
         // Workaround to remove double spaces and trailing whitespace
         let final_out = output.replace("  ", " ").trim_end().to_string();
         return final_out;
+    }
+    pub fn save(self, filename: String) -> Result<(), Error> {
+        let mut file = fs::File::create(filename)?;
+        for row in self.rows {
+            file.write_all(row.row.as_bytes())?;
+            // for the newline
+            file.write_all(b"\n")?;
+        }
+        Ok(())
     }
 }

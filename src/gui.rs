@@ -6,7 +6,7 @@ use eframe::egui::{Grid, ScrollArea};
 use eframe::epaint::Vec2;
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
-use crate::task::{TaskDecoder, self};
+use crate::task::{TaskDecoder, self, TaskEncoder};
 
 /// The author of the package.
 const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
@@ -45,6 +45,8 @@ pub struct TaskWidget {
     /// Vector containing the vector of special tags, of every task in order, containing a empty String in
     /// case there aren't any context tags.
     pub special_tags_vec: Vec<String>,
+    /// The file path to be read and saved to.
+    file_path: String,
     /// Workaround to show different content in window
     main_panel_about_text: bool,
     /// Workaround to show different content in window
@@ -171,7 +173,7 @@ impl Default for TaskWidget {
             }
         
         }
-        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, main_panel_about_text: false, main_panel_welcome_text: true };
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, main_panel_about_text: false, main_panel_welcome_text: true, file_path: path.to_string() };
     }
     
 }
@@ -191,7 +193,13 @@ impl TaskWidget {
             ui.horizontal(|ui| {
                 ui.menu_button("File", |ui| {
                     if ui.button("Save").clicked() {
-                        let _temp = task::TaskEncoder::encode_taskwidget(self.clone());
+                        let temp = TaskEncoder::encode_taskwidget(self.clone());
+                        let path: String = self.file_path.clone();
+                        if TaskEncoder::save(temp, path).is_ok() {
+                            ui.label("Saved");
+                        } else {
+                            ui.label("Saving failed");
+                        };
                     };
                     if ui.button("Choose file location").clicked() {
                         println!("FILE LOCATION!");
