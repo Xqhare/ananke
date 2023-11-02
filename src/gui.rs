@@ -1,8 +1,11 @@
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::io::{BufReader, BufRead};
 use std::fs::File;
-use eframe::egui::{Grid, ScrollArea};
+use eframe::Storage;
+use eframe::egui::util::IdTypeMap;
+use eframe::egui::{Grid, ScrollArea, Area, Window, DroppedFile, Id};
+use eframe::emath::Align2;
 use eframe::epaint::Vec2;
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
@@ -46,11 +49,16 @@ pub struct TaskWidget {
     /// case there aren't any context tags.
     pub special_tags_vec: Vec<String>,
     /// The file path to be read and saved to.
-    file_path: String,
+    file_path: PathBuf,
     /// Workaround to show different content in window
-    main_panel_about_text: bool,
+    show_main_panel_about_text: bool,
     /// Workaround to show different content in window
-    main_panel_welcome_text: bool,
+    show_main_panel_welcome_text: bool,
+    /// Workaround to show different content in window
+    show_task_scroll_area: bool,
+    show_file_drop_area: bool,
+    persistant_storage_map: IdTypeMap,
+    persistant_id_path: Id,
 }
 
 // I need to be able to mutate the data in task.rs... I'm thinking about, to work around the
@@ -84,7 +92,11 @@ impl Default for TaskWidget {
     /// Each line is then interrogated and the appropriate response saved into the struct fields of
     /// `TaskWidget`.
     fn default() -> Self {
+        let pathout: PathBuf = if sel {
+            unimplemented!();
+        }
         let path: &str = "./todo-test.txt";
+        let path_out: PathBuf = PathBuf::from("path");
         let file_lines = Self::read_lines(path);
         let mut output: Vec<TaskDecoder> = Vec::new();
         let mut completed: Vec<bool> = Vec::new();
@@ -173,7 +185,7 @@ impl Default for TaskWidget {
             }
         
         }
-        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, main_panel_about_text: false, main_panel_welcome_text: true, file_path: path.to_string() };
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, show_main_panel_about_text: false, show_main_panel_welcome_text: true, file_path: path_out, show_task_scroll_area: true, show_file_drop_area: false, persistant_storage_map: Default::default(), persistant_id_path: Id::new("path_id")};
     }
     
 }
@@ -188,22 +200,28 @@ impl TaskWidget {
     }
     /// This gui function  creates the main window with the title, author, version. 
     fn main_panel(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
+        
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
             
             ui.horizontal(|ui| {
                 ui.menu_button("File", |ui| {
                     if ui.button("Save").clicked() {
                         let temp = TaskEncoder::encode_taskwidget(self.clone());
-                        let path: String = self.file_path.clone();
+                        let path: PathBuf = self.file_path.clone();
                         if TaskEncoder::save(temp, path).is_ok() {
-                            ui.label("Saved");
+                            println!("Saved!")
                         } else {
-                            ui.label("Saving failed");
+                            println!("Saving failed");
                         };
                     };
                     if ui.button("Choose file location").clicked() {
                         println!("FILE LOCATION!");
-                    }
+                        if self.show_file_drop_area {
+                            self.show_file_drop_area = false;
+                        } else {
+                            self.show_file_drop_area = true;
+                        }
+                    };
                 });
                 ui.menu_button("Task", |ui| {
                     if ui.button("New").clicked() {
@@ -222,90 +240,110 @@ impl TaskWidget {
                     if test_button.clicked() {
                         // The switch of welcome window is here to reduce lag / flickering in
                     // rendering
-                    if self.main_panel_about_text == false {
-                            self.main_panel_about_text = true;
-                            self.main_panel_welcome_text = false;
+                    if self.show_main_panel_about_text == false {
+                            self.show_main_panel_about_text = true;
+                            self.show_main_panel_welcome_text = false;
                         } else {
-                            self.main_panel_about_text = false;
-                            self.main_panel_welcome_text = true;
+                            self.show_main_panel_about_text = false;
+                            self.show_main_panel_welcome_text = true;
                         };
                     }
                     // Legacy, here to remind myself of how it could be done.
                     if test_button.secondary_clicked() {
-                        self.main_panel_about_text = false;
+                        self.show_main_panel_about_text = false;
                     }
                 });
                 
             });
             ui.separator();
-            ScrollArea::vertical().show(ui, |ui| {
-                if self.main_panel_welcome_text {
-                    ui.heading(format!("Ananke - todo.txt editor"));
-                    ui.label(format!("by {AUTHOR}, v. {VERSION}"));
-                    ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
-                }
-                if self.main_panel_about_text {
-                    ui.heading("About Ananke");
-                    ui.label("Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience.
-Built on a solid foundation of cutting-edge technologies, rust.");
-                    ui.label("Ananke decodes your todo.txt, makes it look pretty and searchable, as well as creates new tasks, and updates finished ones.");
-                    ui.heading("About the format todo.txt");
-                    ui.label("The todo.txt format is a plain text format file for managing tasks. It is at it's core really only a .txt file named todo. It contains one task per line, and each task line can contain infomation like: A priority letter (A-Z) first, then the Inception (Creation) and Completion dates in (YYYY-MM-DD format), Project Tags (preceeded by the + sign), Context Tags (preceeded by the @ sign), and finally Special tags that only follow the [keyTag:AnyContentYouWantToBeSearchableWithTheKeyTag].");
-                    ui.heading("Licenses");
-                    ui.hyperlink_to(format!("egui licensed under the MIT-License"), "https://github.com/emilk/egui/blob/master/LICENSE-MIT");
-                }
-                let mut counter = 0;
-                let vec_strings = vec!["Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
-                let task_list_seperator = ui.separator();
-                let _a_grid = Grid::new(task_list_seperator.id).striped(true).show(ui, |ui| {
-                    // Drawing the collum names
-                    for mut name in vec_strings {
-                        // The 2 whitespace in the Project  Tags is on purpose! - As well
-                        // as in the other Tags too!
-                        if name.contains("Project  Tags") {
-                            // 12 whitespace padding
-                            let padded_name = Self::left_and_rightpad(12, name.clone());
-                            name = padded_name;
+            if self.show_file_drop_area {
+                Area::new("Drop todo.txt below:").anchor(Align2::CENTER_TOP, Vec2::from([0.0, 40.0])).show(ctx, |ui: &mut Ui| {
+                    ui.heading("Drop file anywhere in this window!");
+                    ctx.input(|i| {
+                        if !i.raw.dropped_files.is_empty() {
+                            for thing in &i.raw.dropped_files {
+                                if thing.path.clone().is_some() {
+                                    self.file_path = thing.path.clone().expect("No path!");
+                                    println!("{:?}", self.file_path);
+                                    self.show_file_drop_area = false;
+                                    Storage::set_string(&mut self, key, value)
+                                    self.persistant_storage_map.insert_persisted(self.persistant_id_path, self.file_path.clone());
+                                }
+                            }
                         }
-                        if name.contains("Context  Tags") {
-                            // 12 whitespace padding
-                            let padded_name = Self::left_and_rightpad(12, name.clone());
-                            name = padded_name;
-                        }
-                        if name.contains("Special  Tags") {
-                            // 12 whitespace padding
-                            let padded_name = Self::left_and_rightpad(12, name.clone());
-                            name = padded_name;
-                        }
-                        if name.contains("Task") {
-                            // 40 whitespace padding
-                            let padded_name = Self::left_and_rightpad(40, name.clone());
-                            name = padded_name;
-                        }
-                        ui.label(name);
-                    }
-                    ui.end_row();
-                    for _entry in &self.tasks_vec {
-                        let text = "Done!";
-                        // The to be changed struct member HAS TO BE INSIDE the ui call! Got it!
-                        ui.checkbox(&mut self.completed_vec[counter], text);
-                        // completion and creation dates
-                        ui.text_edit_singleline(&mut self.complete_date_vec[counter]);
-                        ui.text_edit_singleline(&mut self.create_date_vec[counter]);
-                        // Priority implementation
-                        // variable input fields are very versitile!
-                        ui.text_edit_singleline(&mut self.priority_vec[counter]);
-                        ui.text_edit_multiline(&mut self.task_text[counter]);
-                        // Da tags!!
-                        ui.text_edit_multiline(&mut self.project_tags_vec[counter]);
-                        ui.text_edit_multiline(&mut self.context_tags_vec[counter]);
-                        ui.text_edit_multiline(&mut self.special_tags_vec[counter]);
-                        // End of task; -> advance counter by one and end the row
-                        counter += 1;
-                        ui.end_row();
-                    };
+                    });
                 });
+            }
+            if self.show_task_scroll_area {
+                ScrollArea::vertical().show(ui, |ui| {
+                    if self.show_main_panel_welcome_text {
+                        ui.heading(format!("Ananke - todo.txt editor"));
+                        ui.label(format!("by {AUTHOR}, v. {VERSION}"));
+                        ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
+                    }
+                    if self.show_main_panel_about_text {
+                        ui.heading("About Ananke");
+                        ui.label("Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience.
+    Built on a solid foundation of cutting-edge technologies, rust.");
+                        ui.label("Ananke decodes your todo.txt, makes it look pretty and searchable, as well as creates new tasks, and updates finished ones.");
+                        ui.heading("About the format todo.txt");
+                        ui.label("The todo.txt format is a plain text format file for managing tasks. It is at it's core really only a .txt file named todo. It contains one task per line, and each task line can contain infomation like: A priority letter (A-Z) first, then the Inception (Creation) and Completion dates in (YYYY-MM-DD format), Project Tags (preceeded by the + sign), Context Tags (preceeded by the @ sign), and finally Special tags that only follow the [keyTag:AnyContentYouWantToBeSearchableWithTheKeyTag].");
+                        ui.heading("Licenses");
+                        ui.hyperlink_to(format!("egui licensed under the MIT-License"), "https://github.com/emilk/egui/blob/master/LICENSE-MIT");
+                    }
+                    let mut counter = 0;
+                    let vec_strings = vec!["Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
+                    let task_list_seperator = ui.separator();
+                    let _a_grid = Grid::new(task_list_seperator.id).striped(true).show(ui, |ui| {
+                        // Drawing the collum names
+                        for mut name in vec_strings {
+                            // The 2 whitespace in the Project  Tags is on purpose! - As well
+                            // as in the other Tags too!
+                            if name.contains("Project  Tags") {
+                                // 12 whitespace padding
+                                let padded_name = Self::left_and_rightpad(12, name.clone());
+                                name = padded_name;
+                            }
+                            if name.contains("Context  Tags") {
+                                // 12 whitespace padding
+                                let padded_name = Self::left_and_rightpad(12, name.clone());
+                                name = padded_name;
+                            }
+                            if name.contains("Special  Tags") {
+                                // 12 whitespace padding
+                                let padded_name = Self::left_and_rightpad(12, name.clone());
+                                name = padded_name;
+                            }
+                            if name.contains("Task") {
+                                // 40 whitespace padding
+                                let padded_name = Self::left_and_rightpad(40, name.clone());
+                                name = padded_name;
+                            }
+                            ui.label(name);
+                        }
+                        ui.end_row();
+                        for _entry in &self.tasks_vec {
+                            let text = "Done!";
+                            // The to be changed struct member HAS TO BE INSIDE the ui call! Got it!
+                            ui.checkbox(&mut self.completed_vec[counter], text);
+                            // completion and creation dates
+                            ui.text_edit_singleline(&mut self.complete_date_vec[counter]);
+                            ui.text_edit_singleline(&mut self.create_date_vec[counter]);
+                            // Priority implementation
+                            // variable input fields are very versitile!
+                            ui.text_edit_singleline(&mut self.priority_vec[counter]);
+                            ui.text_edit_multiline(&mut self.task_text[counter]);
+                            // Da tags!!
+                            ui.text_edit_multiline(&mut self.project_tags_vec[counter]);
+                            ui.text_edit_multiline(&mut self.context_tags_vec[counter]);
+                            ui.text_edit_multiline(&mut self.special_tags_vec[counter]);
+                            // End of task; -> advance counter by one and end the row
+                            counter += 1;
+                            ui.end_row();
+                        };
+                    });
             });
+            };
         });
     }
     /// This helper function padds a String with `x` amount of whitespace.
@@ -347,6 +385,7 @@ pub fn main() {
     let mut native_options = NativeOptions::default();
     {
         native_options.min_window_size = Option::from(size);
+        native_options.drag_and_drop_support = true;
     }
     // the _cc is incredibly important, I don't know why
     run_native(app_name, native_options, Box::new(|_cc| {

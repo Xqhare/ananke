@@ -9,4 +9,4 @@ edition = "2021"
 [dependencies]
 unicode-segmentation = "1"
 mexprp = "0"
-eframe = "0"
+eframe = { version = "0", features = ["persistence"] }

@@ -1,4 +1,4 @@
-use std::{io::{Error, Write}, fs};
+use std::{io::{Error, Write}, fs, path::PathBuf};
 
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -242,7 +242,7 @@ impl TaskEncoder {
         let final_out = output.replace("  ", " ").trim_end().to_string();
         return final_out;
     }
-    pub fn save(self, filename: String) -> Result<(), Error> {
+    pub fn save(self, filename: PathBuf) -> Result<(), Error> {
         let mut file = fs::File::create(filename)?;
         for row in self.rows {
             file.write_all(row.row.as_bytes())?;
