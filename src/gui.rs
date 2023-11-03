@@ -9,6 +9,7 @@ use eframe::emath::Align2;
 use eframe::epaint::Vec2;
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
+use crate::{check_for_persistant_appstate, create_persistant_appstate};
 use crate::task::{TaskDecoder, self, TaskEncoder};
 
 /// The author of the package.
@@ -57,8 +58,7 @@ pub struct TaskWidget {
     /// Workaround to show different content in window
     show_task_scroll_area: bool,
     show_file_drop_area: bool,
-    persistant_storage_map: IdTypeMap,
-    persistant_id_path: Id,
+    show_restart_area: bool,
 }
 
 // I need to be able to mutate the data in task.rs... I'm thinking about, to work around the
@@ -92,11 +92,28 @@ impl Default for TaskWidget {
     /// Each line is then interrogated and the appropriate response saved into the struct fields of
     /// `TaskWidget`.
     fn default() -> Self {
-        let pathout: PathBuf = if sel {
-            unimplemented!();
-        }
-        let path: &str = "./todo-test.txt";
-        let path_out: PathBuf = PathBuf::from("path");
+        let path_out: PathBuf = PathBuf::new();
+        let output: Vec<TaskDecoder> = Vec::new();
+        let completed: Vec<bool> = Vec::new();
+        let priority: Vec<String> = Vec::new();
+        let complete_date: Vec<String> = Vec::new();
+        let creation_date: Vec<String> = Vec::new();
+        let task_str_out: Vec<String> = Vec::new();
+        let project_tags: Vec<String> = Vec::new();
+        let context_tags: Vec<String> = Vec::new();
+        let special_tags: Vec<String> = Vec::new();
+        
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, show_main_panel_about_text: false, show_main_panel_welcome_text: true, file_path: path_out, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false,};
+    }
+    
+}
+
+/// This implementation of `TaskWidget` really is only for helper, support, breakup functions, or for
+/// gui functions that cannot be implemented in the implementation of `egui::App` for `TaskWidget`.
+impl TaskWidget {
+    /// This support function updates the contents of `TaskWidget` to the one's at the supplied path.
+    fn update_from_path(&mut self, path: PathBuf) {
+        let path_out: PathBuf = path.clone();
         let file_lines = Self::read_lines(path);
         let mut output: Vec<TaskDecoder> = Vec::new();
         let mut completed: Vec<bool> = Vec::new();
@@ -108,7 +125,6 @@ impl Default for TaskWidget {
         let mut context_tags: Vec<String> = Vec::new();
         let mut special_tags: Vec<String> = Vec::new();
         if let Ok(lines) = file_lines {
-            
             for line in lines {
                 if let Ok(task) = line {
                     // Setting up individual tasks for interrigation
@@ -183,16 +199,17 @@ impl Default for TaskWidget {
                     output.push(made_task.clone());
                 }
             }
-        
+        self.file_path = path_out;
+        self.completed_vec = completed;
+        self.create_date_vec = creation_date;
+        self.complete_date_vec = complete_date;
+        self.priority_vec = priority;
+        self.task_text = task_str_out;
+        self.project_tags_vec = project_tags;
+        self.context_tags_vec = context_tags;
+        self.special_tags_vec = special_tags;
         }
-        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, show_main_panel_about_text: false, show_main_panel_welcome_text: true, file_path: path_out, show_task_scroll_area: true, show_file_drop_area: false, persistant_storage_map: Default::default(), persistant_id_path: Id::new("path_id")};
     }
-    
-}
-
-/// This implementation of `TaskWidget` really is only for helper, support, breakup functions, or for
-/// gui functions that cannot be implemented in the implementation of `egui::App` for `TaskWidget`.
-impl TaskWidget {
     /// This helper function reads a file by line from a supplied path (could be an &str of the absolute or relative path for examle).
     fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
         let file = File::open(filename)?;
@@ -256,6 +273,16 @@ impl TaskWidget {
                 
             });
             ui.separator();
+            let mut persistant_app_state_path: PathBuf = PathBuf::new();
+            let appstate_answer = check_for_persistant_appstate();
+            persistant_app_state_path = appstate_answer.1;
+            if self.task_text.is_empty() {
+                if appstate_answer.0 {
+                    // read appstate and update self
+                } else {
+                    self.show_file_drop_area = true;
+                }
+            }
             if self.show_file_drop_area {
                 Area::new("Drop todo.txt below:").anchor(Align2::CENTER_TOP, Vec2::from([0.0, 40.0])).show(ctx, |ui: &mut Ui| {
                     ui.heading("Drop file anywhere in this window!");
@@ -264,14 +291,23 @@ impl TaskWidget {
                             for thing in &i.raw.dropped_files {
                                 if thing.path.clone().is_some() {
                                     self.file_path = thing.path.clone().expect("No path!");
-                                    println!("{:?}", self.file_path);
                                     self.show_file_drop_area = false;
-                                    Storage::set_string(&mut self, key, value)
-                                    self.persistant_storage_map.insert_persisted(self.persistant_id_path, self.file_path.clone());
+                                    println!("{:?}", self.file_path);
+                                    // I need a function to take in a pathbuf, save it
+                                    // permanently, and then update self.
+                                    create_persistant_appstate(persistant_app_state_path.clone(), thing.path.clone().expect("No Path!"));
+                                    self.update_from_path(thing.path.clone().expect("No Path!"));
                                 }
+                                println!("{:?}", self.completed_vec);
+                                self.show_restart_area = true;
                             }
                         }
                     });
+                });
+            }
+            if self.show_restart_area {
+                Area::new("Restart").anchor(Align2::CENTER_TOP, Vec2::from([0.0, 40.0])).show(ctx, |ui: &mut Ui| {
+                    ui.heading("Please restart Ananke!");
                 });
             }
             if self.show_task_scroll_area {
