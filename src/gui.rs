@@ -2,15 +2,13 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::io::{BufReader, BufRead};
 use std::fs::File;
-use eframe::Storage;
-use eframe::egui::util::IdTypeMap;
-use eframe::egui::{Grid, ScrollArea, Area, Window, DroppedFile, Id};
+use eframe::egui::{Grid, ScrollArea, Area};
 use eframe::emath::Align2;
 use eframe::epaint::Vec2;
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
 use crate::{check_for_persistant_appstate, create_persistant_appstate};
-use crate::task::{TaskDecoder, self, TaskEncoder};
+use crate::task::{TaskDecoder, TaskEncoder};
 
 /// The author of the package.
 const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
@@ -92,18 +90,111 @@ impl Default for TaskWidget {
     /// Each line is then interrogated and the appropriate response saved into the struct fields of
     /// `TaskWidget`.
     fn default() -> Self {
-        let path_out: PathBuf = PathBuf::new();
-        let output: Vec<TaskDecoder> = Vec::new();
-        let completed: Vec<bool> = Vec::new();
-        let priority: Vec<String> = Vec::new();
-        let complete_date: Vec<String> = Vec::new();
-        let creation_date: Vec<String> = Vec::new();
-        let task_str_out: Vec<String> = Vec::new();
-        let project_tags: Vec<String> = Vec::new();
-        let context_tags: Vec<String> = Vec::new();
-        let special_tags: Vec<String> = Vec::new();
+        let mut path_out: PathBuf = PathBuf::new();
+        let mut output: Vec<TaskDecoder> = Vec::new();
+        let mut completed: Vec<bool> = Vec::new();
+        let mut priority: Vec<String> = Vec::new();
+        let mut complete_date: Vec<String> = Vec::new();
+        let mut creation_date: Vec<String> = Vec::new();
+        let mut task_str_out: Vec<String> = Vec::new();
+        let mut project_tags: Vec<String> = Vec::new();
+        let mut context_tags: Vec<String> = Vec::new();
+        let mut special_tags: Vec<String> = Vec::new();
         
-        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, show_main_panel_about_text: false, show_main_panel_welcome_text: true, file_path: path_out, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false,};
+        let appstate = check_for_persistant_appstate();
+        let tester = Self::read_lines(appstate.1.clone());
+        let mut out_test = PathBuf::new();
+        if let Ok(lines) = tester {
+            for thing in lines {
+                if let Ok(path_as_string) = thing {
+                    let out = PathBuf::from(path_as_string);
+                    out_test.push(out);
+                }
+            }
+        }
+        if appstate.0 {
+            let path_out1: PathBuf = appstate.1.clone();
+            path_out = path_out1;
+            let file_lines = Self::read_lines(out_test);
+            
+            if let Ok(lines) = file_lines {
+                for line in lines {
+                    if let Ok(task) = line {
+                        // Setting up individual tasks for interrigation
+                        let made_task: TaskDecoder = TaskDecoder::new(task);
+                        // Extracting gui state from data
+                        // Extracting completion status
+                        let completed_out = match made_task.completed {
+                            Some(value) => match value {
+                                true => true,
+                                _ => false,
+                            },
+                            _ => false,
+                        };
+                        completed.push(completed_out);
+                        // Extracting priority
+                        let priority_out = match made_task.priority {
+                            Some(ref prio) => prio.clone(),
+                            _ => String::new(),
+                        };
+                        priority.push(priority_out);
+                        // Extracting completion date
+                        let completion_out = match made_task.complete_date {
+                            Some(ref date) => date.clone(),
+                            _ => String::new(),
+                        };
+                        complete_date.push(completion_out);
+                        // Extracting creation date
+                        let creation_out = match made_task.create_date {
+                            Some(ref date) => date.clone(),
+                            _ => String::new(),
+                        };
+                        creation_date.push(creation_out);
+                        // Extracting main text
+                        task_str_out.push(made_task.task.clone());
+                        // Extracting project tags
+                        let mut project_out: String = String::new();
+                        match made_task.project_tags {
+                            Some(ref tags) => {
+                                for tag in tags {
+                                    project_out.push_str(&tag);
+                                    project_out.push_str(" ");
+                                }
+                            },
+                            _ => project_out.push_str(""),
+                        };
+                        project_tags.push(project_out);
+                        // Extracting context tags
+                        let mut context_out = String::new();
+                        match made_task.context_tags {
+                            Some(ref tags) => {
+                                for tag in tags {
+                                    context_out.push_str(&tag);
+                                    context_out.push_str(" ");
+                                }
+                            },
+                            _ => context_out.push_str(""),
+                        };
+                        context_tags.push(context_out);
+                        // Extracting special tags
+                        let mut special_out = String::new();
+                        match made_task.special_tags {
+                            Some(ref tags) => {
+                                for tag in tags {
+                                    special_out.push_str(&tag);
+                                    special_out.push_str(" ");
+                                }
+                            },
+                            _ => special_out.push_str(""),
+                        };
+                        special_tags.push(special_out);
+                        // pushing interrogated Task out
+                        output.push(made_task.clone());
+                    }
+                }
+            }
+            }
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, show_main_panel_about_text: false, show_main_panel_welcome_text: true, file_path: path_out, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false,};
     }
     
 }
@@ -279,6 +370,7 @@ impl TaskWidget {
             if self.task_text.is_empty() {
                 if appstate_answer.0 {
                     // read appstate and update self
+                    self.show_file_drop_area = false;
                 } else {
                     self.show_file_drop_area = true;
                 }

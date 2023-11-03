@@ -6,15 +6,12 @@
 //!
 //! [`github`]: https://github.com/Xqhare/ananke
 
-use std::{path::PathBuf, env, fs::{File, self}, ffi::OsString, io::Write, os::unix::prelude::OsStrExt};
+use std::{path::PathBuf, fs::File, ffi::OsString, io::Write, os::unix::prelude::OsStrExt};
 
 /// Contains the Appstate, rendering, styling and saving.
 mod gui;
 /// Used to decode or encode a line of todo.txt formatted text.
 mod task;
-
-// Nice to have's:
-// WIP: user's customised todo.txt location - persistant between restarts?
 
 /// The main function only calles the `gui::main()` function.
 fn main() {
@@ -35,13 +32,18 @@ pub fn check_for_persistant_appstate() -> (bool, PathBuf) {
     let appstate_file_name: OsString = OsString::from(".ananke_config");
     appstate_dir_os_string.push(appstate_file_name);
     let appstate_dir_pathbuf = PathBuf::from(appstate_dir_os_string);
-    if appstate_dir_pathbuf.try_exists().is_ok() {
-        // appstate exists
-        (true, appstate_dir_pathbuf)
-    } else {
-        // appstate doesn't exist
-        (false, appstate_dir_pathbuf)
-    }
+    match appstate_dir_pathbuf.try_exists() {
+        Ok(result) => {
+            if result {
+                // appstate exists
+                return (true, appstate_dir_pathbuf);
+            } else {
+                // no appstate
+                return (false, appstate_dir_pathbuf);
+            }
+        },
+        _ => return (false, appstate_dir_pathbuf),
+    };
 }
 pub fn create_persistant_appstate(full_appstate_path_name: PathBuf, todo_file_path: PathBuf) {
     let mut new_appstate = File::create(full_appstate_path_name).expect("Something went terribly wrong, main.rs create_persistant_appstate");
