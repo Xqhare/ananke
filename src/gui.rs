@@ -113,8 +113,7 @@ impl Default for TaskWidget {
             }
         }
         if appstate.0 {
-            let path_out1: PathBuf = appstate.1.clone();
-            path_out = path_out1;
+            path_out = out_test.clone();
             let file_lines = Self::read_lines(out_test);
             
             if let Ok(lines) = file_lines {
