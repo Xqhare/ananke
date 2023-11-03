@@ -7,7 +7,7 @@
 
 /// Contains the Appstate, rendering, styling and saving.
 mod gui;
-/// Used to decode a line of todo.txt formatted text.
+/// Used to decode or encode a line of todo.txt formatted text.
 mod task;
 
 // Nice to have's:
