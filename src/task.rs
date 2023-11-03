@@ -4,31 +4,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::gui::TaskWidget;
 
-// To deconstruct a todo.txt task:
-// Each task is on one line
-// whitespace splits the elements
-// if line starts with x+whitespace == completed
-    // put at bottom/do not show
-// Priority is in the format: (A-Z)
-    // It should be discarded after task completion - for better automatic sorting of the tasks by completion, then date; Some clients transform it into a special tag e.g.
-        // pri:A
-// Dates in format YYYY-MM-DD
-    // If completion date is specified, creation time has to be specified too.
-    // for simplicity I could just always add the creation date; - as a special tag!
-// Normal text has no special char at the beginning, but can have any char inside it.
-    // e.g. normal text means one can also use numb3rs 456 and things: like-this
-    // IMPLEMENTAION OPTIONAL
-        // calculations are possible with the = prefix e.g.
-        // =50*32 or more complex.
-// Project tags start with a +
-// Context tags with @
-// and special tags follow -> key:value
-    // here don't forget to check if it's 'word: more text' vs 'word:text'
-    // first would be text, second a special tag
-// interesting special tags to add:
-// - due:YYYY-MM-DD
-// - pri:A
-// - created:YYYY-MM-DD
+
 
 /// The struct that decodes and sorts the todo.txt input.
 /// The fields are in format order.
@@ -127,17 +103,22 @@ impl TaskDecoder {
     }
 }
 
+/// This struct is used to construct a writeable data state, it contains a single row of .txt text,
+/// encoded from the appstate.
 #[derive(Clone)]
 struct Task {
     row: String,
 }
 
+/// It is implemented for any String of any length.
 impl Task {
     fn new(input: String) -> Self {
         Self { row: input }
     }
 }
 
+/// This struct is used to hold all `Task` structs in order, ready to be passed to the save
+/// function.
 #[derive(Clone)]
 pub struct TaskEncoder {
     rows: Vec<Task>,
@@ -242,6 +223,14 @@ impl TaskEncoder {
         let final_out = output.replace("  ", " ").trim_end().to_string();
         return final_out;
     }
+    /// The `save` function takes in a `TaskEncoder` and writes it's contents, the encoded `Task`
+    /// containing the String for each line, line by line with an added newline in between. Will
+    /// return `Ok()` when successful.
+    ///
+    /// # Errors
+    ///
+    /// Will error when encountering either a problem during file creation, or during writing to
+    /// it. 
     pub fn save(self, filename: PathBuf) -> Result<(), Error> {
         let mut file = fs::File::create(filename)?;
         for row in self.rows {
@@ -252,3 +241,4 @@ impl TaskEncoder {
         Ok(())
     }
 }
+
