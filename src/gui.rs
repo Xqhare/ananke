@@ -55,29 +55,11 @@ pub struct TaskWidget {
     show_main_panel_welcome_text: bool,
     /// Workaround to show different content in window
     show_task_scroll_area: bool,
+    /// Workaround to show different content in window
     show_file_drop_area: bool,
+    /// Workaround to show different content in window
     show_restart_area: bool,
 }
-
-// I need to be able to mutate the data in task.rs... I'm thinking about, to work around the
-// truncation problem at saving, to delete and save new anyway, so more jank is no real deal
-// breaker; BUT the only way I currently see is to clone the data inside task.rs, then display it,
-// MAYBE I'll update the data in task to save from there? OR I'll just save the data from the GUI.
-// I hate both approaches equally. The only way to make it not jank would have to start with a
-// propper save implementation, that could be copied from sesaht.
-// Making the data in tasks mutable however is proving to be tricky.
-//
-// Saving or copying everything into the TaskWidet struct seems to be a better idea, and more
-// practical. Hopefully.
-//
-// I no longer think that it has to do with mutability; the gui is just reading it again and again?
-// -> After a quick println debugging session: yes. It is constantly being read. How tf do i fix
-// this. -> How do I set the application state?
-// => As I understand only in the TaskWidget struct, where I could store a Vec of tasks... if I'm
-// right that is.
-    
-// Soo egui reaaaly doesn't like options... wich isn't a problem now that i know what wreaked havok
-
 
 /// Implementing the Default value for `TaskWidget`, interrogates the task returned from the decoding
 /// steps in `task.rs`.
@@ -338,6 +320,28 @@ impl TaskWidget {
                         println!("DELETE TASK");
                     }
                 });
+                ui.menu_button("Sort", |ui| {
+                    // This sorts by completion status and date
+                    if ui.button("By completion and completion date").clicked() {
+                        println!("SORT COMPLETION");
+                    }
+                    // sort by creation date
+                    if ui.button("By inception date").clicked() {
+                        println!("SORT CREATION DATE");
+                    }
+                    if ui.button("By priority").clicked() {
+                        println!("SORT PRIO");
+                    }
+                    if ui.button("By project tags").clicked() {
+                        println!("SORT PROJECT");
+                    }
+                    if ui.button("By context tags").clicked() {
+                        println!("SORT CONTEXT");
+                    }
+                    if ui.button("By special tags").clicked() {
+                        println!("SORT SPECIAL")
+                    }
+                });
                 ui.menu_button("Help", |ui| {
                     if ui.button("Quit").clicked() {
                         frame.close()
@@ -363,9 +367,7 @@ impl TaskWidget {
                 
             });
             ui.separator();
-            let mut persistant_app_state_path: PathBuf = PathBuf::new();
             let appstate_answer = check_for_persistant_appstate();
-            persistant_app_state_path = appstate_answer.1;
             if self.task_text.is_empty() {
                 if appstate_answer.0 {
                     // read appstate and update self
@@ -386,7 +388,7 @@ impl TaskWidget {
                                     println!("{:?}", self.file_path);
                                     // I need a function to take in a pathbuf, save it
                                     // permanently, and then update self.
-                                    create_persistant_appstate(persistant_app_state_path.clone(), thing.path.clone().expect("No Path!"));
+                                    create_persistant_appstate(appstate_answer.1.clone(), thing.path.clone().expect("No Path!"));
                                     self.update_from_path(thing.path.clone().expect("No Path!"));
                                 }
                                 println!("{:?}", self.completed_vec);
@@ -519,3 +521,4 @@ pub fn main() {
         Box::<TaskWidget>::default()
     })).expect("E 001");
 }
+
