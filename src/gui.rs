@@ -1,4 +1,5 @@
 use std::io;
+use chrono::{Utc, Datelike};
 use std::path::{Path, PathBuf};
 use std::io::{BufReader, BufRead};
 use std::fs::File;
@@ -49,16 +50,28 @@ pub struct TaskWidget {
     pub special_tags_vec: Vec<String>,
     /// The file path to be read and saved to.
     file_path: PathBuf,
-    /// Workaround to show different content in window
+    /// Today's date formatted to YYYY-MM-DD.
+    date: String,
+    /// Needed for new task generation. Holds the date.
+    new_create_date_in: String,
+    /// Needed for new task generation. Holds the priotity.
+    new_priority_in: String,
+    /// Needed for new task generation. Holds the task main text.
+    new_task_text_in: String,
+    /// Needed to save state of greyed out creation date during task generation. Default `false`.
+    new_edit_ui_date: bool,
+    /// Workaround to show different content, here the help and about text. Default `false`.
     show_main_panel_about_text: bool,
-    /// Workaround to show different content in window
+    /// Workaround to show different content, here the welcome panel. Defalut `true`.
     show_main_panel_welcome_text: bool,
-    /// Workaround to show different content in window
+    /// Workaround to show different content, here the main scrollable task panel. Default `true`.
     show_task_scroll_area: bool,
-    /// Workaround to show different content in window
+    /// Workaround to show that the window now accepts drag and drop files. Default `false`.
     show_file_drop_area: bool,
-    /// Workaround to show different content in window
+    /// Workaround to show that ananke needs to be restarted. Default `false`.
     show_restart_area: bool,
+    /// Workaround to show task creation dialoge. Default `false`.
+    show_main_task_creation_area: bool,
 }
 
 /// Implementing the Default value for `TaskWidget`, interrogates the task returned from the decoding
@@ -82,6 +95,10 @@ impl Default for TaskWidget {
         let mut project_tags: Vec<String> = Vec::new();
         let mut context_tags: Vec<String> = Vec::new();
         let mut special_tags: Vec<String> = Vec::new();
+        let empty_string: String = String::new();
+
+        let now = Utc::now();
+        let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
         
         let appstate = check_for_persistant_appstate();
         let tester = Self::read_lines(appstate.1.clone());
@@ -175,7 +192,7 @@ impl Default for TaskWidget {
                 }
             }
             }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, show_main_panel_about_text: false, show_main_panel_welcome_text: true, file_path: path_out, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false,};
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false,};
     }
     
 }
@@ -298,23 +315,24 @@ impl TaskWidget {
                         let temp = TaskEncoder::encode_taskwidget(self.clone());
                         let path: PathBuf = self.file_path.clone();
                         if TaskEncoder::save(temp, path).is_ok() {
-                            println!("Saved!")
-                        } else {
-                            println!("Saving failed");
-                        };
-                    };
+                        }
+                    }
                     if ui.button("Choose file location").clicked() {
-                        println!("FILE LOCATION!");
                         if self.show_file_drop_area {
                             self.show_file_drop_area = false;
                         } else {
                             self.show_file_drop_area = true;
                         }
-                    };
+                    }
                 });
                 ui.menu_button("Task", |ui| {
                     if ui.button("New").clicked() {
                         println!("NEW TASK");
+                        if self.show_main_panel_about_text || self.show_main_panel_welcome_text {
+                            self.show_main_panel_welcome_text = false;
+                            self.show_main_panel_about_text = false;
+                        }
+                        self.show_main_task_creation_area = true;
                     }
                     if ui.button("Delete").clicked() {
                         println!("DELETE TASK");
@@ -366,7 +384,7 @@ impl TaskWidget {
                 });
                 
             });
-            ui.separator();
+            let ui_main_area = ui.separator();
             let appstate_answer = check_for_persistant_appstate();
             if self.task_text.is_empty() {
                 if appstate_answer.0 {
@@ -385,13 +403,11 @@ impl TaskWidget {
                                 if thing.path.clone().is_some() {
                                     self.file_path = thing.path.clone().expect("No path!");
                                     self.show_file_drop_area = false;
-                                    println!("{:?}", self.file_path);
                                     // I need a function to take in a pathbuf, save it
                                     // permanently, and then update self.
                                     create_persistant_appstate(appstate_answer.1.clone(), thing.path.clone().expect("No Path!"));
                                     self.update_from_path(thing.path.clone().expect("No Path!"));
                                 }
-                                println!("{:?}", self.completed_vec);
                                 self.show_restart_area = true;
                             }
                         }
@@ -402,6 +418,58 @@ impl TaskWidget {
                 Area::new("Restart").anchor(Align2::CENTER_TOP, Vec2::from([0.0, 40.0])).show(ctx, |ui: &mut Ui| {
                     ui.heading("Please restart Ananke!");
                 });
+            }
+            if self.show_main_task_creation_area {
+                Grid::new(ui_main_area.id).show(ui, |ui: &mut Ui| {
+                    let vec_strings = vec!["Create new task".to_string(), "Inception  date".to_string(), "Priority".to_string(), "Task".to_string()];
+                    // Drawing the collum names
+                    for mut name in vec_strings {
+                        if name.contains("Create new task") {
+                            let padded_name = Self::left_and_rightpad(25, name.clone());
+                            name = padded_name;
+                        }
+                        if name.contains("Inception  date") {
+                            let padded_name = Self::left_and_rightpad(6, name.clone());
+                            name = padded_name;
+                        }
+                        if name.contains("Task") {
+                            // 40 whitespace padding
+                            let padded_name = Self::left_and_rightpad(40, name.clone());
+                            name = padded_name;
+                        }
+                        ui.label(name);
+                    }
+                    ui.end_row();
+                    ui.vertical(|ui: &mut Ui|{
+                        ui.label("1. Delete inception date if it is unwanted.");
+                        ui.label("2. Set priority (any letter A-Z) if any is wanted.");
+                        ui.label("3. Enter task complete with +ProjectTags, @ContextTags and special:tags.");
+                        ui.label("4. Hit save and reload Ananke.");
+                    });
+                    // How to disable something (make it greyed out)
+                    ui.horizontal(|ui: &mut Ui| {
+                        if ui.small_button("Edit").clicked() {
+                            if self.new_edit_ui_date {
+                                self.new_edit_ui_date = false;
+                            } else {
+                                self.new_edit_ui_date = true;
+                            }
+                            }
+                            ui.add_enabled_ui(self.new_edit_ui_date, |ui| {
+                                ui.text_edit_singleline(&mut self.new_create_date_in);
+                            });
+                        });
+                        let mut prio_in = String::new();
+                        ui.horizontal(|ui: &mut Ui|{
+                            ui.text_edit_singleline(&mut self.new_priority_in);
+                        });
+                        ui.text_edit_multiline(&mut self.new_task_text_in);
+                        // Saving logic start:
+                        if ui.button("Save").clicked() {
+                            println!("SAVE");
+                        }
+                    });
+                    ui.end_row();
             }
             if self.show_task_scroll_area {
                 ScrollArea::vertical().show(ui, |ui| {
@@ -419,6 +487,8 @@ impl TaskWidget {
                         ui.label("The todo.txt format is a plain text format file for managing tasks. It is at it's core really only a .txt file named todo. It contains one task per line, and each task line can contain infomation like: A priority letter (A-Z) first, then the Inception (Creation) and Completion dates in (YYYY-MM-DD format), Project Tags (preceeded by the + sign), Context Tags (preceeded by the @ sign), and finally Special tags that only follow the [keyTag:AnyContentYouWantToBeSearchableWithTheKeyTag].");
                         ui.heading("Licenses");
                         ui.hyperlink_to(format!("egui licensed under the MIT-License"), "https://github.com/emilk/egui/blob/master/LICENSE-MIT");
+                    }
+                    if self.show_main_task_creation_area {
                     }
                     let mut counter = 0;
                     let vec_strings = vec!["Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
