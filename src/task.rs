@@ -151,9 +151,9 @@ impl TaskEncoder {
             }
         }
         // Debug / Sanity printout
-        for entry in &output {
-            println!("{:?}", entry.row);
-        }
+        // for entry in &output {
+        //     println!("{:?}", entry.row);
+        // }
         Self { rows: output }
     }
     /// Takes in the `TaskWidget` (Appstate) and a `position`, and returns the finished encoded string of the task
