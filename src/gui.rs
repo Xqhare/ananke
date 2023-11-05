@@ -1,5 +1,6 @@
 use std::io;
 use chrono::{Utc, Datelike};
+use unicode_segmentation::UnicodeSegmentation;
 use std::path::{Path, PathBuf};
 use std::io::{BufReader, BufRead};
 use std::fs::File;
@@ -466,7 +467,80 @@ impl TaskWidget {
                         ui.text_edit_multiline(&mut self.new_task_text_in);
                         // Saving logic start:
                         if ui.button("Save").clicked() {
-                            println!("SAVE");
+                            // Compile user input into todo.txt formatted string,
+                            // function to decode the string and prepend it to TaskWidget elements
+                            let mut encoded_out = String::new();
+                            if self.new_create_date_in.graphemes(true).count() > 0 {
+                                let out = format!("{} ", self.new_create_date_in);
+                                encoded_out.push_str(&out);
+                            } else {
+                                encoded_out.push_str("");
+                            }
+                            if self.new_priority_in.graphemes(true).count() == 1 {
+                                let out = format!("({}) ", self.new_priority_in);
+                                encoded_out.push_str(&out);
+                            } else if self.new_priority_in.graphemes(true).count() > 1 {
+                                let out = format!("({}) ", self.new_priority_in.graphemes(true).take(1).last().unwrap());
+                                encoded_out.push_str(&out);
+                            } else {
+                                encoded_out.push_str("");
+                            }
+                            encoded_out.push_str(self.new_task_text_in.as_str());
+                            // Decoding created String
+                            let decoded_task = TaskDecoder::new(encoded_out);
+                            // As there is only one task, no update loop needed.
+                            let index: usize = 0;
+                            // There is no completion date OR completion marker!
+                            // So first we push the non changing fields:
+                            self.tasks_vec.insert(index, decoded_task.clone());
+                            self.completed_vec.insert(index, false);
+                            self.complete_date_vec.insert(index, String::new());
+                            match decoded_task.create_date {
+                                Some(date) => self.create_date_vec.insert(index, date),
+                                None => self.create_date_vec.insert(index, String::new()),
+                            }
+                            match decoded_task.priority {
+                                Some(prio) => self.priority_vec.insert(index, prio),
+                                None => self.priority_vec.insert(index, String::new()),
+                            }
+                            // task is always some value!
+                            self.task_text.insert(index, decoded_task.task);
+                            // Da tags!
+                            match decoded_task.project_tags {
+                                Some(tag) => {
+                                    let mut out = String::new();
+                                    for entry in tag {
+                                        out.push_str(&entry);
+                                    }
+                                    self.project_tags_vec.insert(index, out);
+                                },
+                                None => self.project_tags_vec.insert(index, String::new()),
+                            }
+                            match decoded_task.context_tags {
+                                Some(tag) => {
+                                    let mut out = String::new();
+                                    for entry in tag {
+                                        out.push_str(&entry);
+                                    }
+                                    self.context_tags_vec.insert(index, out);
+                                },
+                                None => self.context_tags_vec.insert(index, String::new()),
+                            }
+                            match decoded_task.special_tags {
+                                Some(tag) => {
+                                    let mut out = String::new();
+                                    for entry in tag {
+                                        out.push_str(&entry);
+                                    }
+                                    self.special_tags_vec.insert(index, out);
+                                },
+                                None => self.special_tags_vec.insert(index, String::new()),
+                            }
+                            // after saving logic, clear new task:
+                            self.new_create_date_in = self.date.clone();
+                            self.new_edit_ui_date = false;
+                            self.new_priority_in = String::new();
+                            self.new_task_text_in = String::new();
                         }
                     });
                     ui.end_row();
