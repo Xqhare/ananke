@@ -180,7 +180,7 @@ impl TaskEncoder {
                     let mut prio_out = format!("({shortend_prio})");
                     prio_out.push_str(str_spacer);
                     prio_out
-                // This really is only a failsafe - And it makes the LSP shut up.
+                // This checks for NO graphemes -> empty string
                 } else {
                     String::new()
         };
