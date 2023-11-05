@@ -328,7 +328,6 @@ impl TaskWidget {
                 });
                 ui.menu_button("Task", |ui| {
                     if ui.button("New").clicked() {
-                        println!("NEW TASK");
                         if self.show_main_panel_about_text || self.show_main_panel_welcome_text {
                             self.show_main_panel_welcome_text = false;
                             self.show_main_panel_about_text = false;
@@ -442,10 +441,10 @@ impl TaskWidget {
                     }
                     ui.end_row();
                     ui.vertical(|ui: &mut Ui|{
-                        ui.label("1. Delete inception date if it is unwanted.");
-                        ui.label("2. Set priority (any letter A-Z) if any is wanted.");
+                        ui.label("1. Delete inception date if it is unwanted by clicking the 'edit' button.");
+                        ui.label("2. Set priority (any letter A-Z) if any is wanted. A being the highest, Z the lowest, proirity.");
                         ui.label("3. Enter task complete with +ProjectTags, @ContextTags and special:tags.");
-                        ui.label("4. Hit save and reload Ananke.");
+                        ui.label("4. Hit save.");
                     });
                     // How to disable something (make it greyed out)
                     ui.horizontal(|ui: &mut Ui| {
@@ -598,7 +597,21 @@ impl TaskWidget {
                         for _entry in &self.tasks_vec {
                             let text = "Done!";
                             // The to be changed struct member HAS TO BE INSIDE the ui call! Got it!
-                            ui.checkbox(&mut self.completed_vec[counter], text);
+                            // If task is marked as completed AND has a a creation date set, we set
+                            // a completion date.
+                            if ui.checkbox(&mut self.completed_vec[counter], text).clicked() {
+                                if self.completed_vec[counter] {
+                                    if !self.create_date_vec[counter].is_empty() {
+                                        let date_today = self.date.clone();
+                                        self.complete_date_vec.remove(counter);
+                                        self.complete_date_vec.insert(counter, date_today);
+                                    }
+                                } else {
+                                    self.complete_date_vec.remove(counter);
+                                    self.complete_date_vec.insert(counter, String::new());
+                                }
+                            }
+                                
                             // completion and creation dates
                             ui.text_edit_singleline(&mut self.complete_date_vec[counter]);
                             ui.text_edit_singleline(&mut self.create_date_vec[counter]);
