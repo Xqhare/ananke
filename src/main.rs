@@ -51,7 +51,7 @@ fn main() {
 /// together, in that order, as `PathBuf`.
 pub fn check_for_persistant_appstate() -> (bool, PathBuf) {
     let mut appstate_dir_os_string: OsString = OsString::new();
-    let appstate_file_name: OsString = OsString::from(".ananke_config");
+    let appstate_file_name: OsString = OsString::from(".anankeconfig");
     appstate_dir_os_string.push(appstate_file_name);
     let appstate_dir_pathbuf = PathBuf::from(appstate_dir_os_string);
     match appstate_dir_pathbuf.try_exists() {
