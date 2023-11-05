@@ -16,7 +16,7 @@ target/
 *.txt
 *.vim
 ananke_*
-.ananke_config
+.anankeconfig
 # Added by cargo
 
 /target
