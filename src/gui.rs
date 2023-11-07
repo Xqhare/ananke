@@ -659,7 +659,15 @@ impl TaskWidget {
                                 }
                             } else if self.show_task_move_pos_collum {
                                 if ui.text_edit_singleline(&mut self.usr_change_pos_in[counter]).lost_focus() {
-                                    println!("POS {}", self.usr_change_pos_in[counter]);
+                                    let mut vec_out: Vec<(usize, usize)> = Vec::new();
+                                    // This could technichally panic because of unwrap;
+                                    // however it is only called if the value to be
+                                    // unwraped is `Ok()`. 
+                                    if self.usr_change_pos_in[counter].parse::<usize>().is_ok() {
+                                        let new_pos = self.usr_change_pos_in[counter].parse::<usize>().unwrap();
+                                        vec_out.push((counter.clone(), new_pos))
+                                    }
+                                    self.change_task_touple = (true, vec_out);
                                 }
                             } else {
                                 if ui.checkbox(&mut self.completed_vec[counter], text).clicked() {
@@ -735,6 +743,21 @@ impl App for TaskWidget {
                 self.project_tags_vec.remove(position);
                 self.context_tags_vec.remove(position);
                 self.special_tags_vec.remove(position);
+            }
+        }
+        if self.change_task_touple.0 {
+            for element in &mut self.change_task_touple.1 {
+                let old_pos = element.0.clone();
+                let new_pos = element.1.clone();
+                self.tasks_vec.swap(old_pos, new_pos);
+                self.completed_vec.swap(old_pos, new_pos);
+                self.priority_vec.swap(old_pos, new_pos);
+                self.complete_date_vec.swap(old_pos, new_pos);
+                self.create_date_vec.swap(old_pos, new_pos);
+                self.task_text.swap(old_pos, new_pos);
+                self.project_tags_vec.swap(old_pos, new_pos);
+                self.context_tags_vec.swap(old_pos, new_pos);
+                self.special_tags_vec.swap(old_pos, new_pos);
             }
         }
     }
