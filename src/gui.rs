@@ -61,6 +61,9 @@ pub struct TaskWidget {
     new_task_text_in: String,
     /// Needed to save state of greyed out creation date during task generation. Default `false`.
     new_edit_ui_date: bool,
+    /// Needed to save the to be deleted tasks, to be deleted at another point in the loop. Default
+    /// bool `false` and an empty Vec that will contain the indices.
+    delete_task_touple: (bool, Vec<usize>),
     /// Workaround to show different content, here the help and about text. Default `false`.
     show_main_panel_about_text: bool,
     /// Workaround to show different content, here the welcome panel. Defalut `true`.
@@ -73,6 +76,9 @@ pub struct TaskWidget {
     show_restart_area: bool,
     /// Workaround to show task creation dialoge. Default `false`.
     show_main_task_creation_area: bool,
+    /// Workaround to show task deletion dialoge. Default `false`.
+    show_task_deletion_collum: bool,
+    
 }
 
 /// Implementing the Default value for `TaskWidget`, interrogates the task returned from the decoding
@@ -86,6 +92,7 @@ impl Default for TaskWidget {
     /// Each line is then interrogated and the appropriate response saved into the struct fields of
     /// `TaskWidget`.
     fn default() -> Self {
+        let tuple_out: (bool, Vec<usize>) = (false, Vec::new());
         let mut path_out: PathBuf = PathBuf::new();
         let mut output: Vec<TaskDecoder> = Vec::new();
         let mut completed: Vec<bool> = Vec::new();
@@ -193,7 +200,7 @@ impl Default for TaskWidget {
                 }
             }
             }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false,};
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: tuple_out, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false,};
     }
     
 }
@@ -335,7 +342,15 @@ impl TaskWidget {
                         self.show_main_task_creation_area = true;
                     }
                     if ui.button("Delete").clicked() {
-                        println!("DELETE TASK");
+                        if self.show_task_deletion_collum {
+                            self.show_task_deletion_collum = false;
+                        } else {
+                            self.show_task_deletion_collum = true;
+                            println!("DELETE TASK");
+                        }
+                    }
+                    if ui.button("Change position").clicked() {
+                        println!("CHANGE POS");
                     }
                 });
                 ui.menu_button("Sort", |ui| {
@@ -382,6 +397,20 @@ impl TaskWidget {
                         self.show_main_panel_about_text = false;
                     }
                 });
+                // Reset UI toggle
+                if !self.show_task_scroll_area || !self.show_main_panel_welcome_text || self.show_task_deletion_collum || self.show_restart_area || self.show_file_drop_area {
+                    if ui.button("Reset UI").clicked() {
+                        self.show_task_deletion_collum = false;
+                        self.show_main_panel_about_text = false;
+                        self.show_file_drop_area = false;
+                        self.show_restart_area = false;
+                        self.show_main_task_creation_area = false;
+                        // Default true:
+                        self.show_main_panel_welcome_text = true;
+                        self.show_task_scroll_area = true;
+                    }
+                }
+                
                 
             });
             let ui_main_area = ui.separator();
@@ -459,7 +488,6 @@ impl TaskWidget {
                                 ui.text_edit_singleline(&mut self.new_create_date_in);
                             });
                         });
-                        let mut prio_in = String::new();
                         ui.horizontal(|ui: &mut Ui|{
                             ui.text_edit_singleline(&mut self.new_priority_in);
                         });
@@ -564,11 +592,14 @@ impl TaskWidget {
                     if self.show_main_task_creation_area {
                     }
                     let mut counter = 0;
-                    let vec_strings = vec!["Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
+                    let vec_strings = vec!["#".to_string(), "Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
                     let task_list_seperator = ui.separator();
                     let _a_grid = Grid::new(task_list_seperator.id).striped(true).show(ui, |ui| {
                         // Drawing the collum names
                         for mut name in vec_strings {
+                            if name.contains("Completed") && self.show_task_deletion_collum {
+                                name = "Delete".to_string();
+                            }
                             // The 2 whitespace in the Project  Tags is on purpose! - As well
                             // as in the other Tags too!
                             if name.contains("Project  Tags") {
@@ -594,24 +625,35 @@ impl TaskWidget {
                             ui.label(name);
                         }
                         ui.end_row();
+                        let mut delete_entry = false;
+                        let mut delete_pos: Vec<usize> = Vec::new();
                         for _entry in &self.tasks_vec {
+                            ui.label(counter.to_string());
                             let text = "Done!";
                             // The to be changed struct member HAS TO BE INSIDE the ui call! Got it!
                             // If task is marked as completed AND has a a creation date set, we set
                             // a completion date.
-                            if ui.checkbox(&mut self.completed_vec[counter], text).clicked() {
-                                if self.completed_vec[counter] {
-                                    if !self.create_date_vec[counter].is_empty() {
-                                        let date_today = self.date.clone();
+                            if self.show_task_deletion_collum {
+                                if ui.button("Delete").clicked() {
+                                    // Delete entry at counter!
+                                    delete_entry = true;
+                                    delete_pos.push(counter);
+                                }
+                            } else {
+                                if ui.checkbox(&mut self.completed_vec[counter], text).clicked() {
+                                    if self.completed_vec[counter] {
+                                        if !self.create_date_vec[counter].is_empty() {
+                                            let date_today = self.date.clone();
+                                            self.complete_date_vec.remove(counter);
+                                            self.complete_date_vec.insert(counter, date_today);
+                                        }
+                                    } else {
                                         self.complete_date_vec.remove(counter);
-                                        self.complete_date_vec.insert(counter, date_today);
+                                        self.complete_date_vec.insert(counter, String::new());
                                     }
-                                } else {
-                                    self.complete_date_vec.remove(counter);
-                                    self.complete_date_vec.insert(counter, String::new());
                                 }
                             }
-                                
+                            
                             // completion and creation dates
                             ui.text_edit_singleline(&mut self.complete_date_vec[counter]);
                             ui.text_edit_singleline(&mut self.create_date_vec[counter]);
@@ -627,6 +669,7 @@ impl TaskWidget {
                             counter += 1;
                             ui.end_row();
                         };
+                        self.delete_task_touple = (delete_entry, delete_pos);
                     });
             });
             };
@@ -658,6 +701,20 @@ impl App for TaskWidget {
     /// It takes over after being indirectly called in `gui.rs::main()`.
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         self.main_panel(ctx, frame);
+        if self.delete_task_touple.0 {
+            for pos in &mut self.delete_task_touple.1 {
+                let position = pos.to_owned();
+                self.tasks_vec.remove(position);
+                self.completed_vec.remove(position);
+                self.priority_vec.remove(position);
+                self.complete_date_vec.remove(position);
+                self.create_date_vec.remove(position);
+                self.task_text.remove(position);
+                self.project_tags_vec.remove(position);
+                self.context_tags_vec.remove(position);
+                self.special_tags_vec.remove(position);
+            }
+        }
     }
     
 }
@@ -667,7 +724,7 @@ impl App for TaskWidget {
 /// From here `update()` from `impl App for TaskWidget`
 pub fn main() {
     let app_name = "Ananke";
-    let size: Vec2<> = Vec2::from((1050.0, 800.0));
+    let size: Vec2<> = Vec2::from((1100.0, 800.0));
     let mut native_options = NativeOptions::default();
     {
         native_options.min_window_size = Option::from(size);
