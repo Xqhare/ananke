@@ -331,8 +331,7 @@ impl TaskWidget {
                     if ui.button("Save").clicked() {
                         let temp = TaskEncoder::encode_taskwidget(self.clone());
                         let path: PathBuf = self.file_path.clone();
-                        if TaskEncoder::save(temp, path).is_ok() {
-                        }
+                        let _ = TaskEncoder::save(temp, path);
                     }
                     if ui.button("Choose file location").clicked() {
                         if self.show_file_drop_area {
@@ -371,7 +370,6 @@ impl TaskWidget {
                         } else {
                             self.show_task_move_pos_collum = false;
                         }
-                        println!("CHANGE POS");
                     }
                 });
                 ui.menu_button("Sort", |ui| {
@@ -516,6 +514,7 @@ impl TaskWidget {
                         ui.text_edit_multiline(&mut self.new_task_text_in);
                         // Saving logic start:
                         if ui.button("Save").clicked() {
+                            let usr_change_pos_entry: String = String::new();
                             // Compile user input into todo.txt formatted string,
                             // function to decode the string and prepend it to TaskWidget elements
                             let mut encoded_out = String::new();
@@ -539,6 +538,7 @@ impl TaskWidget {
                             let decoded_task = TaskDecoder::new(encoded_out);
                             // As there is only one task, no update loop needed.
                             let index: usize = 0;
+                            self.usr_change_pos_in.insert(index, usr_change_pos_entry);
                             // There is no completion date OR completion marker!
                             // So first we push the non changing fields:
                             self.tasks_vec.insert(index, decoded_task.clone());
@@ -590,6 +590,9 @@ impl TaskWidget {
                             self.new_edit_ui_date = false;
                             self.new_priority_in = String::new();
                             self.new_task_text_in = String::new();
+                            let temp = TaskEncoder::encode_taskwidget(self.clone());
+                            let path: PathBuf = self.file_path.clone();
+                            let _ = TaskEncoder::save(temp, path);
                         }
                     });
                     ui.end_row();
