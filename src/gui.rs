@@ -344,18 +344,25 @@ impl TaskWidget {
                 });
                 ui.menu_button("Task", |ui| {
                     if ui.button("New").clicked() {
-                        if self.show_main_panel_about_text || self.show_main_panel_welcome_text {
-                            self.show_main_panel_welcome_text = false;
-                            self.show_main_panel_about_text = false;
+                        if !self.show_main_task_creation_area {
+                            if self.show_main_panel_about_text || self.show_main_panel_welcome_text {
+                                self.show_main_panel_welcome_text = false;
+                                self.show_main_panel_about_text = false;
+                            }
+                            self.show_task_deletion_collum = false;
+                            self.show_task_move_pos_collum = false;
+                            self.show_main_task_creation_area = true;
+                        } else {
+                            self.show_main_task_creation_area = false;
+                            self.show_main_panel_welcome_text = true;
                         }
-                        self.show_main_task_creation_area = true;
+                        
                     }
                     if ui.button("Delete").clicked() {
                         if self.show_task_deletion_collum {
                             self.show_task_deletion_collum = false;
                         } else {
                             self.show_task_deletion_collum = true;
-                            println!("DELETE TASK");
                         }
                     }
                     if ui.button("Change position").clicked() {
