@@ -64,6 +64,11 @@ pub struct TaskWidget {
     /// Needed to save the to be deleted tasks, to be deleted at another point in the loop. Default
     /// bool `false` and an empty Vec that will contain the indices.
     delete_task_touple: (bool, Vec<usize>),
+    /// Needed for user input of new task position. Default `empty`.
+    usr_change_pos_in: Vec<String>,
+    /// Needed to save the to be moved tasks, to move them at another point in the loop. Default
+    /// bool `false` and an empty `Vec` of touples of `usize` numbers.
+    change_task_touple: (bool, Vec<(usize, usize)>),
     /// Workaround to show different content, here the help and about text. Default `false`.
     show_main_panel_about_text: bool,
     /// Workaround to show different content, here the welcome panel. Defalut `true`.
@@ -78,7 +83,8 @@ pub struct TaskWidget {
     show_main_task_creation_area: bool,
     /// Workaround to show task deletion dialoge. Default `false`.
     show_task_deletion_collum: bool,
-    
+    /// Workaround to show move task position dialoge. Default `false`.
+    show_task_move_pos_collum: bool,
 }
 
 /// Implementing the Default value for `TaskWidget`, interrogates the task returned from the decoding
@@ -92,7 +98,8 @@ impl Default for TaskWidget {
     /// Each line is then interrogated and the appropriate response saved into the struct fields of
     /// `TaskWidget`.
     fn default() -> Self {
-        let tuple_out: (bool, Vec<usize>) = (false, Vec::new());
+        let change_touple: (bool, Vec<(usize, usize)>) = (false, Vec::new());
+        let delete_touple: (bool, Vec<usize>) = (false, Vec::new());
         let mut path_out: PathBuf = PathBuf::new();
         let mut output: Vec<TaskDecoder> = Vec::new();
         let mut completed: Vec<bool> = Vec::new();
@@ -104,6 +111,7 @@ impl Default for TaskWidget {
         let mut context_tags: Vec<String> = Vec::new();
         let mut special_tags: Vec<String> = Vec::new();
         let empty_string: String = String::new();
+        let mut empty_vec_string: Vec<String> = Vec::new();
 
         let now = Utc::now();
         let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
@@ -126,6 +134,7 @@ impl Default for TaskWidget {
             if let Ok(lines) = file_lines {
                 for line in lines {
                     if let Ok(task) = line {
+                        empty_vec_string.push(empty_string.clone());
                         // Setting up individual tasks for interrigation
                         let made_task: TaskDecoder = TaskDecoder::new(task);
                         // Extracting gui state from data
@@ -200,7 +209,7 @@ impl Default for TaskWidget {
                 }
             }
             }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: tuple_out, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false,};
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, };
     }
     
 }
@@ -350,6 +359,11 @@ impl TaskWidget {
                         }
                     }
                     if ui.button("Change position").clicked() {
+                        if !self.show_task_move_pos_collum {
+                            self.show_task_move_pos_collum = true;
+                        } else {
+                            self.show_task_move_pos_collum = false;
+                        }
                         println!("CHANGE POS");
                     }
                 });
@@ -398,13 +412,14 @@ impl TaskWidget {
                     }
                 });
                 // Reset UI toggle
-                if !self.show_task_scroll_area || !self.show_main_panel_welcome_text || self.show_task_deletion_collum || self.show_restart_area || self.show_file_drop_area {
+                if !self.show_task_scroll_area || !self.show_main_panel_welcome_text || self.show_task_deletion_collum || self.show_restart_area || self.show_file_drop_area || self.show_task_move_pos_collum {
                     if ui.button("Reset UI").clicked() {
                         self.show_task_deletion_collum = false;
                         self.show_main_panel_about_text = false;
                         self.show_file_drop_area = false;
                         self.show_restart_area = false;
                         self.show_main_task_creation_area = false;
+                        self.show_task_move_pos_collum = false;
                         // Default true:
                         self.show_main_panel_welcome_text = true;
                         self.show_task_scroll_area = true;
@@ -600,6 +615,9 @@ impl TaskWidget {
                             if name.contains("Completed") && self.show_task_deletion_collum {
                                 name = "Delete".to_string();
                             }
+                            if name.contains("Completed") && self.show_task_move_pos_collum {
+                                name = "Move task to #".to_string();
+                            }
                             // The 2 whitespace in the Project  Tags is on purpose! - As well
                             // as in the other Tags too!
                             if name.contains("Project  Tags") {
@@ -638,6 +656,10 @@ impl TaskWidget {
                                     // Delete entry at counter!
                                     delete_entry = true;
                                     delete_pos.push(counter);
+                                }
+                            } else if self.show_task_move_pos_collum {
+                                if ui.text_edit_singleline(&mut self.usr_change_pos_in[counter]).lost_focus() {
+                                    println!("POS {}", self.usr_change_pos_in[counter]);
                                 }
                             } else {
                                 if ui.checkbox(&mut self.completed_vec[counter], text).clicked() {
