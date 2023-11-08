@@ -217,6 +217,33 @@ impl Default for TaskWidget {
 /// This implementation of `TaskWidget` really is only for helper, support, breakup functions, or for
 /// gui functions that cannot be implemented in the implementation of `egui::App` for `TaskWidget`.
 impl TaskWidget {
+    fn reset_grid_ui(&mut self) {
+        self.show_task_deletion_collum = false;
+        self.show_file_drop_area = false;
+        self.show_restart_area = false;
+        self.show_task_move_pos_collum = false;
+        // Default true:
+        self.show_task_scroll_area = true;
+    }
+    fn reset_top_ui(&mut self) {
+        self.show_main_panel_about_text = false;
+        self.show_file_drop_area = false;
+        self.show_restart_area = false;
+        self.show_main_task_creation_area = false;
+        // Default true:
+        self.show_main_panel_welcome_text = true;
+    }
+    fn reset_all_ui(&mut self) {
+        self.show_task_deletion_collum = false;
+        self.show_main_panel_about_text = false;
+        self.show_file_drop_area = false;
+        self.show_restart_area = false;
+        self.show_main_task_creation_area = false;
+        self.show_task_move_pos_collum = false;
+        // Default true:
+        self.show_main_panel_welcome_text = true;
+        self.show_task_scroll_area = true;
+    }
     /// This support function updates the contents of `TaskWidget` to the one's at the supplied path.
     fn update_from_path(&mut self, path: PathBuf) {
         let path_out: PathBuf = path.clone();
@@ -348,27 +375,27 @@ impl TaskWidget {
                                 self.show_main_panel_welcome_text = false;
                                 self.show_main_panel_about_text = false;
                             }
-                            self.show_task_deletion_collum = false;
-                            self.show_task_move_pos_collum = false;
+                            self.reset_grid_ui();
                             self.show_main_task_creation_area = true;
                         } else {
-                            self.show_main_task_creation_area = false;
-                            self.show_main_panel_welcome_text = true;
+                            self.reset_top_ui();
                         }
                         
                     }
                     if ui.button("Delete").clicked() {
                         if self.show_task_deletion_collum {
-                            self.show_task_deletion_collum = false;
+                            self.reset_grid_ui();
                         } else {
+                            self.reset_grid_ui();
                             self.show_task_deletion_collum = true;
                         }
                     }
                     if ui.button("Change position").clicked() {
                         if !self.show_task_move_pos_collum {
+                            self.reset_grid_ui();
                             self.show_task_move_pos_collum = true;
                         } else {
-                            self.show_task_move_pos_collum = false;
+                            self.reset_grid_ui();
                         }
                     }
                 });
@@ -399,35 +426,22 @@ impl TaskWidget {
                         frame.close()
                     }
                     // The most I have learned about buttons so far.
-                    let test_button = ui.button("About");
-                    if test_button.clicked() {
+                    if ui.button("About").clicked() {
                         // The switch of welcome window is here to reduce lag / flickering in
-                    // rendering
-                    if self.show_main_panel_about_text == false {
-                            self.show_main_panel_about_text = true;
-                            self.show_main_panel_welcome_text = false;
-                        } else {
-                            self.show_main_panel_about_text = false;
-                            self.show_main_panel_welcome_text = true;
-                        };
-                    }
-                    // Legacy, here to remind myself of how it could be done.
-                    if test_button.secondary_clicked() {
-                        self.show_main_panel_about_text = false;
+                        // rendering
+                        if self.show_main_panel_about_text == false {
+                                self.reset_top_ui();
+                                self.show_main_panel_about_text = true;
+                                self.show_main_panel_welcome_text = false;
+                            } else {
+                                self.reset_top_ui();
+                            };
                     }
                 });
                 // Reset UI toggle
                 if !self.show_task_scroll_area || !self.show_main_panel_welcome_text || self.show_task_deletion_collum || self.show_restart_area || self.show_file_drop_area || self.show_task_move_pos_collum {
                     if ui.button("Reset UI").clicked() {
-                        self.show_task_deletion_collum = false;
-                        self.show_main_panel_about_text = false;
-                        self.show_file_drop_area = false;
-                        self.show_restart_area = false;
-                        self.show_main_task_creation_area = false;
-                        self.show_task_move_pos_collum = false;
-                        // Default true:
-                        self.show_main_panel_welcome_text = true;
-                        self.show_task_scroll_area = true;
+                       self.reset_all_ui();
                     }
                 }
                 
