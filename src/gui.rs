@@ -261,6 +261,7 @@ impl TaskWidget {
         self.show_restart_area = false;
         self.show_main_task_creation_area = false;
         self.show_task_move_pos_collum = false;
+        self.show_main_sorting_area = false;
         // Default true:
         self.show_main_panel_welcome_text = true;
         self.show_task_scroll_area = true;
@@ -423,6 +424,7 @@ impl TaskWidget {
                 if ui.button("Sort").clicked() {
                     if !self.show_main_sorting_area {
                         self.reset_top_ui();
+                        self.reset_grid_ui();
                         self.show_main_panel_welcome_text = false;
                         self.show_main_sorting_area = true;
                     } else {
