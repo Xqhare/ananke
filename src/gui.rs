@@ -678,6 +678,8 @@ impl TaskWidget {
                                         vec_out.push((counter.clone(), new_pos))
                                     }
                                     self.change_task_touple = (true, vec_out);
+                                    // resetting user input field after decoding and saving of contents
+                                    self.usr_change_pos_in[counter] = String::new();
                                 }
                             } else {
                                 if ui.checkbox(&mut self.completed_vec[counter], text).clicked() {
@@ -742,6 +744,7 @@ impl App for TaskWidget {
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         self.main_panel(ctx, frame);
         if self.delete_task_touple.0 {
+            let mut counter: usize = 0;
             for pos in &mut self.delete_task_touple.1 {
                 let position = pos.to_owned();
                 self.tasks_vec.remove(position);
@@ -753,21 +756,44 @@ impl App for TaskWidget {
                 self.project_tags_vec.remove(position);
                 self.context_tags_vec.remove(position);
                 self.special_tags_vec.remove(position);
+                counter += 1;
+            }
+            // resetting the delete task buffer
+            if self.delete_task_touple.1.len() == counter {
+                let empty_touple_out: (bool, Vec<usize>) = (false, Vec::new());
+                self.delete_task_touple = empty_touple_out;
             }
         }
         if self.change_task_touple.0 {
+            let mut counter: usize = 0;
             for element in &mut self.change_task_touple.1 {
                 let old_pos = element.0.clone();
                 let new_pos = element.1.clone();
-                self.tasks_vec.swap(old_pos, new_pos);
-                self.completed_vec.swap(old_pos, new_pos);
-                self.priority_vec.swap(old_pos, new_pos);
-                self.complete_date_vec.swap(old_pos, new_pos);
-                self.create_date_vec.swap(old_pos, new_pos);
-                self.task_text.swap(old_pos, new_pos);
-                self.project_tags_vec.swap(old_pos, new_pos);
-                self.context_tags_vec.swap(old_pos, new_pos);
-                self.special_tags_vec.swap(old_pos, new_pos);
+                // remove -> insert loop
+                let task_widget = self.tasks_vec.remove(old_pos);
+                self.tasks_vec.insert(new_pos, task_widget);
+                let completion = self.completed_vec.remove(old_pos);
+                self.completed_vec.insert(new_pos, completion);
+                let prio = self.priority_vec.remove(new_pos);
+                self.priority_vec.insert(new_pos, prio);
+                let comp_date = self.complete_date_vec.remove(old_pos);
+                self.complete_date_vec.insert(new_pos, comp_date);
+                let create_date = self.create_date_vec.remove(old_pos);
+                self.create_date_vec.insert(new_pos, create_date);
+                let task = self.task_text.remove(old_pos);
+                self.task_text.insert(new_pos, task);
+                let project_tag = self.project_tags_vec.remove(old_pos);
+                self.project_tags_vec.insert(new_pos, project_tag);
+                let context_tag = self.context_tags_vec.remove(old_pos);
+                self.context_tags_vec.insert(new_pos, context_tag);
+                let special_tag = self.special_tags_vec.remove(old_pos);
+                self.special_tags_vec.insert(new_pos, special_tag);
+                counter += 1;
+            }
+            // resetting the move buffer
+            if self.change_task_touple.1.len() == counter {
+                let empty_task_touple: (bool, Vec<(usize, usize)>) = (false, Vec::new());
+                self.change_task_touple = empty_task_touple;
             }
         }
     }
