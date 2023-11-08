@@ -69,6 +69,24 @@ pub struct TaskWidget {
     /// Needed to save the to be moved tasks, to move them at another point in the loop. Default
     /// bool `false` and an empty `Vec` of touples of `usize` numbers.
     change_task_touple: (bool, Vec<(usize, usize)>),
+    /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
+    /// task text.
+    sort_task_text: Vec<String>,
+    /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
+    /// task text.
+    sort_project_tags: Vec<String>,
+    /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
+    /// task text.
+    sort_context_tags: Vec<String>,
+    /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
+    /// task text.
+    sort_special_tags: Vec<String>,
+    /// Saves the direct user input of the task, ready to be decoded. Default `Enter task text
+    /// to search for`.
+    usr_sort_task_text_in: String,
+    usr_sort_project_tags_in: String,
+    usr_sort_context_tags_in: String,
+    usr_sort_special_tags_in: String,
     /// Workaround to show different content, here the help and about text. Default `false`.
     show_main_panel_about_text: bool,
     /// Workaround to show different content, here the welcome panel. Defalut `true`.
@@ -85,6 +103,8 @@ pub struct TaskWidget {
     show_task_deletion_collum: bool,
     /// Workaround to show move task position dialoge. Default `false`.
     show_task_move_pos_collum: bool,
+    /// Workaround to show the main sorting area. Default `false`.
+    show_main_sorting_area: bool,
 }
 
 /// Implementing the Default value for `TaskWidget`, interrogates the task returned from the decoding
@@ -209,7 +229,7 @@ impl Default for TaskWidget {
                 }
             }
             }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, };
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), };
     }
     
 }
@@ -230,6 +250,7 @@ impl TaskWidget {
         self.show_file_drop_area = false;
         self.show_restart_area = false;
         self.show_main_task_creation_area = false;
+        self.show_main_sorting_area = false;
         // Default true:
         self.show_main_panel_welcome_text = true;
     }
@@ -399,28 +420,15 @@ impl TaskWidget {
                         }
                     }
                 });
-                ui.menu_button("Sort", |ui| {
-                    // This sorts by completion status and date
-                    if ui.button("By completion and completion date").clicked() {
-                        println!("SORT COMPLETION");
+                if ui.button("Sort").clicked() {
+                    if !self.show_main_sorting_area {
+                        self.reset_top_ui();
+                        self.show_main_panel_welcome_text = false;
+                        self.show_main_sorting_area = true;
+                    } else {
+                        self.reset_top_ui();
                     }
-                    // sort by creation date
-                    if ui.button("By inception date").clicked() {
-                        println!("SORT CREATION DATE");
-                    }
-                    if ui.button("By priority").clicked() {
-                        println!("SORT PRIO");
-                    }
-                    if ui.button("By project tags").clicked() {
-                        println!("SORT PROJECT");
-                    }
-                    if ui.button("By context tags").clicked() {
-                        println!("SORT CONTEXT");
-                    }
-                    if ui.button("By special tags").clicked() {
-                        println!("SORT SPECIAL")
-                    }
-                });
+                }
                 ui.menu_button("Help", |ui| {
                     if ui.button("Quit").clicked() {
                         frame.close()
@@ -611,6 +619,58 @@ impl TaskWidget {
                     });
                     ui.end_row();
             }
+            if self.show_main_sorting_area {
+                Grid::new(ui_main_area.id).show(ui, |ui: &mut Ui| {
+                    for number in 0..9 {
+                        if number == 5 || number == 6 || number == 7 || number == 8 {
+                            let out = Self::left_and_rightpad(25, "".to_string());
+                            ui.label(out);
+                        } else {
+                            ui.label("");
+                        }
+                    }
+                    ui.end_row();
+                    ui.label("");
+                    ui.label("");
+                    if ui.button("By completion").clicked() {
+                    }
+                    if ui.button("By inception date").clicked() {
+                    }
+                    if ui.button("By priority").clicked() {
+                    }
+                    let task_text_in = ui.text_edit_multiline(&mut self.usr_sort_task_text_in);
+                    if task_text_in.gained_focus() {
+                        self.usr_sort_task_text_in = String::new();
+                    } else if task_text_in.lost_focus() {
+                        println!("Lost focus!")
+                    }
+                    let project_in = ui.text_edit_multiline(&mut self.usr_sort_project_tags_in);
+                    if project_in.gained_focus() {
+                        self.usr_sort_project_tags_in = String::new();
+                    } else if project_in.lost_focus() {
+                        println!("Lost focus!")
+                    }
+                    let context_in = ui.text_edit_multiline(&mut self.usr_sort_context_tags_in);
+                    if context_in.gained_focus() {
+                        self.usr_sort_context_tags_in = String::new();
+                    } else if project_in.lost_focus() {
+                        println!("Lost focus!")
+                    }
+                    let special_in = ui.text_edit_multiline(&mut self.usr_sort_special_tags_in);
+                    if special_in.gained_focus() {
+                        self.usr_sort_special_tags_in = String::new();
+                    } else if project_in.lost_focus() {
+                        println!("Lost focus!")
+                    }
+                    ui.label("");
+                    ui.end_row();
+                    for _ in [0..8] {
+                        ui.label("");
+                    }
+                    ui.end_row();
+                });
+            }
+            // display the main task scrollable area.
             if self.show_task_scroll_area {
                 ScrollArea::vertical().show(ui, |ui| {
                     if self.show_main_panel_welcome_text {
