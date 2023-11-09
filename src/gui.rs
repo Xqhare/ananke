@@ -78,14 +78,33 @@ pub struct TaskWidget {
     /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
     /// task text.
     sort_context_tags: Vec<String>,
-    /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
-    /// task text.
+    /// Saves a vector of touple's of `String`'s that's used to search for it's contents, in this case the
+    /// task text. The touple contains: leading the tag, and trailing the text.
     sort_special_tags: Vec<String>,
+    /// Stores the user inputed special tags decoded, ready to search.
+    sort_special_tags_decoded: Vec<(String, String)>,
+    /// Stores the appstate special tags decoded, ready to be searched.
+    sortable_special_tags: Vec<(String, String)>,
+    /// Holds the user input to sort by completion. Default `false`.
+    usr_sort_completion: bool,
+    /// Holds the user input to sort by creation date. Default `false`.
+    usr_sort_create_date: bool,
+    /// Holds the user input to sort by priority. Default `false`.
+    usr_sort_priority: bool,
     /// Saves the direct user input of the task, ready to be decoded. Default `Enter task text
     /// to search for`.
     usr_sort_task_text_in: String,
+    /// Saves the direct user input of the task, ready to be decoded. Default `Enter
+    /// +ProjectTags
+    /// to search`.
     usr_sort_project_tags_in: String,
+    /// Saves the direct user input of the task, ready to be decoded. Default `Enter
+    /// @ContextTags
+    /// to search`.
     usr_sort_context_tags_in: String,
+    /// Saves the direct user input of the task, ready to be decoded. Default `Enter
+    /// Special:Tags
+    /// to search`.
     usr_sort_special_tags_in: String,
     /// Workaround to show different content, here the help and about text. Default `false`.
     show_main_panel_about_text: bool,
@@ -120,6 +139,7 @@ impl Default for TaskWidget {
     fn default() -> Self {
         let change_touple: (bool, Vec<(usize, usize)>) = (false, Vec::new());
         let delete_touple: (bool, Vec<usize>) = (false, Vec::new());
+        let special_tag_touple: Vec<(String, String)> = Vec::new();
         let mut path_out: PathBuf = PathBuf::new();
         let mut output: Vec<TaskDecoder> = Vec::new();
         let mut completed: Vec<bool> = Vec::new();
@@ -132,6 +152,7 @@ impl Default for TaskWidget {
         let mut special_tags: Vec<String> = Vec::new();
         let empty_string: String = String::new();
         let mut empty_vec_string: Vec<String> = Vec::new();
+        let mut special_tags_decoded: Vec<(String, String)> = Vec::new();
 
         let now = Utc::now();
         let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
@@ -213,23 +234,30 @@ impl Default for TaskWidget {
                         context_tags.push(context_out);
                         // Extracting special tags
                         let mut special_out = String::new();
+                        let mut special_decoded_out = (String::new(), String::new());
                         match made_task.special_tags {
                             Some(ref tags) => {
                                 for tag in tags {
                                     special_out.push_str(&tag);
                                     special_out.push_str(" ");
+                                    let temp_val = tag.split_once(":");
+                                    if temp_val.is_some() {
+                                        special_decoded_out.0.push_str(temp_val.unwrap().0);
+                                        special_decoded_out.1.push_str(temp_val.unwrap().1);
+                                    }
                                 }
                             },
                             _ => special_out.push_str(""),
                         };
                         special_tags.push(special_out);
+                        special_tags_decoded.push(special_decoded_out);
                         // pushing interrogated Task out
                         output.push(made_task.clone());
                     }
                 }
             }
             }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), };
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), usr_sort_completion: false, usr_sort_create_date: false, usr_sort_priority: false, sort_special_tags_decoded: special_tag_touple.clone(), sortable_special_tags: special_tags_decoded, };
     }
     
 }
@@ -279,6 +307,7 @@ impl TaskWidget {
         let mut project_tags: Vec<String> = Vec::new();
         let mut context_tags: Vec<String> = Vec::new();
         let mut special_tags: Vec<String> = Vec::new();
+        let mut special_tags_decoded: Vec<(String, String)> = Vec::new();
         if let Ok(lines) = file_lines {
             for line in lines {
                 if let Ok(task) = line {
@@ -340,16 +369,23 @@ impl TaskWidget {
                     context_tags.push(context_out);
                     // Extracting special tags
                     let mut special_out = String::new();
+                    let mut special_decoded_out = (String::new(), String::new());
                     match made_task.special_tags {
                         Some(ref tags) => {
                             for tag in tags {
                                 special_out.push_str(&tag);
                                 special_out.push_str(" ");
+                                let temp_val = tag.split_once(":");
+                                if temp_val.is_some() {
+                                    special_decoded_out.0.push_str(temp_val.unwrap().0);
+                                    special_decoded_out.1.push_str(temp_val.unwrap().1);
+                                }
                             }
                         },
                         _ => special_out.push_str(""),
                     };
                     special_tags.push(special_out);
+                    special_tags_decoded.push(special_decoded_out);
                     // pushing interrogated Task out
                     output.push(made_task.clone());
                 }
@@ -393,6 +429,9 @@ impl TaskWidget {
                 ui.menu_button("Task", |ui| {
                     if ui.button("New").clicked() {
                         if !self.show_main_task_creation_area {
+                            // I know this looks wierd, but it's simple, first the top ui
+                            // is reset and THEN the defaults are disabled!
+                            self.reset_top_ui();
                             if self.show_main_panel_about_text || self.show_main_panel_welcome_text {
                                 self.show_main_panel_welcome_text = false;
                                 self.show_main_panel_about_text = false;
@@ -623,6 +662,8 @@ impl TaskWidget {
             }
             if self.show_main_sorting_area {
                 Grid::new(ui_main_area.id).show(ui, |ui: &mut Ui| {
+                    // I don't understand how to set a custom style or spacing, so I
+                    // guess this monstroity will have to do.
                     for number in 0..9 {
                         if number == 5 || number == 6 || number == 7 || number == 8 {
                             let out = Self::left_and_rightpad(25, "".to_string());
@@ -634,17 +675,44 @@ impl TaskWidget {
                     ui.end_row();
                     ui.label("");
                     ui.label("");
-                    if ui.button("By completion").clicked() {
+                    if ui.radio(self.usr_sort_completion, "By completion").clicked() {
+                        if !self.usr_sort_completion {
+                            self.usr_sort_completion = true;
+                            println!("SORT COMP - {}", self.usr_sort_completion);
+                        } else {
+                            self.usr_sort_completion = false;
+                            println!("SORT COMP - {}", self.usr_sort_completion);
+                        }
+                        
                     }
-                    if ui.button("By inception date").clicked() {
+                    if ui.radio(self.usr_sort_create_date, "By inception date").clicked() {
+                        if !self.usr_sort_create_date {
+                            self.usr_sort_create_date = true;
+                            println!("SORT CREATE - {}", self.usr_sort_create_date);
+                        } else {
+                            self.usr_sort_create_date = false;
+                            println!("SORT CREATE - {}", self.usr_sort_create_date);
+                        }
+                        
                     }
-                    if ui.button("By priority").clicked() {
+                    if ui.radio(self.usr_sort_priority, "By priority").clicked() {
+                        if !self.usr_sort_priority {
+                            self.usr_sort_priority = true;
+                            println!("SORT PRIO - {}", self.usr_sort_priority);
+                        } else {
+                            self.usr_sort_priority = false;
+                            println!("SORT PRIO - {}", self.usr_sort_priority);
+                        }
+                        
                     }
                     let task_text_in = ui.text_edit_multiline(&mut self.usr_sort_task_text_in);
                     if task_text_in.gained_focus() {
-                        self.usr_sort_task_text_in = String::new();
+                        if self.usr_sort_task_text_in.contains("Enter task text to search") {
+                            self.usr_sort_task_text_in = String::new();
+                        }
                     } else if task_text_in.lost_focus() {
-                        println!("Lost focus!")
+                        println!("Lost focus!");
+                        println!("{:?}", self.usr_sort_task_text_in);
                     }
                     let project_in = ui.text_edit_multiline(&mut self.usr_sort_project_tags_in);
                     if project_in.gained_focus() {
