@@ -714,6 +714,7 @@ impl TaskWidget {
                         println!("Lost focus!");
                         println!("{:?}", self.usr_sort_task_text_in);
                     }
+                    
                     let project_in = ui.text_edit_multiline(&mut self.usr_sort_project_tags_in);
                     if project_in.gained_focus() {
                         self.usr_sort_project_tags_in = String::new();
@@ -723,13 +724,13 @@ impl TaskWidget {
                     let context_in = ui.text_edit_multiline(&mut self.usr_sort_context_tags_in);
                     if context_in.gained_focus() {
                         self.usr_sort_context_tags_in = String::new();
-                    } else if project_in.lost_focus() {
+                    } else if context_in.lost_focus() {
                         println!("Lost focus!")
                     }
                     let special_in = ui.text_edit_multiline(&mut self.usr_sort_special_tags_in);
                     if special_in.gained_focus() {
                         self.usr_sort_special_tags_in = String::new();
-                    } else if project_in.lost_focus() {
+                    } else if special_in.lost_focus() {
                         println!("Lost focus!")
                     }
                     ui.label("");
