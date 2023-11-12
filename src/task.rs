@@ -25,7 +25,8 @@ pub struct TaskDecoder {
     pub project_tags: Option<Vec<String>>,
     /// Task context tags as a vector, if any present
     pub context_tags: Option<Vec<String>>,
-    /// Task special tags as a vector, if any present
+    /// Task special tags as a vector, if any present; The touple inside the vector has the tag
+    /// leading and the text trailing.
     pub special_tags: Option<Vec<String>>,
 }
 
