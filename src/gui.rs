@@ -272,55 +272,8 @@ impl TaskWidget {
     /// date, then priority sorting.
     fn sort_true_false(&mut self) {
         let mut sorted_output: Vec<usize> = Vec::new();
-        if self.usr_sort_completion {
-            let mut counter: usize = 0;
-            for task in self.completed_vec.clone() {
-                if task {
-                    sorted_output.push(counter);
-                }
-                counter += 1;
-            }
-            println!("comp: {:?}", sorted_output);
-        }
-        if self.usr_sort_create_date {
-            // If sorted_output is not empty
-            if sorted_output.len() > 0 {
-                // getting out all indices with creation dates.
-                let mut temp_sorting_vec: Vec<(String, usize)> = Vec::new();
-                let mut rest_indices: Vec<usize> = Vec::new();
-                for index in sorted_output.clone() {
-                    if self.create_date_vec[index].len() > 0 {
-                        let aa = (self.create_date_vec[index].clone(), index);
-                        temp_sorting_vec.push(aa);
-                    } else {
-                        rest_indices.push(index);
-                    }
-                }
-                // sorting the indices
-                temp_sorting_vec.sort_unstable();
-                let mut out: Vec<usize> = Vec::new();
-                for entry in temp_sorting_vec {
-                    out.push(entry.1);
-                }
-                out.append(&mut rest_indices);
-                sorted_output = out;
-            } else {
-                let mut counter: usize = 0;
-                let mut temp_sorting: Vec<(String, usize)> = Vec::new();
-                for task in self.create_date_vec.clone() {
-                    if task.len() > 0 {
-                        temp_sorting.push((task, counter.clone()));
-                    }
-                    counter += 1;
-                }
-                temp_sorting.sort_unstable();
-                let mut out: Vec<usize> = Vec::new();
-                for entry in temp_sorting {
-                    out.push(entry.1);
-                }
-                sorted_output = out;
-            }
-            println!("date: {:?}", sorted_output);
+        if self.sort_tasks_indices.len() > 0 {
+            sorted_output = self.sort_tasks_indices.clone();
         }
         if self.usr_sort_priority {
             // If sorted_output is not empty
@@ -337,7 +290,7 @@ impl TaskWidget {
                     }
                 }
                 // sorting the indices
-                temp_sorting_vec.sort_unstable();
+                temp_sorting_vec.sort();
                 let mut out: Vec<usize> = Vec::new();
                 for entry in temp_sorting_vec {
                     out.push(entry.1);
@@ -353,7 +306,7 @@ impl TaskWidget {
                     }
                     counter += 1;
                 }
-                temp_sorting.sort_unstable();
+                temp_sorting.sort();
                 let mut out: Vec<usize> = Vec::new();
                 for entry in temp_sorting {
                     out.push(entry.1);
@@ -361,6 +314,87 @@ impl TaskWidget {
                 sorted_output = out;
             }
             println!("prio: {:?}", sorted_output);
+        }
+        if self.usr_sort_create_date {
+            // If sorted_output is not empty
+            if sorted_output.len() > 0 {
+                // getting out all indices with creation dates.
+                let mut temp_sorting_vec: Vec<(String, usize)> = Vec::new();
+                let mut rest_indices: Vec<usize> = Vec::new();
+                for index in sorted_output.clone() {
+                    if self.create_date_vec[index].len() > 0 {
+                        let aa = (self.create_date_vec[index].clone(), index);
+                        temp_sorting_vec.push(aa);
+                    } else {
+                        rest_indices.push(index);
+                    }
+                }
+                // sorting the indices
+                temp_sorting_vec.sort();
+                let mut out: Vec<usize> = Vec::new();
+                for entry in temp_sorting_vec {
+                    out.push(entry.1);
+                }
+                out.append(&mut rest_indices);
+                sorted_output = out;
+            } else {
+                let mut counter: usize = 0;
+                let mut temp_sorting: Vec<(String, usize)> = Vec::new();
+                for task in self.create_date_vec.clone() {
+                    if task.len() > 0 {
+                        temp_sorting.push((task, counter.clone()));
+                    }
+                    counter += 1;
+                }
+                temp_sorting.sort();
+                let mut out: Vec<usize> = Vec::new();
+                for entry in temp_sorting {
+                    out.push(entry.1);
+                }
+                sorted_output = out;
+            }
+            println!("date: {:?}", sorted_output);
+        }
+        if self.usr_sort_completion {
+            // If sorted_output is not empty
+            if sorted_output.len() > 0 {
+                // getting out all indices with creation dates.
+                let mut temp_sorting_vec: Vec<(bool, usize)> = Vec::new();
+                let mut rest_indices: Vec<usize> = Vec::new();
+                for index in sorted_output.clone() {
+                    if self.completed_vec[index] {
+                        let aa = (self.completed_vec[index].clone(), index);
+                        temp_sorting_vec.push(aa);
+                    } else {
+                        rest_indices.push(index);
+                    }
+                }
+                // sorting the indices
+                temp_sorting_vec.sort();
+                println!("{:?}",temp_sorting_vec.clone());
+                let mut out: Vec<usize> = Vec::new();
+                for entry in temp_sorting_vec {
+                    out.push(entry.1);
+                }
+                out.append(&mut rest_indices);
+                sorted_output = out;
+            } else {
+                let mut counter: usize = 0;
+                let mut temp_sorting: Vec<(bool, usize)> = Vec::new();
+                for task in self.completed_vec.clone() {
+                    if task {
+                        temp_sorting.push((task, counter.clone()));
+                    }
+                    counter += 1;
+                }
+                temp_sorting.sort();
+                let mut out: Vec<usize> = Vec::new();
+                for entry in temp_sorting {
+                    out.push(entry.1);
+                }
+                sorted_output = out;
+            }
+            println!("date: {:?}", sorted_output);
         }
         self.sort_tasks_indices = sorted_output.clone();
         println!("final: {:?}", sorted_output);
@@ -826,19 +860,25 @@ impl TaskWidget {
                     
                     let project_in = ui.text_edit_multiline(&mut self.usr_sort_project_tags_in);
                     if project_in.gained_focus() {
-                        self.usr_sort_project_tags_in = String::new();
+                        if self.usr_sort_project_tags_in.contains("Enter +ProjectTags to search") {
+                            self.usr_sort_project_tags_in = String::new();
+                        }
                     } else if project_in.lost_focus() {
                         println!("Lost focus!")
                     }
                     let context_in = ui.text_edit_multiline(&mut self.usr_sort_context_tags_in);
                     if context_in.gained_focus() {
-                        self.usr_sort_context_tags_in = String::new();
+                        if self.usr_sort_context_tags_in.contains("Enter @ContextTags to search") {
+                            self.usr_sort_context_tags_in = String::new();
+                        }
                     } else if context_in.lost_focus() {
                         println!("Lost focus!")
                     }
                     let special_in = ui.text_edit_multiline(&mut self.usr_sort_special_tags_in);
                     if special_in.gained_focus() {
-                        self.usr_sort_special_tags_in = String::new();
+                        if self.usr_sort_special_tags_in.contains("Enter Special:Tags to search") {
+                            self.usr_sort_special_tags_in = String::new();
+                        }
                     } else if special_in.lost_focus() {
                         println!("Lost focus!")
                     }
@@ -852,7 +892,8 @@ impl TaskWidget {
                 let mut temp = false;
                 ui.horizontal(|ui: &mut Ui| {
                     ui.label("Most used context tags:");
-                    // I'm are going to use buttons!
+                    // I'm are going to use buttons! -> they don't need Appstate
+                    // allocation
                     ui.button("the first tag");
                     ui.checkbox(&mut temp, "second tag");
                 });
@@ -862,8 +903,7 @@ impl TaskWidget {
             // Shows the about text
             if self.show_main_panel_about_text {
                 ui.heading("About Ananke");
-                ui.label("Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience.
-Built on a solid foundation of cutting-edge technologies, rust.");
+                ui.label("Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience. Built on a solid foundation of cutting-edge technologies, rust.");
                 ui.label("Ananke decodes your todo.txt, makes it look pretty and searchable, as well as creates new tasks, and updates finished ones.");
                 ui.heading("About the format todo.txt");
                 ui.label("The todo.txt format is a plain text format file for managing tasks. It is at it's core really only a .txt file named todo. It contains one task per line, and each task line can contain infomation like: A priority letter (A-Z) first, then the Inception (Creation) and Completion dates in (YYYY-MM-DD format), Project Tags (preceeded by the + sign), Context Tags (preceeded by the @ sign), and finally Special tags that only follow the [keyTag:AnyContentYouWantToBeSearchableWithTheKeyTag].");
