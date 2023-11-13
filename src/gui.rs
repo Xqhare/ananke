@@ -24,9 +24,8 @@ const NAME: &str = env!("CARGO_PKG_NAME");
 /// `TaskWidget` contains the App state, and can be thought of like the root of the entire App.
 #[derive(Clone)]
 pub struct TaskWidget {
-    /// A workaround for testing purposes
-    workaround: (bool, PathBuf),
-    /// A vector of `Task`, primarily used for itteration. May be removed in the future.
+    /// A vector of `Task`, primarily used for itteration. May be removed in the future. Could
+    /// be used for a reset task feature in the future.
     pub tasks_vec: Vec<TaskDecoder>,
     /// Vector containing the completed state of every task in order.
     pub completed_vec : Vec<bool>,
@@ -71,6 +70,8 @@ pub struct TaskWidget {
     /// Needed to save the to be moved tasks, to move them at another point in the loop. Default
     /// bool `false` and an empty `Vec` of touples of `usize` numbers.
     change_task_touple: (bool, Vec<(usize, usize)>),
+    /// Saves indices of tasks to be displayed because of sorting. Default `empty`.
+    sort_tasks_indices: Vec<usize>,
     /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
     /// task text.
     sort_task_text: Vec<String>,
@@ -153,7 +154,7 @@ impl Default for TaskWidget {
         let empty_string: String = String::new();
         let mut empty_vec_string: Vec<String> = Vec::new();
         let mut special_tags_decoded: Vec<(String, String)> = Vec::new();
-        let workaround: (bool, PathBuf) = (false, path_out.clone());
+        let sorting_indices: Vec<usize> = Vec::new();
 
         let now = Utc::now();
         let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
@@ -258,7 +259,7 @@ impl Default for TaskWidget {
                 }
             }
             }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), usr_sort_completion: false, usr_sort_create_date: false, usr_sort_priority: false, sort_special_tags_decoded: special_tag_touple.clone(), sortable_special_tags: special_tags_decoded, workaround};
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), usr_sort_completion: false, usr_sort_create_date: false, usr_sort_priority: false, sort_special_tags_decoded: special_tag_touple.clone(), sortable_special_tags: special_tags_decoded, sort_tasks_indices: sorting_indices, };
     }
     
 }
@@ -266,6 +267,104 @@ impl Default for TaskWidget {
 /// This implementation of `TaskWidget` really is only for helper, support, breakup functions, or for
 /// gui functions that cannot be implemented in the implementation of `egui::App` for `TaskWidget`.
 impl TaskWidget {
+    /// This helper function, sorts all taskes by completion / creation date / priority.Any
+    /// combination of the three is valid, with completion being always first, then creation
+    /// date, then priority sorting.
+    fn sort_true_false(&mut self) {
+        let mut sorted_output: Vec<usize> = Vec::new();
+        if self.usr_sort_completion {
+            let mut counter: usize = 0;
+            for task in self.completed_vec.clone() {
+                if task {
+                    sorted_output.push(counter);
+                }
+                counter += 1;
+            }
+            println!("comp: {:?}", sorted_output);
+        }
+        if self.usr_sort_create_date {
+            // If sorted_output is not empty
+            if sorted_output.len() > 0 {
+                // getting out all indices with creation dates.
+                let mut temp_sorting_vec: Vec<(String, usize)> = Vec::new();
+                let mut rest_indices: Vec<usize> = Vec::new();
+                for index in sorted_output.clone() {
+                    if self.create_date_vec[index].len() > 0 {
+                        let aa = (self.create_date_vec[index].clone(), index);
+                        temp_sorting_vec.push(aa);
+                    } else {
+                        rest_indices.push(index);
+                    }
+                }
+                // sorting the indices
+                temp_sorting_vec.sort_unstable();
+                let mut out: Vec<usize> = Vec::new();
+                for entry in temp_sorting_vec {
+                    out.push(entry.1);
+                }
+                out.append(&mut rest_indices);
+                sorted_output = out;
+            } else {
+                let mut counter: usize = 0;
+                let mut temp_sorting: Vec<(String, usize)> = Vec::new();
+                for task in self.create_date_vec.clone() {
+                    if task.len() > 0 {
+                        temp_sorting.push((task, counter.clone()));
+                    }
+                    counter += 1;
+                }
+                temp_sorting.sort_unstable();
+                let mut out: Vec<usize> = Vec::new();
+                for entry in temp_sorting {
+                    out.push(entry.1);
+                }
+                sorted_output = out;
+            }
+            println!("date: {:?}", sorted_output);
+        }
+        if self.usr_sort_priority {
+            // If sorted_output is not empty
+            if sorted_output.len() > 0 {
+                // getting out all indices with creation dates.
+                let mut temp_sorting_vec: Vec<(String, usize)> = Vec::new();
+                let mut rest_indices: Vec<usize> = Vec::new();
+                for index in sorted_output.clone() {
+                    if self.priority_vec[index].len() > 0 {
+                        let aa = (self.priority_vec[index].clone(), index);
+                        temp_sorting_vec.push(aa);
+                    } else {
+                        rest_indices.push(index);
+                    }
+                }
+                // sorting the indices
+                temp_sorting_vec.sort_unstable();
+                let mut out: Vec<usize> = Vec::new();
+                for entry in temp_sorting_vec {
+                    out.push(entry.1);
+                }
+                out.append(&mut rest_indices);
+                sorted_output = out;
+            } else {
+                let mut counter: usize = 0;
+                let mut temp_sorting: Vec<(String, usize)> = Vec::new();
+                for task in self.priority_vec.clone() {
+                    if task.len() > 0 {
+                        temp_sorting.push((task, counter.clone()));
+                    }
+                    counter += 1;
+                }
+                temp_sorting.sort_unstable();
+                let mut out: Vec<usize> = Vec::new();
+                for entry in temp_sorting {
+                    out.push(entry.1);
+                }
+                sorted_output = out;
+            }
+            println!("prio: {:?}", sorted_output);
+        }
+        self.sort_tasks_indices = sorted_output.clone();
+        println!("final: {:?}", sorted_output);
+    }
     fn reset_grid_ui(&mut self) {
         self.show_task_deletion_collum = false;
         self.show_file_drop_area = false;
@@ -291,6 +390,8 @@ impl TaskWidget {
         // Default true:
         self.show_main_panel_welcome_text = true;
         self.show_task_scroll_area = true;
+        // Reset shown tasks
+        self.sort_tasks_indices = Vec::new();
     }
     /// This support function updates the contents of `TaskWidget` to the one's at the supplied path.
     fn update_from_path(&mut self, path: PathBuf) {
@@ -398,6 +499,7 @@ impl TaskWidget {
         self.project_tags_vec = project_tags;
         self.context_tags_vec = context_tags;
         self.special_tags_vec = special_tags;
+        self.sortable_special_tags = special_tags_decoded;
         }
     }
     /// This helper function reads a file by line from a supplied path (could be an &str of the absolute or relative path for examle).
@@ -459,7 +561,7 @@ impl TaskWidget {
                         }
                     }
                 });
-                if ui.button("Sort").clicked() {
+                if ui.button("Search").clicked() {
                     if !self.show_main_sorting_area {
                         self.reset_top_ui();
                         self.reset_grid_ui();
@@ -519,8 +621,6 @@ impl TaskWidget {
                                     // this is called, but the output doesn't update... is self not
                                     // read again?
                                     self.update_from_path(thing.path.clone().expect("No Path!"));
-                                    let workaround_out = (true, thing.path.clone().unwrap());
-                                    self.workaround = workaround_out;
                                     self.show_file_drop_area = false;
                                 }
                             }
@@ -673,36 +773,46 @@ impl TaskWidget {
                     }
                     ui.end_row();
                     ui.label("");
-                    ui.label("");
+                    if ui.button("Reset search").clicked() {
+                        self.usr_sort_completion = false;
+                        self.usr_sort_create_date = false;
+                        self.usr_sort_priority = false;
+                        self.usr_sort_task_text_in = "Enter task text to search".to_string();
+                        self.usr_sort_project_tags_in = "Enter +ProjectTags to search".to_string();
+                        self.usr_sort_context_tags_in = "Enter @ContextTags to search".to_string();
+                        self.usr_sort_special_tags_in = "Enter Special:Tags to search".to_string();
+                        self.sort_tasks_indices = Vec::new();
+                    }
+                    // Radio buttons for true / false sorting.
+                    // By completion: First by if completed, then by completion date if
+                    // applicable.
                     if ui.radio(self.usr_sort_completion, "By completion").clicked() {
                         if !self.usr_sort_completion {
                             self.usr_sort_completion = true;
-                            println!("SORT COMP - {}", self.usr_sort_completion);
                         } else {
                             self.usr_sort_completion = false;
-                            println!("SORT COMP - {}", self.usr_sort_completion);
                         }
                         
                     }
                     if ui.radio(self.usr_sort_create_date, "By inception date").clicked() {
                         if !self.usr_sort_create_date {
                             self.usr_sort_create_date = true;
-                            println!("SORT CREATE - {}", self.usr_sort_create_date);
                         } else {
                             self.usr_sort_create_date = false;
-                            println!("SORT CREATE - {}", self.usr_sort_create_date);
                         }
                         
                     }
                     if ui.radio(self.usr_sort_priority, "By priority").clicked() {
                         if !self.usr_sort_priority {
                             self.usr_sort_priority = true;
-                            println!("SORT PRIO - {}", self.usr_sort_priority);
                         } else {
                             self.usr_sort_priority = false;
-                            println!("SORT PRIO - {}", self.usr_sort_priority);
                         }
                         
+                    }
+                    // Sorting logic for true / false sorting
+                    if self.usr_sort_completion || self.usr_sort_create_date || self.usr_sort_priority {
+                        self.sort_true_false();
                     }
                     let task_text_in = ui.text_edit_multiline(&mut self.usr_sort_task_text_in);
                     if task_text_in.gained_focus() {
@@ -770,7 +880,6 @@ Built on a solid foundation of cutting-edge technologies, rust.");
                         ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
                     }
                     // This is all for displaying the grid of tasks.
-                    let mut counter = 0;
                     let vec_strings = vec!["#".to_string(), "Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
                     let task_list_seperator = ui.separator();
                     let _a_grid = Grid::new(task_list_seperator.id).striped(true).show(ui, |ui| {
@@ -809,8 +918,17 @@ Built on a solid foundation of cutting-edge technologies, rust.");
                         ui.end_row();
                         let mut delete_entry = false;
                         let mut delete_pos: Vec<usize> = Vec::new();
-                        for _entry in &self.tasks_vec {
-                            ui.label(counter.to_string());
+                        let mut display_task_indicies: Vec<usize> = Vec::new();
+                        if self.sort_tasks_indices.len() > 0 {
+                            display_task_indicies = self.sort_tasks_indices.clone();
+                        } else {
+                            let all_tasks: usize = self.tasks_vec.len();
+                            for num in 0..all_tasks {
+                                display_task_indicies.push(num);
+                            }
+                        }
+                        for entry in display_task_indicies {
+                            ui.label(entry.to_string());
                             let text = "Done!";
                             // The to be changed struct member HAS TO BE INSIDE the ui call! Got it!
                             // If task is marked as completed AND has a a creation date set, we set
@@ -819,50 +937,49 @@ Built on a solid foundation of cutting-edge technologies, rust.");
                                 if ui.button("Delete").clicked() {
                                     // Delete entry at counter!
                                     delete_entry = true;
-                                    delete_pos.push(counter);
+                                    delete_pos.push(entry);
                                 }
                             } else if self.show_task_move_pos_collum {
-                                if ui.text_edit_singleline(&mut self.usr_change_pos_in[counter]).lost_focus() {
+                                if ui.text_edit_singleline(&mut self.usr_change_pos_in[entry]).lost_focus() {
                                     let mut vec_out: Vec<(usize, usize)> = Vec::new();
                                     // This could technichally panic because of unwrap;
                                     // however it is only called if the value to be
                                     // unwraped is `Ok()`. 
-                                    if self.usr_change_pos_in[counter].parse::<usize>().is_ok() {
-                                        let new_pos = self.usr_change_pos_in[counter].parse::<usize>().unwrap();
-                                        vec_out.push((counter.clone(), new_pos))
+                                    if self.usr_change_pos_in[entry].parse::<usize>().is_ok() {
+                                        let new_pos = self.usr_change_pos_in[entry].parse::<usize>().unwrap();
+                                        vec_out.push((entry.clone(), new_pos))
                                     }
                                     self.change_task_touple = (true, vec_out);
                                     // resetting user input field after decoding and saving of contents
-                                    self.usr_change_pos_in[counter] = String::new();
+                                    self.usr_change_pos_in[entry] = String::new();
                                 }
                             } else {
-                                if ui.checkbox(&mut self.completed_vec[counter], text).clicked() {
-                                    if self.completed_vec[counter] {
-                                        if !self.create_date_vec[counter].is_empty() {
+                                if ui.checkbox(&mut self.completed_vec[entry], text).clicked() {
+                                    if self.completed_vec[entry] {
+                                        if !self.create_date_vec[entry].is_empty() {
                                             let date_today = self.date.clone();
-                                            self.complete_date_vec.remove(counter);
-                                            self.complete_date_vec.insert(counter, date_today);
+                                            self.complete_date_vec.remove(entry);
+                                            self.complete_date_vec.insert(entry, date_today);
                                         }
                                     } else {
-                                        self.complete_date_vec.remove(counter);
-                                        self.complete_date_vec.insert(counter, String::new());
+                                        self.complete_date_vec.remove(entry);
+                                        self.complete_date_vec.insert(entry, String::new());
                                     }
                                 }
                             }
                             
                             // completion and creation dates
-                            ui.text_edit_singleline(&mut self.complete_date_vec[counter]);
-                            ui.text_edit_singleline(&mut self.create_date_vec[counter]);
+                            ui.text_edit_singleline(&mut self.complete_date_vec[entry]);
+                            ui.text_edit_singleline(&mut self.create_date_vec[entry]);
                             // Priority implementation
                             // variable input fields are very versitile!
-                            ui.text_edit_singleline(&mut self.priority_vec[counter]);
-                            ui.text_edit_multiline(&mut self.task_text[counter]);
+                            ui.text_edit_singleline(&mut self.priority_vec[entry]);
+                            ui.text_edit_multiline(&mut self.task_text[entry]);
                             // Da tags!!
-                            ui.text_edit_multiline(&mut self.project_tags_vec[counter]);
-                            ui.text_edit_multiline(&mut self.context_tags_vec[counter]);
-                            ui.text_edit_multiline(&mut self.special_tags_vec[counter]);
-                            // End of task; -> advance counter by one and end the row
-                            counter += 1;
+                            ui.text_edit_multiline(&mut self.project_tags_vec[entry]);
+                            ui.text_edit_multiline(&mut self.context_tags_vec[entry]);
+                            ui.text_edit_multiline(&mut self.special_tags_vec[entry]);
+                            // End of task; -> end the row
                             ui.end_row();
                         };
                         self.delete_task_touple = (delete_entry, delete_pos);
@@ -948,9 +1065,6 @@ impl App for TaskWidget {
                 let empty_task_touple: (bool, Vec<(usize, usize)>) = (false, Vec::new());
                 self.change_task_touple = empty_task_touple;
             }
-        }
-        if self.workaround.0 {
-            self.update_from_path(self.workaround.1.clone())
         }
         self.main_panel(ctx, frame);
     }
