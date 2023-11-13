@@ -24,6 +24,8 @@ const NAME: &str = env!("CARGO_PKG_NAME");
 /// `TaskWidget` contains the App state, and can be thought of like the root of the entire App.
 #[derive(Clone)]
 pub struct TaskWidget {
+    /// A workaround for testing purposes
+    workaround: (bool, PathBuf),
     /// A vector of `Task`, primarily used for itteration. May be removed in the future.
     pub tasks_vec: Vec<TaskDecoder>,
     /// Vector containing the completed state of every task in order.
@@ -114,8 +116,6 @@ pub struct TaskWidget {
     show_task_scroll_area: bool,
     /// Workaround to show that the window now accepts drag and drop files. Default `false`.
     show_file_drop_area: bool,
-    /// Workaround to show that ananke needs to be restarted. Default `false`.
-    show_restart_area: bool,
     /// Workaround to show task creation dialoge. Default `false`.
     show_main_task_creation_area: bool,
     /// Workaround to show task deletion dialoge. Default `false`.
@@ -153,6 +153,7 @@ impl Default for TaskWidget {
         let empty_string: String = String::new();
         let mut empty_vec_string: Vec<String> = Vec::new();
         let mut special_tags_decoded: Vec<(String, String)> = Vec::new();
+        let workaround: (bool, PathBuf) = (false, path_out.clone());
 
         let now = Utc::now();
         let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
@@ -257,7 +258,7 @@ impl Default for TaskWidget {
                 }
             }
             }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_restart_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), usr_sort_completion: false, usr_sort_create_date: false, usr_sort_priority: false, sort_special_tags_decoded: special_tag_touple.clone(), sortable_special_tags: special_tags_decoded, };
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), usr_sort_completion: false, usr_sort_create_date: false, usr_sort_priority: false, sort_special_tags_decoded: special_tag_touple.clone(), sortable_special_tags: special_tags_decoded, workaround};
     }
     
 }
@@ -268,7 +269,6 @@ impl TaskWidget {
     fn reset_grid_ui(&mut self) {
         self.show_task_deletion_collum = false;
         self.show_file_drop_area = false;
-        self.show_restart_area = false;
         self.show_task_move_pos_collum = false;
         // Default true:
         self.show_task_scroll_area = true;
@@ -276,7 +276,6 @@ impl TaskWidget {
     fn reset_top_ui(&mut self) {
         self.show_main_panel_about_text = false;
         self.show_file_drop_area = false;
-        self.show_restart_area = false;
         self.show_main_task_creation_area = false;
         self.show_main_sorting_area = false;
         // Default true:
@@ -286,7 +285,6 @@ impl TaskWidget {
         self.show_task_deletion_collum = false;
         self.show_main_panel_about_text = false;
         self.show_file_drop_area = false;
-        self.show_restart_area = false;
         self.show_main_task_creation_area = false;
         self.show_task_move_pos_collum = false;
         self.show_main_sorting_area = false;
@@ -390,6 +388,7 @@ impl TaskWidget {
                     output.push(made_task.clone());
                 }
             }
+        self.tasks_vec = output;
         self.file_path = path_out;
         self.completed_vec = completed;
         self.create_date_vec = creation_date;
@@ -488,7 +487,7 @@ impl TaskWidget {
                     }
                 });
                 // Reset UI toggle
-                if !self.show_task_scroll_area || !self.show_main_panel_welcome_text || self.show_task_deletion_collum || self.show_restart_area || self.show_file_drop_area || self.show_task_move_pos_collum {
+                if !self.show_task_scroll_area || !self.show_main_panel_welcome_text || self.show_task_deletion_collum || self.show_file_drop_area || self.show_task_move_pos_collum {
                     if ui.button("Reset UI").clicked() {
                        self.reset_all_ui();
                     }
@@ -514,23 +513,22 @@ impl TaskWidget {
                             for thing in &i.raw.dropped_files {
                                 if thing.path.clone().is_some() {
                                     self.file_path = thing.path.clone().expect("No path!");
-                                    self.show_file_drop_area = false;
                                     // I need a function to take in a pathbuf, save it
                                     // permanently, and then update self.
                                     create_persistant_appstate(appstate_answer.1.clone(), thing.path.clone().expect("No Path!"));
+                                    // this is called, but the output doesn't update... is self not
+                                    // read again?
                                     self.update_from_path(thing.path.clone().expect("No Path!"));
+                                    let workaround_out = (true, thing.path.clone().unwrap());
+                                    self.workaround = workaround_out;
+                                    self.show_file_drop_area = false;
                                 }
-                                self.show_restart_area = true;
                             }
                         }
                     });
                 });
             }
-            if self.show_restart_area {
-                Area::new("Restart").anchor(Align2::CENTER_TOP, Vec2::from([0.0, 40.0])).show(ctx, |ui: &mut Ui| {
-                    ui.heading("Please restart Ananke!");
-                });
-            }
+            // Show the task creation area
             if self.show_main_task_creation_area {
                 Grid::new(ui_main_area.id).show(ui, |ui: &mut Ui| {
                     let vec_strings = vec!["Create new task".to_string(), "Inception  date".to_string(), "Priority".to_string(), "Task".to_string()];
@@ -554,7 +552,7 @@ impl TaskWidget {
                     ui.end_row();
                     ui.vertical(|ui: &mut Ui|{
                         ui.label("1. Delete inception date if it is unwanted by clicking the 'edit' button.");
-                        ui.label("2. Set priority (any letter A-Z) if any is wanted. A being the highest, Z the lowest, proirity.");
+                        ui.label("2. Set priority (any letter A-Z) if any is wanted. A is the highest and Z the lowest proirity.");
                         ui.label("3. Enter task complete with +ProjectTags, @ContextTags and special:tags.");
                         ui.label("4. Hit save.");
                     });
@@ -660,6 +658,7 @@ impl TaskWidget {
                     });
                     ui.end_row();
             }
+            // Show the sorting area
             if self.show_main_sorting_area {
                 Grid::new(ui_main_area.id).show(ui, |ui: &mut Ui| {
                     // I don't understand how to set a custom style or spacing, so I
@@ -738,29 +737,39 @@ impl TaskWidget {
                     for _ in [0..8] {
                         ui.label("");
                     }
-                    ui.end_row();
                 });
+                // WIP: most used tags
+                let mut temp = false;
+                ui.horizontal(|ui: &mut Ui| {
+                    ui.label("Most used context tags:");
+                    ui.button("the first tag");
+                    ui.checkbox(&mut temp, "second tag");
+                });
+                ui.label("Most used context tags:");
+                ui.label("Most used special tags:");
             }
+            // Shows the about text
+            if self.show_main_panel_about_text {
+                ui.heading("About Ananke");
+                ui.label("Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience.
+Built on a solid foundation of cutting-edge technologies, rust.");
+                ui.label("Ananke decodes your todo.txt, makes it look pretty and searchable, as well as creates new tasks, and updates finished ones.");
+                ui.heading("About the format todo.txt");
+                ui.label("The todo.txt format is a plain text format file for managing tasks. It is at it's core really only a .txt file named todo. It contains one task per line, and each task line can contain infomation like: A priority letter (A-Z) first, then the Inception (Creation) and Completion dates in (YYYY-MM-DD format), Project Tags (preceeded by the + sign), Context Tags (preceeded by the @ sign), and finally Special tags that only follow the [keyTag:AnyContentYouWantToBeSearchableWithTheKeyTag].");
+                ui.heading("Licenses");
+                ui.hyperlink_to(format!("egui licensed under the MIT-License"), "https://github.com/emilk/egui/blob/master/LICENSE-MIT");
+                    }
             // display the main task scrollable area.
             if self.show_task_scroll_area {
                 ScrollArea::vertical().show(ui, |ui| {
+                    // I want the main welcome text to be inside the scrollable area. In contrast
+                    // to everything else in the top slot.
                     if self.show_main_panel_welcome_text {
                         ui.heading(format!("Ananke - todo.txt editor"));
                         ui.label(format!("by {AUTHOR}, v. {VERSION}"));
                         ui.hyperlink_to(format!("{NAME} on github"), "https://github.com/Xqhare/ananke");
                     }
-                    if self.show_main_panel_about_text {
-                        ui.heading("About Ananke");
-                        ui.label("Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience.
-    Built on a solid foundation of cutting-edge technologies, rust.");
-                        ui.label("Ananke decodes your todo.txt, makes it look pretty and searchable, as well as creates new tasks, and updates finished ones.");
-                        ui.heading("About the format todo.txt");
-                        ui.label("The todo.txt format is a plain text format file for managing tasks. It is at it's core really only a .txt file named todo. It contains one task per line, and each task line can contain infomation like: A priority letter (A-Z) first, then the Inception (Creation) and Completion dates in (YYYY-MM-DD format), Project Tags (preceeded by the + sign), Context Tags (preceeded by the @ sign), and finally Special tags that only follow the [keyTag:AnyContentYouWantToBeSearchableWithTheKeyTag].");
-                        ui.heading("Licenses");
-                        ui.hyperlink_to(format!("egui licensed under the MIT-License"), "https://github.com/emilk/egui/blob/master/LICENSE-MIT");
-                    }
-                    if self.show_main_task_creation_area {
-                    }
+                    // This is all for displaying the grid of tasks.
                     let mut counter = 0;
                     let vec_strings = vec!["#".to_string(), "Completed".to_string(), "Completion date".to_string(), "Inception date ".to_string(), "Priority".to_string(), "Task".to_string(), "Project  Tags".to_string(), "Context  Tags".to_string(), "Special  Tags".to_string()];
                     let task_list_seperator = ui.separator();
@@ -887,7 +896,6 @@ impl App for TaskWidget {
     /// It should be thought of as the rectangle that the app renders in.
     /// It takes over after being indirectly called in `gui.rs::main()`.
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
-        self.main_panel(ctx, frame);
         if self.delete_task_touple.0 {
             let mut counter: usize = 0;
             for pos in &mut self.delete_task_touple.1 {
@@ -941,6 +949,10 @@ impl App for TaskWidget {
                 self.change_task_touple = empty_task_touple;
             }
         }
+        if self.workaround.0 {
+            self.update_from_path(self.workaround.1.clone())
+        }
+        self.main_panel(ctx, frame);
     }
     
 }
