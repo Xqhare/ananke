@@ -852,6 +852,7 @@ impl TaskWidget {
                 let mut temp = false;
                 ui.horizontal(|ui: &mut Ui| {
                     ui.label("Most used context tags:");
+                    // I'm are going to use buttons!
                     ui.button("the first tag");
                     ui.checkbox(&mut temp, "second tag");
                 });
@@ -922,8 +923,7 @@ Built on a solid foundation of cutting-edge technologies, rust.");
                         if self.sort_tasks_indices.len() > 0 {
                             display_task_indicies = self.sort_tasks_indices.clone();
                         } else {
-                            let all_tasks: usize = self.tasks_vec.len();
-                            for num in 0..all_tasks {
+                            for num in 0..self.tasks_vec.len() {
                                 display_task_indicies.push(num);
                             }
                         }
