@@ -815,11 +815,10 @@ impl TaskWidget {
             // Show the sorting area
             if self.show_main_sorting_area {
                 ui.horizontal(|ui: &mut Ui| {
-                    // This button does nothing; if clicked all text input looses focus
-                    // so a search will happen.
-                    let _dummy = ui.button("Search");
                     if self.show_no_results_found_text {
-                        ui.heading("No results found!");
+                        ui.centered_and_justified(|ui: &mut Ui| {
+                            ui.heading("No results found!");
+                        });
                     }
                 });
                 
@@ -835,7 +834,9 @@ impl TaskWidget {
                         }
                     }
                     ui.end_row();
-                    ui.label("");
+                    // This button does nothing; if clicked all text input looses focus
+                    // so a search will happen.
+                    let _dummy = ui.button("Search");
                     if ui.button("Reset search").clicked() {
                         self.usr_sort_completion = false;
                         self.usr_sort_create_date = false;
