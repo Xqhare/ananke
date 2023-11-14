@@ -418,6 +418,7 @@ impl TaskWidget {
         }
         self.sort_tasks_indices = sorted_output.clone();
     }
+    /// This helper resets all grid ui elements to their default values.
     fn reset_grid_ui(&mut self) {
         self.show_saving_sucess_text = false;
         self.show_no_results_found_text = false;
@@ -427,6 +428,7 @@ impl TaskWidget {
         // Default true:
         self.show_task_scroll_area = true;
     }
+    /// This helper resets all top ui elements to their default values.
     fn reset_top_ui(&mut self) {
         self.show_saving_sucess_text = false;
         self.show_no_results_found_text = false;
@@ -437,6 +439,7 @@ impl TaskWidget {
         // Default true:
         self.show_main_panel_welcome_text = true;
     }
+    /// This helper resets all ui elements to their default values.
     fn reset_all_ui(&mut self) {
         self.show_saving_sucess_text = false;
         self.show_no_results_found_text = false;
@@ -566,11 +569,10 @@ impl TaskWidget {
         let file = File::open(filename)?;
         Ok(BufReader::new(file).lines())
     }
-    /// This gui function  creates the main window with the title, author, version. 
+    /// This gui function  creates the main window with the title, author, version. And
+    /// everything it contains.
     fn main_panel(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
-        
         CentralPanel::default().show(ctx, |ui: &mut Ui| {
-            
             ui.horizontal(|ui| {
                 ui.menu_button("File", |ui| {
                     if ui.button("Save").clicked() {
@@ -654,8 +656,6 @@ impl TaskWidget {
                        self.reset_all_ui();
                     }
                 }
-                
-                
             });
             let ui_main_area = ui.separator();
             let appstate_answer = check_for_persistant_appstate();
@@ -668,6 +668,8 @@ impl TaskWidget {
                 }
             }
             if self.show_file_drop_area {
+                self.show_no_results_found_text = false;
+                self.show_saving_sucess_text = false;
                 Area::new("Drop todo.txt below:").anchor(Align2::CENTER_TOP, Vec2::from([0.0, 40.0])).show(ctx, |ui: &mut Ui| {
                     ui.heading("Drop file anywhere in this window!");
                     ctx.input(|i| {
@@ -690,6 +692,7 @@ impl TaskWidget {
             }
             if self.show_saving_sucess_text {
                 ui.vertical_centered(|ui: &mut Ui| {
+                    self.show_no_results_found_text = false;
                     ui.heading("Saving done!");
                 });
             }
@@ -828,11 +831,11 @@ impl TaskWidget {
                 ui.horizontal(|ui: &mut Ui| {
                     if self.show_no_results_found_text {
                         ui.centered_and_justified(|ui: &mut Ui| {
+                            self.show_saving_sucess_text = false;
                             ui.heading("No results found!");
                         });
                     }
                 });
-                
                 Grid::new(ui_main_area.id).show(ui, |ui: &mut Ui| {
                     // I don't understand how to set a custom style or spacing, so I
                     // guess this monstroity will have to do.
@@ -1060,7 +1063,6 @@ impl TaskWidget {
                                     }
                                 }
                             }
-                            
                             // completion and creation dates
                             ui.text_edit_singleline(&mut self.complete_date_vec[entry]);
                             ui.text_edit_singleline(&mut self.create_date_vec[entry]);
@@ -1082,7 +1084,8 @@ impl TaskWidget {
         });
     }
     /// This helper function padds a String with `x` amount of whitespace.
-    fn left_and_rightpad(padding: u16, input_string: String) -> String {
+    /// Supports up to `u8` (255) padding.
+    fn left_and_rightpad(padding: u8, input_string: String) -> String {
         let mut right_pad = String::new();
         for _ in 0..padding {
             right_pad.push_str(" ");
@@ -1161,7 +1164,6 @@ impl App for TaskWidget {
         }
         self.main_panel(ctx, frame);
     }
-    
 }
 
 /// The main function should be thought of as the startup function, only defining the `app_name`
