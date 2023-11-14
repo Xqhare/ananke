@@ -638,7 +638,7 @@ impl TaskWidget {
                         frame.close()
                     }
                     // The most I have learned about buttons so far.
-                    if ui.button("About").clicked() {
+                    if ui.button("About / Help").clicked() {
                         // The switch of welcome window is here to reduce lag / flickering in
                         // rendering
                         if self.show_main_panel_about_text == false {
@@ -839,6 +839,9 @@ impl TaskWidget {
                 Grid::new(ui_main_area.id).show(ui, |ui: &mut Ui| {
                     // I don't understand how to set a custom style or spacing, so I
                     // guess this monstroity will have to do.
+                    // While I do know now (ui.add_space) this has actually proven
+                    // itself to be surprisingly resilliant to wierd edge cases and
+                    // pretty easy to maintain. -> no rework neccesarry!
                     for number in 0..9 {
                         if number == 5 || number == 6 || number == 7 || number == 8 {
                             let out = Self::left_and_rightpad(25, "".to_string());
@@ -871,7 +874,6 @@ impl TaskWidget {
                         } else {
                             self.usr_sort_completion = false;
                         }
-                        
                     }
                     if ui.radio(self.usr_sort_create_date, "By inception date").clicked() {
                         if !self.usr_sort_create_date {
@@ -879,7 +881,6 @@ impl TaskWidget {
                         } else {
                             self.usr_sort_create_date = false;
                         }
-                        
                     }
                     if ui.radio(self.usr_sort_priority, "By priority").clicked() {
                         if !self.usr_sort_priority {
@@ -887,7 +888,6 @@ impl TaskWidget {
                         } else {
                             self.usr_sort_priority = false;
                         }
-                        
                     }
                     // Sorting logic for true / false sorting
                     if self.usr_sort_completion || self.usr_sort_create_date || self.usr_sort_priority {
@@ -961,8 +961,23 @@ impl TaskWidget {
                 ui.heading("About Ananke");
                 ui.label("Ananke is a fully-featured, end-to-end, zero-to-one Todo app that leverages the power of the todo.txt format to provide a seamless, frictionless and streamlined user experience. Built on a solid foundation of cutting-edge technologies, rust.");
                 ui.label("Ananke decodes your todo.txt, makes it look pretty and searchable, as well as creates new tasks, and updates finished ones.");
-                ui.heading("About the format todo.txt");
-                ui.label("The todo.txt format is a plain text format file for managing tasks. It is at it's core really only a .txt file named todo. It contains one task per line, and each task line can contain infomation like: A priority letter (A-Z) first, then the Inception (Creation) and Completion dates in (YYYY-MM-DD format), Project Tags (preceeded by the + sign), Context Tags (preceeded by the @ sign), and finally Special tags that only follow the [keyTag:AnyContentYouWantToBeSearchableWithTheKeyTag].");
+                ui.separator();
+                ui.heading("Using the format todo.txt");
+                ui.label("The todo.txt format is a plain text format file for managing tasks. It is at it's core really only a .txt file named todo. It contains one task per line.");
+                ui.label("Each task line can contain infomation like:");
+                ui.label("A priority letter (A-Z),");
+                ui.label("The Inception (Creation) and Completion dates in (YYYY-MM-DD format),");
+                ui.label("Project Tags (preceeded by the + sign),");
+                ui.label("Context Tags (preceeded by the @ sign),");
+                ui.label("and finally Special tags that only follow the [keyTag:AnyContentYouWantToBeSearchableWithTheKeyTag].");
+                ui.separator();
+                ui.heading("Using Ananke");
+                ui.label("After opening Ananke and dropping in your todo.txt file of any name, Ananke will read out the file contents and display them for you. ");
+                ui.label("You can edit everything inside the text boxes then hit the 'Save' button found in the 'File' menu to save everything. Inside this menu you can also choose another file location if you want to edit another todo.txt file or want to move the one you are already editing.");
+                ui.label("The next menu is the 'Task' menu, here you can open the new task menu, as well as changing the position of tasks or delete them entirely.");
+                ui.label("Now we come to the 'Search' menu, here you can search and filter your tasks. Editing them is also allowed!");
+                ui.label("Lastly we have the 'Help' menu, it contains this About / Help page as well as the 'Quit' button. Clicking the 'Quit' button does not save the current appstate!");
+                ui.separator();
                 ui.heading("Licenses");
                 ui.hyperlink_to(format!("egui licensed under the MIT-License"), "https://github.com/emilk/egui/blob/master/LICENSE-MIT");
                     }
@@ -1171,7 +1186,7 @@ impl App for TaskWidget {
 /// From here `update()` from `impl App for TaskWidget`
 pub fn main() {
     let app_name = "Ananke";
-    let size: Vec2<> = Vec2::from((1100.0, 800.0));
+    let size: Vec2<> = Vec2::from((1100.0, 1020.0));
     let mut native_options = NativeOptions::default();
     {
         native_options.min_window_size = Option::from(size);
