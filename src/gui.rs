@@ -127,6 +127,8 @@ pub struct TaskWidget {
     show_main_sorting_area: bool,
     /// Workaround to show the "No results found" dialoge after a failed search. Default `false`.
     show_no_results_found_text: bool,
+    /// Workaround to show the "Saving done!" dialoge after a failed search. Default `false`.
+    show_saving_sucess_text: bool,
 }
 
 /// Implementing the Default value for `TaskWidget`, interrogates the task returned from the decoding
@@ -261,7 +263,7 @@ impl Default for TaskWidget {
                 }
             }
             }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), usr_sort_completion: false, usr_sort_create_date: false, usr_sort_priority: false, sort_special_tags_decoded: special_tag_touple.clone(), sortable_special_tags: special_tags_decoded, sort_tasks_indices: sorting_indices, show_no_results_found_text: false, };
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), usr_sort_completion: false, usr_sort_create_date: false, usr_sort_priority: false, sort_special_tags_decoded: special_tag_touple.clone(), sortable_special_tags: special_tags_decoded, sort_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, };
     }
     
 }
@@ -417,6 +419,7 @@ impl TaskWidget {
         self.sort_tasks_indices = sorted_output.clone();
     }
     fn reset_grid_ui(&mut self) {
+        self.show_saving_sucess_text = false;
         self.show_no_results_found_text = false;
         self.show_task_deletion_collum = false;
         self.show_file_drop_area = false;
@@ -425,6 +428,7 @@ impl TaskWidget {
         self.show_task_scroll_area = true;
     }
     fn reset_top_ui(&mut self) {
+        self.show_saving_sucess_text = false;
         self.show_no_results_found_text = false;
         self.show_main_panel_about_text = false;
         self.show_file_drop_area = false;
@@ -434,6 +438,7 @@ impl TaskWidget {
         self.show_main_panel_welcome_text = true;
     }
     fn reset_all_ui(&mut self) {
+        self.show_saving_sucess_text = false;
         self.show_no_results_found_text = false;
         self.show_task_deletion_collum = false;
         self.show_main_panel_about_text = false;
@@ -572,6 +577,7 @@ impl TaskWidget {
                         let temp = TaskEncoder::encode_taskwidget(self.clone());
                         let path: PathBuf = self.file_path.clone();
                         let _ = TaskEncoder::save(temp, path);
+                        self.show_saving_sucess_text = true;
                     }
                     if ui.button("Choose file location").clicked() {
                         if self.show_file_drop_area {
@@ -680,6 +686,11 @@ impl TaskWidget {
                             }
                         }
                     });
+                });
+            }
+            if self.show_saving_sucess_text {
+                ui.vertical_centered(|ui: &mut Ui| {
+                    ui.heading("Saving done!");
                 });
             }
             // Show the task creation area
@@ -838,6 +849,7 @@ impl TaskWidget {
                     // so a search will happen.
                     let _dummy = ui.button("Search");
                     if ui.button("Reset search").clicked() {
+                        self.show_no_results_found_text = false;
                         self.usr_sort_completion = false;
                         self.usr_sort_create_date = false;
                         self.usr_sort_priority = false;
@@ -877,6 +889,7 @@ impl TaskWidget {
                     // Sorting logic for true / false sorting
                     if self.usr_sort_completion || self.usr_sort_create_date || self.usr_sort_priority {
                         self.sort_true_false();
+                        self.show_no_results_found_text = false;
                     }
                     // Text input for field searching
                     // Task text search
@@ -885,6 +898,7 @@ impl TaskWidget {
                         if self.usr_sort_task_text_in.contains("Enter task text to search") {
                             self.usr_sort_task_text_in = String::new();
                         }
+                        self.show_no_results_found_text = false;
                     } else if task_text_in.lost_focus() {
                         self.sort_task_text();
                         if self.sort_tasks_indices.len() < 1 {
@@ -897,6 +911,7 @@ impl TaskWidget {
                         if self.usr_sort_project_tags_in.contains("Enter +ProjectTags to search") {
                             self.usr_sort_project_tags_in = String::new();
                         }
+                        self.show_no_results_found_text = false;
                     } else if project_in.lost_focus() {
                         println!("Lost focus!")
                     }
@@ -906,6 +921,7 @@ impl TaskWidget {
                         if self.usr_sort_context_tags_in.contains("Enter @ContextTags to search") {
                             self.usr_sort_context_tags_in = String::new();
                         }
+                        self.show_no_results_found_text = false;
                     } else if context_in.lost_focus() {
                         println!("Lost focus!")
                     }
@@ -915,6 +931,7 @@ impl TaskWidget {
                         if self.usr_sort_special_tags_in.contains("Enter Special:Tags to search") {
                             self.usr_sort_special_tags_in = String::new();
                         }
+                        self.show_no_results_found_text = false;
                     } else if special_in.lost_focus() {
                         println!("Lost focus!")
                     }
