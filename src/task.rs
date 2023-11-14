@@ -4,8 +4,6 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::gui::TaskWidget;
 
-
-
 /// The struct that decodes and sorts the todo.txt input.
 /// The fields are in format order.
 /// This struct doesn't panik if supplied with an any-length String.
@@ -35,7 +33,6 @@ impl TaskDecoder {
     /// This function decodes a line of todo.txt formatted text and returns the Task struct for
     /// interrigation and doesn't panik if supplied with a 0 length string.
     pub fn new(task_to_decode: String) -> Self {
-
         let mut completed = Option::from(false);
         let mut priority: Option<String> = Option::default();
         let mut complete_date: Option<String> = Option::default();
@@ -44,9 +41,7 @@ impl TaskDecoder {
         let mut project_tags: Option<Vec<String>> = Option::default();
         let mut context_tags: Option<Vec<String>> = Option::default();
         let mut special_tags: Option<Vec<String>> = Option::default();
-
         let mut date_number = 0;
-
         for item in task_to_decode.split_whitespace() {
             if item.starts_with("x") {
                 completed = Option::Some(true)
@@ -99,7 +94,6 @@ impl TaskDecoder {
             let reset_var: Option<String> = Option::default();
             complete_date = reset_var;
         }
-
         return TaskDecoder{completed, priority, complete_date, create_date, task, project_tags, context_tags, special_tags};
     }
 }
