@@ -331,7 +331,7 @@ impl TaskWidget {
     /// If the struct member `sort_tasks_indices` is filled, I truncate, as this search has
     /// priority over the booleans; They will be called anyway after, and handle the prefilled
     /// struct member already.
-    fn sort_task_text_new(&mut self) {
+    fn sort_task_text(&mut self) {
         let mut output_indices: Vec<usize> = Vec::new();
         let mut counter: usize = 0;
         let mut temp_count: usize = 0;
@@ -343,15 +343,35 @@ impl TaskWidget {
                         if output_indices.len() < 1 {
                             output_indices.push(counter);
                             temp_count = counter;
-                            println!("true, #{counter}; {:?} -> {:?}", search_term, entry);
                         }
                         if temp_count != counter {
                             output_indices.push(counter);
-                            println!("true, #{counter}; {:?} -> {:?}", search_term, entry);
                             temp_count = counter;
                         }
-                    } else {
-                        println!("FALSE, #{counter}; {:?} -> {:?}", search_term, entry);
+                    }
+                }
+                counter += 1;
+            }
+        }
+        self.sorted_tasks_indices = output_indices;
+    }
+    fn sort_project_tags(&mut self) {
+        let mut output_indices: Vec<usize> = Vec::new();
+        let mut counter: usize = 0;
+        let mut temp_count: usize = 0;
+        for search_term in &self.search_project_tags {
+            for vector in &self.searchable_project_tags {
+                for entry in vector {
+                    if entry.contains(search_term.as_str()) {
+                        // Check if task has the same word twice
+                        if output_indices.len() < 1 {
+                            output_indices.push(counter);
+                            temp_count = counter;
+                        }
+                        if temp_count != counter {
+                            output_indices.push(counter);
+                            temp_count = counter;
+                        }
                     }
                 }
                 counter += 1;
@@ -1006,7 +1026,7 @@ impl TaskWidget {
                             split_usr_search.push(entry.to_lowercase());
                         }
                         self.search_task_text = split_usr_search;
-                        self.sort_task_text_new();
+                        self.sort_task_text();
                         if self.sorted_tasks_indices.len() < 1 {
                             self.show_no_results_found_text = true;
                         }
@@ -1019,7 +1039,15 @@ impl TaskWidget {
                         }
                         self.show_no_results_found_text = false;
                     } else if project_in.lost_focus() {
-                        println!("Lost focus!")
+                        let mut split_usr_search: Vec<String> = Vec::new();
+                        for entry in self.usr_search_project_tags_in.split_whitespace() {
+                            split_usr_search.push(entry.to_lowercase());
+                        }
+                        self.search_project_tags = split_usr_search;
+                        self.sort_project_tags();
+                        if self.sorted_tasks_indices.len() < 1 {
+                            self.show_no_results_found_text = true;
+                        }
                     }
                     // context tag search
                     let context_in = ui.text_edit_multiline(&mut self.usr_search_context_tags_in);
@@ -1029,7 +1057,15 @@ impl TaskWidget {
                         }
                         self.show_no_results_found_text = false;
                     } else if context_in.lost_focus() {
-                        println!("Lost focus!")
+                        let mut split_usr_search: Vec<String> = Vec::new();
+                        for entry in self.usr_search_context_tags_in.split_whitespace() {
+                            split_usr_search.push(entry.to_lowercase());
+                        }
+                        self.search_context_tags = split_usr_search;
+                        // WIP self.sort_context_tags();
+                        if self.sorted_tasks_indices.len() < 1 {
+                            self.show_no_results_found_text = true;
+                        }
                     }
                     // speacial tag search
                     let special_in = ui.text_edit_multiline(&mut self.usr_search_special_tags_in);
