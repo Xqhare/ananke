@@ -205,7 +205,6 @@ impl Default for TaskWidget {
                 let mut temp_special_tag_var: Vec<(String, String)> = Vec::new();
                 for line in lines {
                     if let Ok(task) = line {
-                        empty_vec_string.push(empty_string.clone());
                         // Setting up individual tasks for interrigation
                         let made_task: TaskDecoder = TaskDecoder::new(task);
                         // Extracting gui state from data
@@ -241,7 +240,7 @@ impl Default for TaskWidget {
                         let task_split = made_task.task.split_whitespace();
                         let mut task_text_split_out: Vec<String> = Vec::new();
                         for text in task_split {
-                            task_text_split_out.push(text.to_string());
+                            task_text_split_out.push(text.to_string().to_lowercase());
                         }
                         searchable_task_text.push(task_text_split_out);
                         // Extracting project tags
@@ -252,25 +251,34 @@ impl Default for TaskWidget {
                                 for tag in tags {
                                     project_out.push_str(&tag);
                                     project_out.push_str(" ");
-                                    searchable_project_out.push(tag.to_string());
+                                    searchable_project_out.push(tag.to_string().to_lowercase());
                                 }
                                 searchable_project_tags.push(searchable_project_out);
-                                println!("Debug0 {:?}", searchable_project_tags);
                             },
-                            _ => project_out.push_str(""),
+                            _ => {
+                                project_out.push_str("");
+                                searchable_project_tags.push(Vec::new());
+                            },
                         };
                         project_tags.push(project_out);
                         // Extracting context tags
                         let mut context_out = String::new();
                         match made_task.context_tags {
                             Some(ref tags) => {
+                                let mut searchable_context_out: Vec<String> = Vec::new();
                                 for tag in tags {
                                     context_out.push_str(&tag);
                                     context_out.push_str(" ");
+                                    searchable_context_out.push(tag.to_string().to_lowercase());
                                 }
+                                searchable_context_tags.push(searchable_context_out);
                             },
-                            _ => context_out.push_str(""),
+                            _ => {
+                                context_out.push_str("");
+                                searchable_context_tags.push(Vec::new());
+                            },
                         };
+                        println!("Debug0 {:?}", searchable_context_tags);
                         context_tags.push(context_out);
                         // Extracting special tags
                         let mut special_out = String::new();
@@ -283,8 +291,8 @@ impl Default for TaskWidget {
                                     special_out.push_str(" ");
                                     let temp_val = tag.split_once(":");
                                     if temp_val.is_some() {
-                                        special_decoded.0.push_str(temp_val.unwrap().0);
-                                        special_decoded.1.push_str(temp_val.unwrap().1);
+                                        special_decoded.0.push_str(temp_val.unwrap().0.to_lowercase().as_str());
+                                        special_decoded.1.push_str(temp_val.unwrap().1.to_lowercase().as_str());
                                         special_decoded_out.push(special_decoded.clone());
                                     }
                                 }
@@ -301,7 +309,7 @@ impl Default for TaskWidget {
                         // pushing interrogated Task out
                         output.push(made_task.clone());
                     }
-                }
+            }
             }
         }
         return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, search_task_text: empty_vec_string.clone(), search_project_tags: empty_vec_string.clone(), search_context_tags: empty_vec_string.clone(), usr_search_task_text_in: "Enter task text to search".to_string(), usr_search_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_search_context_tags_in: "Enter @ContextTags to search".to_string(), usr_search_special_tags_in: "Enter Special:Tags to search".to_string(), usr_search_completion: false, usr_search_create_date: false, usr_search_priority: false, search_special_tags: special_tag_touple.clone(), searchable_special_tags, sorted_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, searchable_task_text, searchable_project_tags, searchable_context_tags, };
@@ -557,7 +565,7 @@ impl TaskWidget {
                     let task_split = made_task.task.split_whitespace();
                     let mut task_text_split_out: Vec<String> = Vec::new();
                     for text in task_split {
-                        task_text_split_out.push(text.to_string());
+                        task_text_split_out.push(text.to_string().to_lowercase());
                     }
                     searchable_task_text.push(task_text_split_out);
                     // Extracting project tags
@@ -568,25 +576,34 @@ impl TaskWidget {
                             for tag in tags {
                                 project_out.push_str(&tag);
                                 project_out.push_str(" ");
-                                searchable_project_out.push(tag.to_string());
+                                searchable_project_out.push(tag.to_string().to_lowercase());
                             }
                             searchable_project_tags.push(searchable_project_out);
-                            println!("Debug0 {:?}", searchable_project_tags);
                         },
-                        _ => project_out.push_str(""),
+                        _ => {
+                            project_out.push_str("");
+                            searchable_project_tags.push(Vec::new());
+                        },
                     };
                     project_tags.push(project_out);
                     // Extracting context tags
                     let mut context_out = String::new();
                     match made_task.context_tags {
                         Some(ref tags) => {
+                            let mut searchable_context_out: Vec<String> = Vec::new();
                             for tag in tags {
                                 context_out.push_str(&tag);
                                 context_out.push_str(" ");
+                                searchable_context_out.push(tag.to_string().to_lowercase());
                             }
+                            searchable_context_tags.push(searchable_context_out);
                         },
-                        _ => context_out.push_str(""),
+                        _ => {
+                            context_out.push_str("");
+                            searchable_context_tags.push(Vec::new());
+                        },
                     };
+                    println!("Debug0 {:?}", searchable_context_tags);
                     context_tags.push(context_out);
                     // Extracting special tags
                     let mut special_out = String::new();
@@ -599,8 +616,8 @@ impl TaskWidget {
                                 special_out.push_str(" ");
                                 let temp_val = tag.split_once(":");
                                 if temp_val.is_some() {
-                                    special_decoded.0.push_str(temp_val.unwrap().0);
-                                    special_decoded.1.push_str(temp_val.unwrap().1);
+                                    special_decoded.0.push_str(temp_val.unwrap().0.to_lowercase().as_str());
+                                    special_decoded.1.push_str(temp_val.unwrap().1.to_lowercase().as_str());
                                     special_decoded_out.push(special_decoded.clone());
                                 }
                             }
