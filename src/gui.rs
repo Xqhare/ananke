@@ -326,31 +326,30 @@ impl TaskWidget {
     /// search box. It reads out the input, decodes it and saves the indices of the hits. 
     ///
     /// ## Technical info
-    /// I just read the entire task text and search it for the input;
+    /// Each entered search term is checked against each member of any task text. Hits are
+    /// recorded.
     /// If the struct member `sort_tasks_indices` is filled, I truncate, as this search has
     /// priority over the booleans; They will be called anyway after, and handle the prefilled
     /// struct member already.
-    fn sort_task_text(&mut self) {
-        let mut output_vec: Vec<usize> = Vec::new();
-        let mut counter: usize = 0;
-        for task_text in self.task_text.clone() {
-            if task_text.contains(&self.usr_search_task_text_in) {
-                output_vec.push(counter);
-                println!("Debug {task_text}");
-            }
-            counter +=1;
-        }
-        self.sorted_tasks_indices = output_vec;
-    }
     fn sort_task_text_new(&mut self) {
         let mut output_indices: Vec<usize> = Vec::new();
         let mut counter: usize = 0;
+        let mut temp_count: usize = 0;
         for search_term in &self.search_task_text {
             for vector in &self.searchable_task_text {
                 for entry in vector {
                     if entry.contains(search_term.as_str()) {
-                        output_indices.push(counter);
-                        println!("true, #{counter}");
+                        // Check if task has the same word twice
+                        if output_indices.len() < 1 {
+                            output_indices.push(counter);
+                            temp_count = counter;
+                            println!("true, #{counter}; {:?} -> {:?}", search_term, entry);
+                        }
+                        if temp_count != counter {
+                            output_indices.push(counter);
+                            println!("true, #{counter}; {:?} -> {:?}", search_term, entry);
+                            temp_count = counter;
+                        }
                     } else {
                         println!("FALSE, #{counter}; {:?} -> {:?}", search_term, entry);
                     }
