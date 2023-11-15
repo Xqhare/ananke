@@ -66,8 +66,8 @@ pub struct TaskWidget {
     /// bool `false` and an empty Vec that will contain the indices.
     delete_task_touple: (bool, Vec<usize>),
     /// Needed for user input of new task position. Default `empty`.
-    change_usr_pos_in: Vec<String>,
-    /// Needed to save the to be moved tasks, to move them at another point in the loop. Default
+    usr_change_pos_in: Vec<String>,
+    /// WORKAROUND: Needed to save the to be moved tasks, to move them at another point in the loop. Default
     /// bool `false` and an empty `Vec` of touples of `usize` numbers.
     change_task_touple: (bool, Vec<(usize, usize)>),
     /// Saves indices of tasks to be displayed because of sorting. Default `empty`.
@@ -100,9 +100,14 @@ pub struct TaskWidget {
     /// task.
     searchable_context_tags: Vec<Vec<String>>,
     /// Stores the user inputed special tags decoded, ready to search.
-    search_special_tags: Vec<Vec<(String, String)>>,
+    search_special_tags: Vec<(String, String)>,
     /// Stores the appstate special tags decoded, ready to be searched.
-    searchable_special_tags: Vec<(String, String)>,
+    /// 
+    /// The special tags are split up into touples, position 0 is the key and position 1 is the
+    /// text. The special tags of a task are inside their own vector inside an outer vec
+    /// containing all special tags of all tasks, with their indices corresponding to the
+    /// respective task.
+    searchable_special_tags: Vec<Vec<(String, String)>>,
     /// Holds the user input to sort by completion. Default `false`.
     usr_search_completion: bool,
     /// Holds the user input to sort by creation date. Default `false`.
@@ -259,30 +264,40 @@ impl Default for TaskWidget {
                         context_tags.push(context_out);
                         // Extracting special tags
                         let mut special_out = String::new();
-                        let mut special_decoded_out = (String::new(), String::new());
+                        let mut special_decoded_out: Vec<(String, String)> = Vec::new();
                         match made_task.special_tags {
                             Some(ref tags) => {
                                 for tag in tags {
+                                    let mut special_decoded = (String::new(), String::new());
                                     special_out.push_str(&tag);
                                     special_out.push_str(" ");
                                     let temp_val = tag.split_once(":");
                                     if temp_val.is_some() {
-                                        special_decoded_out.0.push_str(temp_val.unwrap().0);
-                                        special_decoded_out.1.push_str(temp_val.unwrap().1);
+                                        special_decoded.0.push_str(temp_val.unwrap().0);
+                                        special_decoded.1.push_str(temp_val.unwrap().1);
+                                        println!("Debug0 {:?}", special_decoded.clone());
+                                        special_decoded_out.push(special_decoded.clone());
                                     }
                                 }
+                                println!("Debug1 {:?}", special_decoded_out.clone());
+                                searchable_special_tags.push(special_decoded_out);
                             },
-                            _ => special_out.push_str(""),
+                            _ => {
+                                special_out.push_str("");
+                                // Remember to push empty vectors as representations of the
+                                // other tasks!
+                                searchable_special_tags.push(special_decoded_out);
+                            },
                         };
                         special_tags.push(special_out);
-                        searchable_special_tags.push(special_decoded_out);
                         // pushing interrogated Task out
                         output.push(made_task.clone());
                     }
                 }
             }
-            }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, change_usr_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, search_task_text: empty_vec_string.clone(), search_project_tags: empty_vec_string.clone(), search_context_tags: empty_vec_string.clone(), usr_search_task_text_in: "Enter task text to search".to_string(), usr_search_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_search_context_tags_in: "Enter @ContextTags to search".to_string(), usr_search_special_tags_in: "Enter Special:Tags to search".to_string(), usr_search_completion: false, usr_search_create_date: false, usr_search_priority: false, search_special_tags: special_tag_touple.clone(), searchable_special_tags, sorted_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, searchable_task_text, searchable_project_tags, searchable_context_tags, };
+        }
+        println!("Debug2 {:?}", searchable_special_tags);
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, search_task_text: empty_vec_string.clone(), search_project_tags: empty_vec_string.clone(), search_context_tags: empty_vec_string.clone(), usr_search_task_text_in: "Enter task text to search".to_string(), usr_search_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_search_context_tags_in: "Enter @ContextTags to search".to_string(), usr_search_special_tags_in: "Enter Special:Tags to search".to_string(), usr_search_completion: false, usr_search_create_date: false, usr_search_priority: false, search_special_tags: special_tag_touple.clone(), searchable_special_tags, sorted_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, searchable_task_text, searchable_project_tags, searchable_context_tags, };
     }
     
 }
@@ -491,12 +506,13 @@ impl TaskWidget {
         let mut project_tags: Vec<String> = Vec::new();
         let mut context_tags: Vec<String> = Vec::new();
         let mut special_tags: Vec<String> = Vec::new();
-        let mut special_tags_decoded: Vec<(String, String)> = Vec::new();
+        let mut searchable_special_tags: Vec<Vec<(String, String)>> = Vec::new();
         let mut searchable_task_text: Vec<Vec<String>> = Vec::new();
         let mut searchable_project_tags: Vec<Vec<String>> = Vec::new();
         let mut searchable_context_tags: Vec<Vec<String>> = Vec::new();
         // special tags are handled seperatly; -> legacy code I'm too lazy to fix.
         if let Ok(lines) = file_lines {
+            let mut temp_special_tag_var: Vec<(String, String)> = Vec::new();
             for line in lines {
                 if let Ok(task) = line {
                     // Setting up individual tasks for interrigation
@@ -557,27 +573,37 @@ impl TaskWidget {
                     context_tags.push(context_out);
                     // Extracting special tags
                     let mut special_out = String::new();
-                    let mut special_decoded_out = (String::new(), String::new());
+                    let mut special_decoded_out: Vec<(String, String)> = Vec::new();
                     match made_task.special_tags {
                         Some(ref tags) => {
                             for tag in tags {
+                                let mut special_decoded = (String::new(), String::new());
                                 special_out.push_str(&tag);
                                 special_out.push_str(" ");
                                 let temp_val = tag.split_once(":");
                                 if temp_val.is_some() {
-                                    special_decoded_out.0.push_str(temp_val.unwrap().0);
-                                    special_decoded_out.1.push_str(temp_val.unwrap().1);
+                                    special_decoded.0.push_str(temp_val.unwrap().0);
+                                    special_decoded.1.push_str(temp_val.unwrap().1);
+                                    println!("Debug0 {:?}", special_decoded.clone());
+                                    special_decoded_out.push(special_decoded.clone());
                                 }
                             }
+                            println!("Debug1 {:?}", special_decoded_out.clone());
+                            searchable_special_tags.push(special_decoded_out);
                         },
-                        _ => special_out.push_str(""),
+                        _ => {
+                            special_out.push_str("");
+                            // Remember to push empty vectors as representations of the
+                            // other tasks!
+                            searchable_special_tags.push(special_decoded_out);
+                        },
                     };
                     special_tags.push(special_out);
-                    special_tags_decoded.push(special_decoded_out);
                     // pushing interrogated Task out
                     output.push(made_task.clone());
                 }
             }
+        println!("Debug2 {:?}", searchable_special_tags);
         self.tasks_vec = output;
         self.file_path = path_out;
         self.completed_vec = completed;
@@ -588,7 +614,7 @@ impl TaskWidget {
         self.project_tags_vec = project_tags;
         self.context_tags_vec = context_tags;
         self.special_tags_vec = special_tags;
-        self.searchable_special_tags = special_tags_decoded;
+        self.searchable_special_tags = searchable_special_tags;
         }
     }
     /// This helper function reads a file by line from a supplied path (could be an &str of the absolute or relative path for examle).
@@ -794,7 +820,7 @@ impl TaskWidget {
                             let decoded_task = TaskDecoder::new(encoded_out);
                             // As there is only one task, no update loop needed.
                             let index: usize = 0;
-                            self.change_usr_pos_in.insert(index, usr_change_pos_entry);
+                            self.usr_change_pos_in.insert(index, usr_change_pos_entry);
                             // There is no completion date OR completion marker!
                             // So first we push the non changing fields:
                             self.tasks_vec.insert(index, decoded_task.clone());
@@ -1078,18 +1104,18 @@ impl TaskWidget {
                                     delete_pos.push(entry);
                                 }
                             } else if self.show_task_move_pos_collum {
-                                if ui.text_edit_singleline(&mut self.change_usr_pos_in[entry]).lost_focus() {
+                                if ui.text_edit_singleline(&mut self.usr_change_pos_in[entry]).lost_focus() {
                                     let mut vec_out: Vec<(usize, usize)> = Vec::new();
                                     // This could technichally panic because of unwrap;
                                     // however it is only called if the value to be
                                     // unwraped is `Ok()`. 
-                                    if self.change_usr_pos_in[entry].parse::<usize>().is_ok() {
-                                        let new_pos = self.change_usr_pos_in[entry].parse::<usize>().unwrap();
+                                    if self.usr_change_pos_in[entry].parse::<usize>().is_ok() {
+                                        let new_pos = self.usr_change_pos_in[entry].parse::<usize>().unwrap();
                                         vec_out.push((entry.clone(), new_pos))
                                     }
                                     self.change_task_touple = (true, vec_out);
                                     // resetting user input field after decoding and saving of contents
-                                    self.change_usr_pos_in[entry] = String::new();
+                                    self.usr_change_pos_in[entry] = String::new();
                                 }
                             } else {
                                 if ui.checkbox(&mut self.completed_vec[entry], text).clicked() {
