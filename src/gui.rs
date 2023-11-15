@@ -244,15 +244,18 @@ impl Default for TaskWidget {
                             task_text_split_out.push(text.to_string());
                         }
                         searchable_task_text.push(task_text_split_out);
-                        println!("Debug0 {:?}", searchable_task_text);
                         // Extracting project tags
                         let mut project_out: String = String::new();
                         match made_task.project_tags {
                             Some(ref tags) => {
+                                let mut searchable_project_out: Vec<String> = Vec::new();
                                 for tag in tags {
                                     project_out.push_str(&tag);
                                     project_out.push_str(" ");
+                                    searchable_project_out.push(tag.to_string());
                                 }
+                                searchable_project_tags.push(searchable_project_out);
+                                println!("Debug0 {:?}", searchable_project_tags);
                             },
                             _ => project_out.push_str(""),
                         };
@@ -557,15 +560,18 @@ impl TaskWidget {
                         task_text_split_out.push(text.to_string());
                     }
                     searchable_task_text.push(task_text_split_out);
-                    println!("Debug0 {:?}", searchable_task_text);
                     // Extracting project tags
                     let mut project_out: String = String::new();
                     match made_task.project_tags {
                         Some(ref tags) => {
+                            let mut searchable_project_out: Vec<String> = Vec::new();
                             for tag in tags {
                                 project_out.push_str(&tag);
                                 project_out.push_str(" ");
+                                searchable_project_out.push(tag.to_string());
                             }
+                            searchable_project_tags.push(searchable_project_out);
+                            println!("Debug0 {:?}", searchable_project_tags);
                         },
                         _ => project_out.push_str(""),
                     };
