@@ -1,0 +1,59 @@
+(F) 2023-11-07 Test +test +TEST +Tester @testing @TEST @test test:anotherTest tag:woooo
+(B) 2023-11-07 test
+(D) 2023-11-07 dest
+(C) 2023-11-07 Test
+(B) Test +Testproject @Acontext
+(A) 2023-11-05 TEST TASK +TEST +test @testing test:whatATest
+() golden apples  @minecraft [created:2023-08-27]
+(T) TESTING 123 +TEST
+() full armour enchant  @minecraft [created:2023-08-27]
+() another test 250  [created:2023-10-21]
+(A) Thank Mom for the meatballs  @phone [created:2023-10-21]
+(B) Schedule Goodwill pickup +GarageSale @phone [created:2023-10-21]
+(A) 2022-10-14 Schedule annual checkup +Health
+(B) Outline chapter 5 +Novel @Computer
+() Plan backyard herb garden  @Home
+() Pick up milk  @GroceryStore
+() Research self-publishing services +Novel @Computer
+() 2023-11-18 Clean bathroom +Chores @home
+() 2023-11-20 Office Mail package +Post @errands
+() 2023-11-21 Finish reading book +Learning @personal
+() 2023-11-15 Pay bills +Finances @work
+() 2023-11-16 Get oil change +Car @errands
+() 2023-11-17 Go for a run +Fitness @personal
+() 2023-11-22 Make dinner +Cooking @home
+() 2023-11-23 10am meeting with client +Meetings @work
+() Go to the movies +Fun @personal
+() Organize closet  @home
+() 2023-11-27 Complete all outstanding tasks +Tasks @work
+() 2023-11-28 Deposit paycheck +Bank @errands
+() 2023-11-29 Call friend to catch up +Social @personal
+() 2023-12-01 Create plan for next quarter  @work
+() 2023-12-02 Store Buy groceries for the week +Grocery @errands
+(A) Call Mom +Family @Phone
+(A) Schedule annual checkup +Health
+(C) Add cover sheets +TPSReports @Office
+() Plan backyard herb garden  @Home
+() Pick up milk  @GroceryStore
+(C) 2021-03-23 Fix faucet  @home
+(C) 2021-03-25 Do laundry  @home
+(A) 2021-03-24 Work on +todoreport @home
+() Read Racket Guide
+x () Eskimo pies  @GroceryStore
+x (C) Add cover sheets +TPSReports @Office
+x (T) 2023-11-05 2023-11-05 ANOTHER TEST TASK +TEST+test @testing test:AnotherValue
+x () 2018-04-12 2018-04-28 Post signs around the neighborhood +GarageSale
+x (A) 2020-12-12 2020-12-10 Call Mom +Family @Phone
+x () golden carrots  @minecraft [created:2023-08-27]
+x () Download Todo.txt mobile app  @Phone
+x () Schedule for 1600 dollars +dentist @phone
+x () 2011-03-02 2011-03-01 Review Tim's pull request +TodoTxtTouch +Test +whatHappens +WhenThereAre +many +different +project_tags +Donaudampfschiffschaurundfahrtengenehmigungsstempel @github
+x () 2023-11-20 2023-11-19 Write blog post +Marketing @work
+x () Buy milk, eggs, and bread +Groceries
+x () Return books +Library @errands
+x () Fix leaky faucet +Repairs
+x () Set goals for the next months +Goals @personal
+x (B) Outline chapter 5 +Novel @Computer
+x () Research self-publishing services +Novel @Computer
+x () Download Todo.txt mobile app  @Phone
+x (A) 2023-11-20 2021-03-22 Call boss  @work
