@@ -75,7 +75,8 @@ pub struct TaskWidget {
     /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
     /// task text.
     search_task_text: Vec<String>,
-    /// Holds the appstate task text in a searchable state. 
+    /// Holds the appstate task text in a searchable state.
+    /// For ease of search all strings were converted to lowercase.
     ///
     /// The task text is split up by whitespace and the elements put inside the inside vector.
     /// The resulting vector is put inside the outer vec, at the index pos of the corresponding
@@ -85,6 +86,7 @@ pub struct TaskWidget {
     /// project tags.
     search_project_tags: Vec<String>,
     /// Holds the appstate project tags in a searchable state. 
+    /// For ease of search all strings were converted to lowercase.
     ///
     /// The project tags are split up by whitespace and the elements put inside the inside vector.
     /// The resulting vector is put inside the outer vec, at the index pos of the corresponding
@@ -94,6 +96,7 @@ pub struct TaskWidget {
     /// context tags.
     search_context_tags: Vec<String>,
     /// Holds the appstate context tags in a searchable state. 
+    /// For ease of search all strings were converted to lowercase.
     ///
     /// The context tags are split up by whitespace and the elements put inside the inside vector.
     /// The resulting vector is put inside the outer vec, at the index pos of the corresponding
@@ -102,6 +105,7 @@ pub struct TaskWidget {
     /// Stores the user inputed special tags decoded, ready to search.
     search_special_tags: Vec<(String, String)>,
     /// Stores the appstate special tags decoded, ready to be searched.
+    /// For ease of search all strings were converted to lowercase.
     /// 
     /// The special tags are split up into touples, position 0 is the key and position 1 is the
     /// text. The special tags of a task are inside their own vector inside an outer vec
@@ -162,6 +166,8 @@ impl Default for TaskWidget {
     /// Each line is then interrogated and the appropriate response saved into the struct fields of
     /// `TaskWidget`.
     fn default() -> Self {
+        let sorting_indices: Vec<usize> = Vec::new();
+        let empty_string: String = String::new();
         let change_touple: (bool, Vec<(usize, usize)>) = (false, Vec::new());
         let delete_touple: (bool, Vec<usize>) = (false, Vec::new());
         let special_tag_touple: Vec<(String, String)> = Vec::new();
@@ -175,17 +181,14 @@ impl Default for TaskWidget {
         let mut project_tags: Vec<String> = Vec::new();
         let mut context_tags: Vec<String> = Vec::new();
         let mut special_tags: Vec<String> = Vec::new();
-        let empty_string: String = String::new();
         let mut empty_vec_string: Vec<String> = Vec::new();
         let mut searchable_special_tags: Vec<Vec<(String, String)>> = Vec::new();
-        let sorting_indices: Vec<usize> = Vec::new();
         let mut searchable_project_tags: Vec<Vec<String>> = Vec::new();
         let mut searchable_context_tags: Vec<Vec<String>> = Vec::new();
         let mut searchable_task_text: Vec<Vec<String>> = Vec::new();
 
         let now = Utc::now();
         let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
-        
         let appstate = check_for_persistant_appstate();
         let tester = Self::read_lines(appstate.1.clone());
         let mut out_test = PathBuf::new();
@@ -278,7 +281,6 @@ impl Default for TaskWidget {
                                 searchable_context_tags.push(Vec::new());
                             },
                         };
-                        println!("Debug0 {:?}", searchable_context_tags);
                         context_tags.push(context_out);
                         // Extracting special tags
                         let mut special_out = String::new();
@@ -309,7 +311,7 @@ impl Default for TaskWidget {
                         // pushing interrogated Task out
                         output.push(made_task.clone());
                     }
-            }
+                }
             }
         }
         return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, search_task_text: empty_vec_string.clone(), search_project_tags: empty_vec_string.clone(), search_context_tags: empty_vec_string.clone(), usr_search_task_text_in: "Enter task text to search".to_string(), usr_search_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_search_context_tags_in: "Enter @ContextTags to search".to_string(), usr_search_special_tags_in: "Enter Special:Tags to search".to_string(), usr_search_completion: false, usr_search_create_date: false, usr_search_priority: false, search_special_tags: special_tag_touple.clone(), searchable_special_tags, sorted_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, searchable_task_text, searchable_project_tags, searchable_context_tags, };
@@ -342,7 +344,21 @@ impl TaskWidget {
     }
     fn sort_task_text_new(&mut self) {
         let mut output_indices: Vec<usize> = Vec::new();
-        
+        let mut counter: usize = 0;
+        for search_term in &self.search_task_text {
+            for vector in &self.searchable_task_text {
+                for entry in vector {
+                    if entry.contains(search_term.as_str()) {
+                        output_indices.push(counter);
+                        println!("true, #{counter}");
+                    } else {
+                        println!("FALSE, #{counter}; {:?} -> {:?}", search_term, entry);
+                    }
+                }
+                counter += 1;
+            }
+        }
+        self.sorted_tasks_indices = output_indices;
     }
     /// This helper function, sorts all taskes by completion / creation date / priority.Any
     /// combination of the three is valid, with completion being always first, then creation
@@ -603,7 +619,6 @@ impl TaskWidget {
                             searchable_context_tags.push(Vec::new());
                         },
                     };
-                    println!("Debug0 {:?}", searchable_context_tags);
                     context_tags.push(context_out);
                     // Extracting special tags
                     let mut special_out = String::new();
@@ -910,7 +925,7 @@ impl TaskWidget {
                     });
                     ui.end_row();
             }
-            // Show the sorting area
+            // Show the search area
             if self.show_main_sorting_area {
                 ui.horizontal(|ui: &mut Ui| {
                     if self.show_no_results_found_text {
@@ -987,7 +1002,12 @@ impl TaskWidget {
                         }
                         self.show_no_results_found_text = false;
                     } else if task_text_in.lost_focus() {
-                        self.sort_task_text();
+                        let mut split_usr_search: Vec<String> = Vec::new();
+                        for entry in self.usr_search_task_text_in.split_whitespace() {
+                            split_usr_search.push(entry.to_lowercase());
+                        }
+                        self.search_task_text = split_usr_search;
+                        self.sort_task_text_new();
                         if self.sorted_tasks_indices.len() < 1 {
                             self.show_no_results_found_text = true;
                         }
