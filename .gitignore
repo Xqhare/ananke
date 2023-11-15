@@ -17,6 +17,7 @@ target/
 *.vim
 ananke_*
 .anankeconfig
+old_ananke_versions/
 # Added by cargo
 
 /target
