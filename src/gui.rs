@@ -66,49 +66,64 @@ pub struct TaskWidget {
     /// bool `false` and an empty Vec that will contain the indices.
     delete_task_touple: (bool, Vec<usize>),
     /// Needed for user input of new task position. Default `empty`.
-    usr_change_pos_in: Vec<String>,
+    change_usr_pos_in: Vec<String>,
     /// Needed to save the to be moved tasks, to move them at another point in the loop. Default
     /// bool `false` and an empty `Vec` of touples of `usize` numbers.
     change_task_touple: (bool, Vec<(usize, usize)>),
     /// Saves indices of tasks to be displayed because of sorting. Default `empty`.
-    sort_tasks_indices: Vec<usize>,
+    sorted_tasks_indices: Vec<usize>,
     /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
     /// task text.
-    sort_task_text: Vec<String>,
-    /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
-    /// task text.
-    sort_project_tags: Vec<String>,
-    /// Saves a vector of `String`'s that's used to search for it's contents, in this case the
-    /// task text.
-    sort_context_tags: Vec<String>,
-    /// Saves a vector of touple's of `String`'s that's used to search for it's contents, in this case the
-    /// task text. The touple contains: leading the tag, and trailing the text.
-    sort_special_tags: Vec<String>,
+    search_task_text: Vec<String>,
+    /// Holds the appstate task text in a searchable state. 
+    ///
+    /// The task text is split up by whitespace and the elements put inside the inside vector.
+    /// The resulting vector is put inside the outer vec, at the index pos of the corresponding
+    /// task.
+    searchable_task_text: Vec<Vec<String>>,
+    /// Saves a vector of `String` that's used to search for it's contents, in this case the
+    /// project tags.
+    search_project_tags: Vec<String>,
+    /// Holds the appstate project tags in a searchable state. 
+    ///
+    /// The project tags are split up by whitespace and the elements put inside the inside vector.
+    /// The resulting vector is put inside the outer vec, at the index pos of the corresponding
+    /// task.
+    searchable_project_tags: Vec<Vec<String>>,
+    /// Saves a vector of `String` that's used to search for it's contents, in this case the
+    /// context tags.
+    search_context_tags: Vec<String>,
+    /// Holds the appstate context tags in a searchable state. 
+    ///
+    /// The context tags are split up by whitespace and the elements put inside the inside vector.
+    /// The resulting vector is put inside the outer vec, at the index pos of the corresponding
+    /// task.
+    searchable_context_tags: Vec<Vec<String>>,
     /// Stores the user inputed special tags decoded, ready to search.
-    sort_special_tags_decoded: Vec<(String, String)>,
+    search_special_tags: Vec<Vec<(String, String)>>,
     /// Stores the appstate special tags decoded, ready to be searched.
-    sortable_special_tags: Vec<(String, String)>,
+    searchable_special_tags: Vec<(String, String)>,
     /// Holds the user input to sort by completion. Default `false`.
-    usr_sort_completion: bool,
+    usr_search_completion: bool,
     /// Holds the user input to sort by creation date. Default `false`.
-    usr_sort_create_date: bool,
+    usr_search_create_date: bool,
     /// Holds the user input to sort by priority. Default `false`.
-    usr_sort_priority: bool,
+    usr_search_priority: bool,
     /// Saves the direct user input of the task, ready to be decoded. Default `Enter task text
     /// to search for`.
-    usr_sort_task_text_in: String,
+    usr_search_task_text_in: String,
     /// Saves the direct user input of the task, ready to be decoded. Default `Enter
     /// +ProjectTags
     /// to search`.
-    usr_sort_project_tags_in: String,
+    usr_search_project_tags_in: String,
     /// Saves the direct user input of the task, ready to be decoded. Default `Enter
     /// @ContextTags
     /// to search`.
-    usr_sort_context_tags_in: String,
+    usr_search_context_tags_in: String,
     /// Saves the direct user input of the task, ready to be decoded. Default `Enter
     /// Special:Tags
     /// to search`.
-    usr_sort_special_tags_in: String,
+    usr_search_special_tags_in: String,
     /// Workaround to show different content, here the help and about text. Default `false`.
     show_main_panel_about_text: bool,
     /// Workaround to show different content, here the welcome panel. Defalut `true`.
@@ -157,8 +172,11 @@ impl Default for TaskWidget {
         let mut special_tags: Vec<String> = Vec::new();
         let empty_string: String = String::new();
         let mut empty_vec_string: Vec<String> = Vec::new();
-        let mut special_tags_decoded: Vec<(String, String)> = Vec::new();
+        let mut searchable_special_tags: Vec<Vec<(String, String)>> = Vec::new();
         let sorting_indices: Vec<usize> = Vec::new();
+        let mut searchable_project_tags: Vec<Vec<String>> = Vec::new();
+        let mut searchable_context_tags: Vec<Vec<String>> = Vec::new();
+        let mut searchable_task_text: Vec<Vec<String>> = Vec::new();
 
         let now = Utc::now();
         let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
@@ -179,6 +197,7 @@ impl Default for TaskWidget {
             let file_lines = Self::read_lines(out_test);
             
             if let Ok(lines) = file_lines {
+                let mut temp_special_tag_var: Vec<(String, String)> = Vec::new();
                 for line in lines {
                     if let Ok(task) = line {
                         empty_vec_string.push(empty_string.clone());
@@ -256,14 +275,14 @@ impl Default for TaskWidget {
                             _ => special_out.push_str(""),
                         };
                         special_tags.push(special_out);
-                        special_tags_decoded.push(special_decoded_out);
+                        searchable_special_tags.push(special_decoded_out);
                         // pushing interrogated Task out
                         output.push(made_task.clone());
                     }
                 }
             }
             }
-            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, sort_task_text: empty_vec_string.clone(), sort_project_tags: empty_vec_string.clone(), sort_context_tags: empty_vec_string.clone(), sort_special_tags: empty_vec_string.clone(), usr_sort_task_text_in: "Enter task text to search".to_string(), usr_sort_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_sort_context_tags_in: "Enter @ContextTags to search".to_string(), usr_sort_special_tags_in: "Enter Special:Tags to search".to_string(), usr_sort_completion: false, usr_sort_create_date: false, usr_sort_priority: false, sort_special_tags_decoded: special_tag_touple.clone(), sortable_special_tags: special_tags_decoded, sort_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, };
+            return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, change_usr_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, search_task_text: empty_vec_string.clone(), search_project_tags: empty_vec_string.clone(), search_context_tags: empty_vec_string.clone(), usr_search_task_text_in: "Enter task text to search".to_string(), usr_search_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_search_context_tags_in: "Enter @ContextTags to search".to_string(), usr_search_special_tags_in: "Enter Special:Tags to search".to_string(), usr_search_completion: false, usr_search_create_date: false, usr_search_priority: false, search_special_tags: special_tag_touple.clone(), searchable_special_tags, sorted_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, searchable_task_text, searchable_project_tags, searchable_context_tags, };
     }
     
 }
@@ -283,23 +302,27 @@ impl TaskWidget {
         let mut output_vec: Vec<usize> = Vec::new();
         let mut counter: usize = 0;
         for task_text in self.task_text.clone() {
-            if task_text.contains(&self.usr_sort_task_text_in) {
+            if task_text.contains(&self.usr_search_task_text_in) {
                 output_vec.push(counter);
                 println!("Debug {task_text}");
             }
             counter +=1;
         }
-        self.sort_tasks_indices = output_vec;
+        self.sorted_tasks_indices = output_vec;
+    }
+    fn sort_task_text_new(&mut self) {
+        let mut output_indices: Vec<usize> = Vec::new();
+        
     }
     /// This helper function, sorts all taskes by completion / creation date / priority.Any
     /// combination of the three is valid, with completion being always first, then creation
     /// date, then priority sorting.
     fn sort_true_false(&mut self) {
         let mut sorted_output: Vec<usize> = Vec::new();
-        if self.sort_tasks_indices.len() > 0 {
-            sorted_output = self.sort_tasks_indices.clone();
+        if self.sorted_tasks_indices.len() > 0 {
+            sorted_output = self.sorted_tasks_indices.clone();
         }
-        if self.usr_sort_priority {
+        if self.usr_search_priority {
             // If sorted_output is not empty
             if sorted_output.len() > 0 {
                 // getting out all indices with creation dates.
@@ -338,7 +361,7 @@ impl TaskWidget {
                 sorted_output = out;
             }
         }
-        if self.usr_sort_create_date {
+        if self.usr_search_create_date {
             // If sorted_output is not empty
             if sorted_output.len() > 0 {
                 // getting out all indices with creation dates.
@@ -377,7 +400,7 @@ impl TaskWidget {
                 sorted_output = out;
             }
         }
-        if self.usr_sort_completion {
+        if self.usr_search_completion {
             // If sorted_output is not empty
             if sorted_output.len() > 0 {
                 // getting out all indices with creation dates.
@@ -416,7 +439,7 @@ impl TaskWidget {
                 sorted_output = out;
             }
         }
-        self.sort_tasks_indices = sorted_output.clone();
+        self.sorted_tasks_indices = sorted_output.clone();
     }
     /// This helper resets all grid ui elements to their default values.
     fn reset_grid_ui(&mut self) {
@@ -453,7 +476,7 @@ impl TaskWidget {
         self.show_main_panel_welcome_text = true;
         self.show_task_scroll_area = true;
         // Reset shown tasks
-        self.sort_tasks_indices = Vec::new();
+        self.sorted_tasks_indices = Vec::new();
     }
     /// This support function updates the contents of `TaskWidget` to the one's at the supplied path.
     fn update_from_path(&mut self, path: PathBuf) {
@@ -469,6 +492,10 @@ impl TaskWidget {
         let mut context_tags: Vec<String> = Vec::new();
         let mut special_tags: Vec<String> = Vec::new();
         let mut special_tags_decoded: Vec<(String, String)> = Vec::new();
+        let mut searchable_task_text: Vec<Vec<String>> = Vec::new();
+        let mut searchable_project_tags: Vec<Vec<String>> = Vec::new();
+        let mut searchable_context_tags: Vec<Vec<String>> = Vec::new();
+        // special tags are handled seperatly; -> legacy code I'm too lazy to fix.
         if let Ok(lines) = file_lines {
             for line in lines {
                 if let Ok(task) = line {
@@ -561,7 +588,7 @@ impl TaskWidget {
         self.project_tags_vec = project_tags;
         self.context_tags_vec = context_tags;
         self.special_tags_vec = special_tags;
-        self.sortable_special_tags = special_tags_decoded;
+        self.searchable_special_tags = special_tags_decoded;
         }
     }
     /// This helper function reads a file by line from a supplied path (could be an &str of the absolute or relative path for examle).
@@ -767,7 +794,7 @@ impl TaskWidget {
                             let decoded_task = TaskDecoder::new(encoded_out);
                             // As there is only one task, no update loop needed.
                             let index: usize = 0;
-                            self.usr_change_pos_in.insert(index, usr_change_pos_entry);
+                            self.change_usr_pos_in.insert(index, usr_change_pos_entry);
                             // There is no completion date OR completion marker!
                             // So first we push the non changing fields:
                             self.tasks_vec.insert(index, decoded_task.clone());
@@ -856,83 +883,83 @@ impl TaskWidget {
                     let _dummy = ui.button("Search");
                     if ui.button("Reset search").clicked() {
                         self.show_no_results_found_text = false;
-                        self.usr_sort_completion = false;
-                        self.usr_sort_create_date = false;
-                        self.usr_sort_priority = false;
-                        self.usr_sort_task_text_in = "Enter task text to search".to_string();
-                        self.usr_sort_project_tags_in = "Enter +ProjectTags to search".to_string();
-                        self.usr_sort_context_tags_in = "Enter @ContextTags to search".to_string();
-                        self.usr_sort_special_tags_in = "Enter Special:Tags to search".to_string();
-                        self.sort_tasks_indices = Vec::new();
+                        self.usr_search_completion = false;
+                        self.usr_search_create_date = false;
+                        self.usr_search_priority = false;
+                        self.usr_search_task_text_in = "Enter task text to search".to_string();
+                        self.usr_search_project_tags_in = "Enter +ProjectTags to search".to_string();
+                        self.usr_search_context_tags_in = "Enter @ContextTags to search".to_string();
+                        self.usr_search_special_tags_in = "Enter Special:Tags to search".to_string();
+                        self.sorted_tasks_indices = Vec::new();
                     }
                     // Radio buttons for true / false sorting.
                     // By completion: First by if completed, then by completion date if
                     // applicable.
-                    if ui.radio(self.usr_sort_completion, "By completion").clicked() {
-                        if !self.usr_sort_completion {
-                            self.usr_sort_completion = true;
+                    if ui.radio(self.usr_search_completion, "By completion").clicked() {
+                        if !self.usr_search_completion {
+                            self.usr_search_completion = true;
                         } else {
-                            self.usr_sort_completion = false;
+                            self.usr_search_completion = false;
                         }
                     }
-                    if ui.radio(self.usr_sort_create_date, "By inception date").clicked() {
-                        if !self.usr_sort_create_date {
-                            self.usr_sort_create_date = true;
+                    if ui.radio(self.usr_search_create_date, "By inception date").clicked() {
+                        if !self.usr_search_create_date {
+                            self.usr_search_create_date = true;
                         } else {
-                            self.usr_sort_create_date = false;
+                            self.usr_search_create_date = false;
                         }
                     }
-                    if ui.radio(self.usr_sort_priority, "By priority").clicked() {
-                        if !self.usr_sort_priority {
-                            self.usr_sort_priority = true;
+                    if ui.radio(self.usr_search_priority, "By priority").clicked() {
+                        if !self.usr_search_priority {
+                            self.usr_search_priority = true;
                         } else {
-                            self.usr_sort_priority = false;
+                            self.usr_search_priority = false;
                         }
                     }
                     // Sorting logic for true / false sorting
-                    if self.usr_sort_completion || self.usr_sort_create_date || self.usr_sort_priority {
+                    if self.usr_search_completion || self.usr_search_create_date || self.usr_search_priority {
                         self.sort_true_false();
                         self.show_no_results_found_text = false;
                     }
                     // Text input for field searching
                     // Task text search
-                    let task_text_in = ui.text_edit_multiline(&mut self.usr_sort_task_text_in);
+                    let task_text_in = ui.text_edit_multiline(&mut self.usr_search_task_text_in);
                     if task_text_in.gained_focus() {
-                        if self.usr_sort_task_text_in.contains("Enter task text to search") {
-                            self.usr_sort_task_text_in = String::new();
+                        if self.usr_search_task_text_in.contains("Enter task text to search") {
+                            self.usr_search_task_text_in = String::new();
                         }
                         self.show_no_results_found_text = false;
                     } else if task_text_in.lost_focus() {
                         self.sort_task_text();
-                        if self.sort_tasks_indices.len() < 1 {
+                        if self.sorted_tasks_indices.len() < 1 {
                             self.show_no_results_found_text = true;
                         }
                     }
                     // Project tag search
-                    let project_in = ui.text_edit_multiline(&mut self.usr_sort_project_tags_in);
+                    let project_in = ui.text_edit_multiline(&mut self.usr_search_project_tags_in);
                     if project_in.gained_focus() {
-                        if self.usr_sort_project_tags_in.contains("Enter +ProjectTags to search") {
-                            self.usr_sort_project_tags_in = String::new();
+                        if self.usr_search_project_tags_in.contains("Enter +ProjectTags to search") {
+                            self.usr_search_project_tags_in = String::new();
                         }
                         self.show_no_results_found_text = false;
                     } else if project_in.lost_focus() {
                         println!("Lost focus!")
                     }
                     // context tag search
-                    let context_in = ui.text_edit_multiline(&mut self.usr_sort_context_tags_in);
+                    let context_in = ui.text_edit_multiline(&mut self.usr_search_context_tags_in);
                     if context_in.gained_focus() {
-                        if self.usr_sort_context_tags_in.contains("Enter @ContextTags to search") {
-                            self.usr_sort_context_tags_in = String::new();
+                        if self.usr_search_context_tags_in.contains("Enter @ContextTags to search") {
+                            self.usr_search_context_tags_in = String::new();
                         }
                         self.show_no_results_found_text = false;
                     } else if context_in.lost_focus() {
                         println!("Lost focus!")
                     }
                     // speacial tag search
-                    let special_in = ui.text_edit_multiline(&mut self.usr_sort_special_tags_in);
+                    let special_in = ui.text_edit_multiline(&mut self.usr_search_special_tags_in);
                     if special_in.gained_focus() {
-                        if self.usr_sort_special_tags_in.contains("Enter Special:Tags to search") {
-                            self.usr_sort_special_tags_in = String::new();
+                        if self.usr_search_special_tags_in.contains("Enter Special:Tags to search") {
+                            self.usr_search_special_tags_in = String::new();
                         }
                         self.show_no_results_found_text = false;
                     } else if special_in.lost_focus() {
@@ -1031,8 +1058,8 @@ impl TaskWidget {
                         let mut delete_entry = false;
                         let mut delete_pos: Vec<usize> = Vec::new();
                         let mut display_task_indicies: Vec<usize> = Vec::new();
-                        if self.sort_tasks_indices.len() > 0 {
-                            display_task_indicies = self.sort_tasks_indices.clone();
+                        if self.sorted_tasks_indices.len() > 0 {
+                            display_task_indicies = self.sorted_tasks_indices.clone();
                         } else {
                             for num in 0..self.tasks_vec.len() {
                                 display_task_indicies.push(num);
@@ -1051,18 +1078,18 @@ impl TaskWidget {
                                     delete_pos.push(entry);
                                 }
                             } else if self.show_task_move_pos_collum {
-                                if ui.text_edit_singleline(&mut self.usr_change_pos_in[entry]).lost_focus() {
+                                if ui.text_edit_singleline(&mut self.change_usr_pos_in[entry]).lost_focus() {
                                     let mut vec_out: Vec<(usize, usize)> = Vec::new();
                                     // This could technichally panic because of unwrap;
                                     // however it is only called if the value to be
                                     // unwraped is `Ok()`. 
-                                    if self.usr_change_pos_in[entry].parse::<usize>().is_ok() {
-                                        let new_pos = self.usr_change_pos_in[entry].parse::<usize>().unwrap();
+                                    if self.change_usr_pos_in[entry].parse::<usize>().is_ok() {
+                                        let new_pos = self.change_usr_pos_in[entry].parse::<usize>().unwrap();
                                         vec_out.push((entry.clone(), new_pos))
                                     }
                                     self.change_task_touple = (true, vec_out);
                                     // resetting user input field after decoding and saving of contents
-                                    self.usr_change_pos_in[entry] = String::new();
+                                    self.change_usr_pos_in[entry] = String::new();
                                 }
                             } else {
                                 if ui.checkbox(&mut self.completed_vec[entry], text).clicked() {
