@@ -203,6 +203,7 @@ impl Default for TaskWidget {
         let mut most_used_project_tags: Vec<(String, usize)> = Vec::new();
         let mut most_used_context_tags: Vec<(String, usize)> = Vec::new();
         let mut most_used_special_tags: Vec<(String, usize)> = Vec::new();
+        let mut change_pos_string: Vec<String> = Vec::new();
         let now = Utc::now();
         let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
         let appstate = check_for_persistant_appstate();
@@ -222,6 +223,7 @@ impl Default for TaskWidget {
             if let Ok(lines) = file_lines {
                 for line in lines {
                     if let Ok(task) = line {
+                        change_pos_string.push(String::new());
                         // Setting up individual tasks for interrigation
                         let made_task: TaskDecoder = TaskDecoder::new(task);
                         // Extracting gui state from data
@@ -351,7 +353,7 @@ impl Default for TaskWidget {
                 most_used_special_tags = word_counts(temp_s_search_tags);
             }
         }
-        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, search_task_text: empty_vec_string.clone(), search_project_tags: empty_vec_string.clone(), search_context_tags: empty_vec_string.clone(), usr_search_task_text_in: "Enter task text to search".to_string(), usr_search_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_search_context_tags_in: "Enter @ContextTags to search".to_string(), usr_search_special_tags_in: "Enter Special:Tags to search".to_string(), usr_search_completion: false, usr_search_create_date: false, usr_search_priority: false, search_special_tags: special_tag_touple.clone(), searchable_special_tags, sorted_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, searchable_task_text, searchable_project_tags, searchable_context_tags, most_used_project_tags, most_used_context_tags, most_used_special_tags, workaround_search_project_tags: false, workaround_search_context_tags: false, workaround_search_special_tags: false, };
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: change_pos_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, search_task_text: empty_vec_string.clone(), search_project_tags: empty_vec_string.clone(), search_context_tags: empty_vec_string.clone(), usr_search_task_text_in: "Enter task text to search".to_string(), usr_search_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_search_context_tags_in: "Enter @ContextTags to search".to_string(), usr_search_special_tags_in: "Enter Special:Tags to search".to_string(), usr_search_completion: false, usr_search_create_date: false, usr_search_priority: false, search_special_tags: special_tag_touple.clone(), searchable_special_tags, sorted_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, searchable_task_text, searchable_project_tags, searchable_context_tags, most_used_project_tags, most_used_context_tags, most_used_special_tags, workaround_search_project_tags: false, workaround_search_context_tags: false, workaround_search_special_tags: false, };
     }
     
 }
@@ -675,10 +677,12 @@ impl TaskWidget {
         let mut searchable_task_text: Vec<Vec<String>> = Vec::new();
         let mut searchable_project_tags: Vec<Vec<String>> = Vec::new();
         let mut searchable_context_tags: Vec<Vec<String>> = Vec::new();
+        let mut change_usr_pos: Vec<String> = Vec::new();
         // special tags are handled seperatly; -> legacy code I'm too lazy to fix.
         if let Ok(lines) = file_lines {
             for line in lines {
                 if let Ok(task) = line {
+                    change_usr_pos.push(String::new());
                     // Setting up individual tasks for interrigation
                     let made_task: TaskDecoder = TaskDecoder::new(task);
                     // Extracting gui state from data
@@ -817,6 +821,7 @@ impl TaskWidget {
             self.most_used_project_tags = word_counts(temp_p_search_tags);
             self.most_used_context_tags = word_counts(temp_c_search_tags);
             self.most_used_special_tags = word_counts(temp_s_search_tags);
+            self.usr_change_pos_in = change_usr_pos;
         }
     }
     /// This gui function  creates the main window with the title, author, version. And
@@ -1039,6 +1044,7 @@ impl TaskWidget {
                                     let mut out = String::new();
                                     for entry in tag {
                                         out.push_str(&entry);
+                                        out.push_str(" ");
                                     }
                                     self.project_tags_vec.insert(index, out);
                                 },
@@ -1049,6 +1055,7 @@ impl TaskWidget {
                                     let mut out = String::new();
                                     for entry in tag {
                                         out.push_str(&entry);
+                                        out.push_str(" ");
                                     }
                                     self.context_tags_vec.insert(index, out);
                                 },
@@ -1059,6 +1066,7 @@ impl TaskWidget {
                                     let mut out = String::new();
                                     for entry in tag {
                                         out.push_str(&entry);
+                                        out.push_str(" ");
                                     }
                                     self.special_tags_vec.insert(index, out);
                                 },
