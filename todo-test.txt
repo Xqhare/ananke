@@ -15,7 +15,7 @@
 (B) Outline chapter 5 +Novel @Computer
 () Plan backyard herb garden  @Home
 () Pick up milk  @GroceryStore
-() Research self-publishing services +Novel @Computer
+() Choose self-publishing services +Novel @Computer
 () 2023-11-18 Clean bathroom +Chores @home
 () 2023-11-20 Office Mail package +Post @errands
 () 2023-11-21 Finish reading book +Learning @personal
@@ -54,7 +54,7 @@ x () Buy milk, eggs, and bread +Groceries
 x () Return books +Library @errands
 x () Fix leaky faucet +Repairs
 x () Set goals for the next months +Goals @personal
-x (B) Outline chapter 5 +Novel @Computer
+x (B) Outline chapter 4 +Novel @Computer
 x () Research self-publishing services +Novel @Computer
 x () Download Todo.txt mobile app  @Phone
 x (A) 2023-11-20 2021-03-22 Call boss  @work
