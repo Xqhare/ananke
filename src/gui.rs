@@ -339,7 +339,7 @@ impl Default for TaskWidget {
                 for touple in searchable_special_tags.clone() {
                     for tag in touple {
                         temp_s_search_tags.push_str(&tag.0);
-                        // temp_c_search_tags.push_str(" ");
+                        temp_s_search_tags.push_str(": ");
                     }
                 }
                 most_used_special_tags = word_counts(temp_s_search_tags);
@@ -785,7 +785,7 @@ impl TaskWidget {
             for touple in searchable_special_tags.clone() {
                 for tag in touple {
                     temp_s_search_tags.push_str(&tag.0);
-                    // temp_c_search_tags.push_str(" ");
+                    temp_s_search_tags.push_str(": ");
                 }
             }
             self.tasks_vec = output;
@@ -1234,7 +1234,6 @@ impl TaskWidget {
                 });
                 // WIP: most used tags
                 // creating the most used tags:
-                // Project tags
                 ui.horizontal(|ui: &mut Ui| {
                     ui.label("Most used project tags:");
                     // I'm are going to use buttons! -> they don't need Appstate
@@ -1247,8 +1246,26 @@ impl TaskWidget {
                         }
                     }
                 });
-                ui.label("Most used context tags:");
-                ui.label("Most used special tags:");
+                ui.horizontal(|ui: &mut Ui| {
+                    ui.label("Most used context tags:");
+                    for entry in &self.most_used_context_tags {
+                        let search_tag_button = ui.button(format!("{}", entry.0));
+                        if search_tag_button.clicked() {
+                            self.usr_search_context_tags_in = entry.0.clone();
+                            self.workaround_search_context_tags = true;
+                        }
+                    }
+                });
+                ui.horizontal(|ui: &mut Ui| {
+                    ui.label("Most used special tag keys:");
+                    for entry in &self.most_used_special_tags {
+                        let search_tag_button = ui.button(format!("{}", entry.0));
+                        if search_tag_button.clicked() {
+                            self.usr_search_special_tags_in = entry.0.clone();
+                            self.workaround_search_special_tags = true;
+                        }
+                    }
+                });
             }
             // Shows the about text
             if self.show_main_panel_about_text {
