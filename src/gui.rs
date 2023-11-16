@@ -1,15 +1,12 @@
-use std::io;
 use chrono::{Utc, Datelike};
 use unicode_segmentation::UnicodeSegmentation;
-use std::path::{Path, PathBuf};
-use std::io::{BufReader, BufRead};
-use std::fs::File;
+use std::path::PathBuf;
 use eframe::egui::{Grid, ScrollArea, Area};
 use eframe::emath::Align2;
 use eframe::epaint::Vec2;
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
-use crate::{check_for_persistant_appstate, create_persistant_appstate, word_counts};
+use crate::{check_for_persistant_appstate, create_persistant_appstate, word_counts, read_lines};
 use crate::task::{TaskDecoder, TaskEncoder};
 
 /// The author of the package.
@@ -20,7 +17,6 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 const NAME: &str = env!("CARGO_PKG_NAME");
 
 // TaskWidget is really the App itself
-
 /// `TaskWidget` contains the App state, and can be thought of like the root of the entire App.
 #[derive(Clone)]
 pub struct TaskWidget {
@@ -133,8 +129,17 @@ pub struct TaskWidget {
     /// Special:Tags
     /// to search`.
     usr_search_special_tags_in: String,
+    /// Saves all project tags, ordered by frequency.
+    /// Holds a `Vec` of `touples`, each `touple` contains a word and a number.
+    /// The number is the amount of times the word was found.
     most_used_project_tags: Vec<(String, usize)>,
+    /// Saves all context tags, ordered by frequency.
+    /// Holds a `Vec` of `touples`, each `touple` contains a word and a number.
+    /// The number is the amount of times the word was found.
     most_used_context_tags: Vec<(String, usize)>,
+    /// Saves all special tag keys, ordered by frequency.
+    /// Holds a `Vec` of `touples`, each `touple` contains a word and a number.
+    /// The number is the amount of times the word was found.
     most_used_special_tags: Vec<(String, usize)>,
     /// Workaround to show different content, here the help and about text. Default `false`.
     show_main_panel_about_text: bool,
@@ -156,8 +161,11 @@ pub struct TaskWidget {
     show_no_results_found_text: bool,
     /// Workaround to show the "Saving done!" dialoge after a failed search. Default `false`.
     show_saving_sucess_text: bool,
+    /// Workaround to search for tags that are filled in by ananke itself.
     workaround_search_project_tags: bool,
+    /// Workaround to search for tags that are filled in by ananke itself.
     workaround_search_context_tags: bool,
+    /// Workaround to search for tags that are filled in by ananke itself.
     workaround_search_special_tags: bool,
 }
 
@@ -195,11 +203,10 @@ impl Default for TaskWidget {
         let mut most_used_project_tags: Vec<(String, usize)> = Vec::new();
         let mut most_used_context_tags: Vec<(String, usize)> = Vec::new();
         let mut most_used_special_tags: Vec<(String, usize)> = Vec::new();
-
         let now = Utc::now();
         let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
         let appstate = check_for_persistant_appstate();
-        let tester = Self::read_lines(appstate.1.clone());
+        let tester = read_lines(appstate.1.clone());
         let mut out_test = PathBuf::new();
         if let Ok(lines) = tester {
             for thing in lines {
@@ -211,8 +218,7 @@ impl Default for TaskWidget {
         }
         if appstate.0 {
             path_out = out_test.clone();
-            let file_lines = Self::read_lines(out_test);
-            
+            let file_lines = read_lines(out_test);
             if let Ok(lines) = file_lines {
                 for line in lines {
                     if let Ok(task) = line {
@@ -455,6 +461,15 @@ impl TaskWidget {
         }
         self.sorted_tasks_indices = output_indices;
     }
+    /// This helper function is called when the user has entered a `String` into the special tag
+    /// search box. It reads out the input, decodes it and saves the indices of the hits. 
+    ///
+    /// ## Technical info
+    /// Each entered search term is checked against each key of any task special tag. Hits are
+    /// recorded.
+    /// If the struct member `sort_tasks_indices` is filled, I truncate, as this search has
+    /// priority over the booleans; They will be called anyway after, and handle the prefilled
+    /// struct member already.
     fn search_special_tags(&mut self) {
         let mut output_indices: Vec<usize> = Vec::new();
         let mut counter: usize = 0;
@@ -646,7 +661,7 @@ impl TaskWidget {
     /// This support function updates the contents of `TaskWidget` to the one's at the supplied path.
     fn update_from_path(&mut self, path: PathBuf) {
         let path_out: PathBuf = path.clone();
-        let file_lines = Self::read_lines(path);
+        let file_lines = read_lines(path);
         let mut output: Vec<TaskDecoder> = Vec::new();
         let mut completed: Vec<bool> = Vec::new();
         let mut priority: Vec<String> = Vec::new();
@@ -803,11 +818,6 @@ impl TaskWidget {
             self.most_used_context_tags = word_counts(temp_c_search_tags);
             self.most_used_special_tags = word_counts(temp_s_search_tags);
         }
-    }
-    /// This helper function reads a file by line from a supplied path (could be an &str of the absolute or relative path for examle).
-    fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
-        let file = File::open(filename)?;
-        Ok(BufReader::new(file).lines())
     }
     /// This gui function  creates the main window with the title, author, version. And
     /// everything it contains.
@@ -1232,7 +1242,6 @@ impl TaskWidget {
                         ui.label("");
                     }
                 });
-                // WIP: most used tags
                 // creating the most used tags:
                 ui.horizontal(|ui: &mut Ui| {
                     ui.label("Most used project tags:");
@@ -1291,7 +1300,7 @@ impl TaskWidget {
                 ui.separator();
                 ui.heading("Licenses");
                 ui.hyperlink_to(format!("egui licensed under the MIT-License"), "https://github.com/emilk/egui/blob/master/LICENSE-MIT");
-                    }
+            }
             // display the main task scrollable area.
             if self.show_task_scroll_area {
                 ScrollArea::vertical().show(ui, |ui| {
@@ -1405,7 +1414,7 @@ impl TaskWidget {
                         };
                         self.delete_task_touple = (delete_entry, delete_pos);
                     });
-            });
+                });
             };
         });
     }
@@ -1435,6 +1444,7 @@ impl App for TaskWidget {
     /// It should be thought of as the rectangle that the app renders in.
     /// It takes over after being indirectly called in `gui.rs::main()`.
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
+        // First task deletion
         if self.delete_task_touple.0 {
             let mut counter: usize = 0;
             for pos in &mut self.delete_task_touple.1 {
@@ -1456,6 +1466,7 @@ impl App for TaskWidget {
                 self.delete_task_touple = empty_touple_out;
             }
         }
+        // Then task changing
         if self.change_task_touple.0 {
             let mut counter: usize = 0;
             for element in &mut self.change_task_touple.1 {
@@ -1488,6 +1499,7 @@ impl App for TaskWidget {
                 self.change_task_touple = empty_task_touple;
             }
         }
+        // Now I draw the panel with updated data.
         self.main_panel(ctx, frame);
     }
 }

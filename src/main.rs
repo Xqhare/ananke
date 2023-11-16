@@ -6,7 +6,7 @@
 //!
 //! [`github`]: https://github.com/Xqhare/ananke
 
-use std::{path::PathBuf, fs::File, ffi::OsString, io::Write, os::unix::prelude::OsStrExt, collections::HashMap};
+use std::{path::{Path, PathBuf}, fs::File, ffi::OsString, io::Write, os::unix::prelude::OsStrExt, collections::HashMap, io::{BufReader, BufRead}, io, };
 
 /// Contains the Appstate, rendering, styling and saving.
 mod gui;
@@ -96,3 +96,9 @@ pub fn word_counts(input: String) -> Vec<(String, usize)> {
     word_count_vec.sort_by(|a, b| b.1.cmp(&a.1));
     return word_count_vec;
 }
+/// This helper function reads a file by line from a supplied path (could be an &str of the absolute or relative path for examle).
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
+    let file = File::open(filename)?;
+    Ok(BufReader::new(file).lines())
+}
+
