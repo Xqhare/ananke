@@ -6,7 +6,7 @@
 //!
 //! [`github`]: https://github.com/Xqhare/ananke
 
-use std::{path::PathBuf, fs::File, ffi::OsString, io::Write, os::unix::prelude::OsStrExt};
+use std::{path::PathBuf, fs::File, ffi::OsString, io::Write, os::unix::prelude::OsStrExt, collections::HashMap};
 
 /// Contains the Appstate, rendering, styling and saving.
 mod gui;
@@ -67,7 +67,7 @@ pub fn check_for_persistant_appstate() -> (bool, PathBuf) {
         _ => return (false, appstate_dir_pathbuf),
     };
 }
-/// creates a file, and writes the data needed for the persistant appstate, in this case only the
+/// Creates a file, and writes the data needed for the persistant appstate, in this case only the
 /// path to the todo.txt file of the user. Takes in the path (filename) and thing to be written,
 /// the todo file path.
 pub fn create_persistant_appstate(full_appstate_path_name: PathBuf, todo_file_path: PathBuf) {
@@ -75,4 +75,24 @@ pub fn create_persistant_appstate(full_appstate_path_name: PathBuf, todo_file_pa
     let out = todo_file_path.into_os_string();
     let _ignore_errot = new_appstate.write_all(out.as_bytes());
 }
-
+/// Takes in a `String` and returns a Vector containing all words and the amount of times they were
+/// used ordered by that amount.
+///
+/// ## Info
+/// This is the first time I used an `HashMap`, so this explanation could be wrong:
+/// 
+/// ### Explanation
+/// The input is split by whitespace, and then put as a key into the `HashMap`. The `or_insert` part counts
+/// up if a key inside this map already exists and the count is put inside the `HashMap` aswell.
+/// The `HashMap` is then collected into a `Vec` filled with the `touples` of the `String` with its
+/// amount. 
+/// That `Vec` is then sorted by the amount.
+pub fn word_counts(input: String) -> Vec<(String, usize)> {
+    let mut word_counts = HashMap::new();
+    for word in input.split_whitespace() {
+        word_counts.entry(word).or_insert(0) += 1;
+    }
+    let mut word_count_vec: Vec<(String, usize)> = word_counts.into_iter().collect();
+    word_count_vec.sort_by(|a, b| b.1.cmp(&a.1));
+    return word_count_vec;
+}
