@@ -424,7 +424,28 @@ impl TaskWidget {
         self.sorted_tasks_indices = output_indices;
     }
     fn search_special_tags(&mut self) {
-        
+        let mut output_indices: Vec<usize> = Vec::new();
+        let mut counter: usize = 0;
+        let mut last_hit_index: usize = 0;
+        for search_term in &self.search_special_tags {
+            for vector in &self.searchable_special_tags {
+                for entry in vector {
+                    if entry.0.contains(search_term.0.as_str()) {
+                        // Check if task has the same word twice
+                        if output_indices.len() < 1 {
+                            output_indices.push(counter);
+                            last_hit_index = counter;
+                        }
+                        if last_hit_index != counter {
+                            output_indices.push(counter);
+                            last_hit_index = counter;
+                        }
+                    }
+                }
+                counter += 1;
+            }
+        }
+        self.sorted_tasks_indices = output_indices;
     }
     /// This helper function, sorts all taskes by completion / creation date / priority.Any
     /// combination of the three is valid, with completion being always first, then creation
@@ -1142,7 +1163,7 @@ impl TaskWidget {
                             }
                         }
                         self.search_special_tags = split_usr_search.clone();
-                        println!("{:?}", split_usr_search);
+                        self.search_special_tags();
                     }
                     ui.label("");
                     ui.end_row();
