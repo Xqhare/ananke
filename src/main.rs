@@ -88,9 +88,9 @@ pub fn create_persistant_appstate(full_appstate_path_name: PathBuf, todo_file_pa
 /// amount. 
 /// That `Vec` is then sorted by the amount.
 pub fn word_counts(input: String) -> Vec<(String, usize)> {
-    let mut word_counts = HashMap::new();
+    let mut word_counts: HashMap<String, usize> = HashMap::new();
     for word in input.split_whitespace() {
-        word_counts.entry(word).or_insert(0) += 1;
+        *word_counts.entry(word.to_string()).or_insert(0) += 1;
     }
     let mut word_count_vec: Vec<(String, usize)> = word_counts.into_iter().collect();
     word_count_vec.sort_by(|a, b| b.1.cmp(&a.1));
