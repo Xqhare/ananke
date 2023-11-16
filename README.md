@@ -55,3 +55,8 @@ The name Ananke is a reverse acronym: Ananke Never Abandons Needs Known Early.
 ### Windows
 
 Ananke wasn't designed to work with the windows backend, and was never tested to work there. It might, but it probably wont. Good luck!
+
+## Usage
+
+Ananke has a built in help page, where most of the application as well as the concept of a todo.txt file is explained.
+There are more help texts in other submenus of Ananke.
