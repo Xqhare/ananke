@@ -181,7 +181,7 @@ impl Default for TaskWidget {
         let mut project_tags: Vec<String> = Vec::new();
         let mut context_tags: Vec<String> = Vec::new();
         let mut special_tags: Vec<String> = Vec::new();
-        let mut empty_vec_string: Vec<String> = Vec::new();
+        let empty_vec_string: Vec<String> = Vec::new();
         let mut searchable_special_tags: Vec<Vec<(String, String)>> = Vec::new();
         let mut searchable_project_tags: Vec<Vec<String>> = Vec::new();
         let mut searchable_context_tags: Vec<Vec<String>> = Vec::new();
@@ -205,7 +205,6 @@ impl Default for TaskWidget {
             let file_lines = Self::read_lines(out_test);
             
             if let Ok(lines) = file_lines {
-                let mut temp_special_tag_var: Vec<(String, String)> = Vec::new();
                 for line in lines {
                     if let Ok(task) = line {
                         // Setting up individual tasks for interrigation
@@ -322,6 +321,9 @@ impl Default for TaskWidget {
 /// This implementation of `TaskWidget` really is only for helper, support, breakup functions, or for
 /// gui functions that cannot be implemented in the implementation of `egui::App` for `TaskWidget`.
 impl TaskWidget {
+    // NOTE the text searching currently overwrites each other, meaning that for just the last
+    // used enterd field any search is returned; All other input is ignored, exept for the
+    // boolean search.
     /// This helper function is called when the user has entered a `String` into the text
     /// search box. It reads out the input, decodes it and saves the indices of the hits. 
     ///
@@ -355,10 +357,19 @@ impl TaskWidget {
         }
         self.sorted_tasks_indices = output_indices;
     }
+    /// This helper function is called when the user has entered a `String` into the project tag
+    /// search box. It reads out the input, decodes it and saves the indices of the hits. 
+    ///
+    /// ## Technical info
+    /// Each entered search term is checked against each member of any task project tag. Hits are
+    /// recorded.
+    /// If the struct member `sort_tasks_indices` is filled, I truncate, as this search has
+    /// priority over the booleans; They will be called anyway after, and handle the prefilled
+    /// struct member already.
     fn sort_project_tags(&mut self) {
         let mut output_indices: Vec<usize> = Vec::new();
         let mut counter: usize = 0;
-        let mut temp_count: usize = 0;
+        let mut last_hit_index: usize = 0;
         for search_term in &self.search_project_tags {
             for vector in &self.searchable_project_tags {
                 for entry in vector {
@@ -366,11 +377,44 @@ impl TaskWidget {
                         // Check if task has the same word twice
                         if output_indices.len() < 1 {
                             output_indices.push(counter);
-                            temp_count = counter;
+                            last_hit_index = counter;
                         }
-                        if temp_count != counter {
+                        if last_hit_index != counter {
                             output_indices.push(counter);
-                            temp_count = counter;
+                            last_hit_index = counter;
+                        }
+                    }
+                }
+                counter += 1;
+            }
+        }
+        self.sorted_tasks_indices = output_indices;
+    }
+    /// This helper function is called when the user has entered a `String` into the context tag
+    /// search box. It reads out the input, decodes it and saves the indices of the hits. 
+    ///
+    /// ## Technical info
+    /// Each entered search term is checked against each member of any task context tag. Hits are
+    /// recorded.
+    /// If the struct member `sort_tasks_indices` is filled, I truncate, as this search has
+    /// priority over the booleans; They will be called anyway after, and handle the prefilled
+    /// struct member already.
+    fn sort_context_tags(&mut self) {
+        let mut output_indices: Vec<usize> = Vec::new();
+        let mut counter: usize = 0;
+        let mut last_hit_index: usize = 0;
+        for search_term in &self.search_context_tags {
+            for vector in &self.searchable_context_tags {
+                for entry in vector {
+                    if entry.contains(search_term.as_str()) {
+                        // Check if task has the same word twice
+                        if output_indices.len() < 1 {
+                            output_indices.push(counter);
+                            last_hit_index = counter;
+                        }
+                        if last_hit_index != counter {
+                            output_indices.push(counter);
+                            last_hit_index = counter;
                         }
                     }
                 }
@@ -562,7 +606,6 @@ impl TaskWidget {
         let mut searchable_context_tags: Vec<Vec<String>> = Vec::new();
         // special tags are handled seperatly; -> legacy code I'm too lazy to fix.
         if let Ok(lines) = file_lines {
-            let mut temp_special_tag_var: Vec<(String, String)> = Vec::new();
             for line in lines {
                 if let Ok(task) = line {
                     // Setting up individual tasks for interrigation
@@ -1020,7 +1063,8 @@ impl TaskWidget {
                             self.usr_search_task_text_in = String::new();
                         }
                         self.show_no_results_found_text = false;
-                    } else if task_text_in.lost_focus() {
+                    } 
+                    if task_text_in.changed() && self.usr_search_task_text_in.len() > 0 {
                         let mut split_usr_search: Vec<String> = Vec::new();
                         for entry in self.usr_search_task_text_in.split_whitespace() {
                             split_usr_search.push(entry.to_lowercase());
@@ -1038,7 +1082,8 @@ impl TaskWidget {
                             self.usr_search_project_tags_in = String::new();
                         }
                         self.show_no_results_found_text = false;
-                    } else if project_in.lost_focus() {
+                    } 
+                    if project_in.changed() && self.usr_search_project_tags_in.len() > 0 {
                         let mut split_usr_search: Vec<String> = Vec::new();
                         for entry in self.usr_search_project_tags_in.split_whitespace() {
                             split_usr_search.push(entry.to_lowercase());
@@ -1056,13 +1101,14 @@ impl TaskWidget {
                             self.usr_search_context_tags_in = String::new();
                         }
                         self.show_no_results_found_text = false;
-                    } else if context_in.lost_focus() {
+                    } 
+                    if context_in.changed() && self.usr_search_context_tags_in.len() > 0 {
                         let mut split_usr_search: Vec<String> = Vec::new();
                         for entry in self.usr_search_context_tags_in.split_whitespace() {
                             split_usr_search.push(entry.to_lowercase());
                         }
                         self.search_context_tags = split_usr_search;
-                        // WIP self.sort_context_tags();
+                        self.sort_context_tags();
                         if self.sorted_tasks_indices.len() < 1 {
                             self.show_no_results_found_text = true;
                         }
@@ -1074,7 +1120,8 @@ impl TaskWidget {
                             self.usr_search_special_tags_in = String::new();
                         }
                         self.show_no_results_found_text = false;
-                    } else if special_in.lost_focus() {
+                    } 
+                    if special_in.changed() && self.usr_search_special_tags_in.len() > 0 {
                         println!("Lost focus!")
                     }
                     ui.label("");
