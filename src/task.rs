@@ -102,11 +102,13 @@ impl TaskDecoder {
 /// encoded from the appstate.
 #[derive(Clone)]
 struct Task {
+    /// Contains one entire row of the todo.txt file, as a single `String`.
     row: String,
 }
 
 /// It is implemented for any String of any length.
 impl Task {
+    /// Takes in a String of any length, and creates a new `Task` from it.
     fn new(input: String) -> Self {
         Self { row: input }
     }
@@ -213,7 +215,6 @@ impl TaskEncoder {
         let mut special_tag = input_task.special_tags_vec[position].clone();
         special_tag.push_str(str_spacer);
         output.push_str(&special_tag);
-        
         // Workaround to remove double spaces and trailing whitespace
         let final_out = output.replace("  ", " ").trim_end().to_string();
         return final_out;
