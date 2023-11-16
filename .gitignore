@@ -18,6 +18,7 @@ todo-test-*.txt
 ananke_*
 .anankeconfig
 old_ananke_versions/
+testing_env/
 # Added by cargo
 
 /target
