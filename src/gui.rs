@@ -9,7 +9,7 @@ use eframe::emath::Align2;
 use eframe::epaint::Vec2;
 use eframe::{run_native, App, egui::{CentralPanel, Ui}, NativeOptions};
 
-use crate::{check_for_persistant_appstate, create_persistant_appstate};
+use crate::{check_for_persistant_appstate, create_persistant_appstate, word_counts};
 use crate::task::{TaskDecoder, TaskEncoder};
 
 /// The author of the package.
@@ -133,6 +133,9 @@ pub struct TaskWidget {
     /// Special:Tags
     /// to search`.
     usr_search_special_tags_in: String,
+    most_used_project_tags: Vec<(String, usize)>,
+    most_used_context_tags: Vec<(String, usize)>,
+    most_used_special_tags: Vec<(String, usize)>,
     /// Workaround to show different content, here the help and about text. Default `false`.
     show_main_panel_about_text: bool,
     /// Workaround to show different content, here the welcome panel. Defalut `true`.
@@ -153,6 +156,9 @@ pub struct TaskWidget {
     show_no_results_found_text: bool,
     /// Workaround to show the "Saving done!" dialoge after a failed search. Default `false`.
     show_saving_sucess_text: bool,
+    workaround_search_project_tags: bool,
+    workaround_search_context_tags: bool,
+    workaround_search_special_tags: bool,
 }
 
 /// Implementing the Default value for `TaskWidget`, interrogates the task returned from the decoding
@@ -186,6 +192,9 @@ impl Default for TaskWidget {
         let mut searchable_project_tags: Vec<Vec<String>> = Vec::new();
         let mut searchable_context_tags: Vec<Vec<String>> = Vec::new();
         let mut searchable_task_text: Vec<Vec<String>> = Vec::new();
+        let mut most_used_project_tags: Vec<(String, usize)> = Vec::new();
+        let mut most_used_context_tags: Vec<(String, usize)> = Vec::new();
+        let mut most_used_special_tags: Vec<(String, usize)> = Vec::new();
 
         let now = Utc::now();
         let date_today = format!("{}-{:02}-{:02}", now.year(), now.month(), now.day());
@@ -311,9 +320,32 @@ impl Default for TaskWidget {
                         output.push(made_task.clone());
                     }
                 }
+                // most used project tags
+                let mut temp_p_search_tags = String::new();
+                for tag in project_tags.clone() {
+                    temp_p_search_tags.push_str(&tag);
+                    // temp_p_search_tags.push_str(" ");
+                }
+                most_used_project_tags = word_counts(temp_p_search_tags);
+                // most used context tags
+                let mut temp_c_search_tags = String::new();
+                for tag in context_tags.clone() {
+                    temp_c_search_tags.push_str(&tag);
+                    // temp_c_search_tags.push_str(" ");
+                }
+                most_used_context_tags = word_counts(temp_c_search_tags);
+                // most used special tags
+                let mut temp_s_search_tags = String::new();
+                for touple in searchable_special_tags.clone() {
+                    for tag in touple {
+                        temp_s_search_tags.push_str(&tag.0);
+                        // temp_c_search_tags.push_str(" ");
+                    }
+                }
+                most_used_special_tags = word_counts(temp_s_search_tags);
             }
         }
-        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, search_task_text: empty_vec_string.clone(), search_project_tags: empty_vec_string.clone(), search_context_tags: empty_vec_string.clone(), usr_search_task_text_in: "Enter task text to search".to_string(), usr_search_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_search_context_tags_in: "Enter @ContextTags to search".to_string(), usr_search_special_tags_in: "Enter Special:Tags to search".to_string(), usr_search_completion: false, usr_search_create_date: false, usr_search_priority: false, search_special_tags: special_tag_touple.clone(), searchable_special_tags, sorted_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, searchable_task_text, searchable_project_tags, searchable_context_tags, };
+        return TaskWidget{tasks_vec: output, completed_vec: completed, priority_vec: priority, complete_date_vec: complete_date, create_date_vec:creation_date, task_text: task_str_out, project_tags_vec: project_tags, context_tags_vec: context_tags, special_tags_vec: special_tags, date: date_today.clone(), file_path: path_out, new_create_date_in: date_today.clone(), new_priority_in: empty_string.clone(), new_task_text_in: empty_string.clone(), new_edit_ui_date: false, delete_task_touple: delete_touple, usr_change_pos_in: empty_vec_string.clone(), change_task_touple: change_touple, show_main_panel_about_text: false, show_main_panel_welcome_text: true, show_task_scroll_area: true, show_file_drop_area: false, show_main_task_creation_area: false, show_task_deletion_collum: false, show_task_move_pos_collum: false, show_main_sorting_area: false, search_task_text: empty_vec_string.clone(), search_project_tags: empty_vec_string.clone(), search_context_tags: empty_vec_string.clone(), usr_search_task_text_in: "Enter task text to search".to_string(), usr_search_project_tags_in: "Enter +ProjectTags to search".to_string(), usr_search_context_tags_in: "Enter @ContextTags to search".to_string(), usr_search_special_tags_in: "Enter Special:Tags to search".to_string(), usr_search_completion: false, usr_search_create_date: false, usr_search_priority: false, search_special_tags: special_tag_touple.clone(), searchable_special_tags, sorted_tasks_indices: sorting_indices, show_no_results_found_text: false, show_saving_sucess_text: false, searchable_task_text, searchable_project_tags, searchable_context_tags, most_used_project_tags, most_used_context_tags, most_used_special_tags, workaround_search_project_tags: false, workaround_search_context_tags: false, workaround_search_special_tags: false, };
     }
     
 }
@@ -736,17 +768,40 @@ impl TaskWidget {
                     output.push(made_task.clone());
                 }
             }
-        self.tasks_vec = output;
-        self.file_path = path_out;
-        self.completed_vec = completed;
-        self.create_date_vec = creation_date;
-        self.complete_date_vec = complete_date;
-        self.priority_vec = priority;
-        self.task_text = task_str_out;
-        self.project_tags_vec = project_tags;
-        self.context_tags_vec = context_tags;
-        self.special_tags_vec = special_tags;
-        self.searchable_special_tags = searchable_special_tags;
+            // most used project tags
+            let mut temp_p_search_tags = String::new();
+            for tag in project_tags.clone() {
+                temp_p_search_tags.push_str(&tag);
+                // temp_p_search_tags.push_str(" ");
+            }
+            // most used context tags
+            let mut temp_c_search_tags = String::new();
+            for tag in context_tags.clone() {
+                temp_c_search_tags.push_str(&tag);
+                // temp_c_search_tags.push_str(" ");
+            }
+            // most used special tags
+            let mut temp_s_search_tags = String::new();
+            for touple in searchable_special_tags.clone() {
+                for tag in touple {
+                    temp_s_search_tags.push_str(&tag.0);
+                    // temp_c_search_tags.push_str(" ");
+                }
+            }
+            self.tasks_vec = output;
+            self.file_path = path_out;
+            self.completed_vec = completed;
+            self.create_date_vec = creation_date;
+            self.complete_date_vec = complete_date;
+            self.priority_vec = priority;
+            self.task_text = task_str_out;
+            self.project_tags_vec = project_tags;
+            self.context_tags_vec = context_tags;
+            self.special_tags_vec = special_tags;
+            self.searchable_special_tags = searchable_special_tags;
+            self.most_used_project_tags = word_counts(temp_p_search_tags);
+            self.most_used_context_tags = word_counts(temp_c_search_tags);
+            self.most_used_special_tags = word_counts(temp_s_search_tags);
         }
     }
     /// This helper function reads a file by line from a supplied path (could be an &str of the absolute or relative path for examle).
@@ -1107,7 +1162,7 @@ impl TaskWidget {
                         }
                         self.show_no_results_found_text = false;
                     } 
-                    if project_in.changed() && self.usr_search_project_tags_in.len() > 0 {
+                    if project_in.changed() && self.usr_search_project_tags_in.len() > 0 || self.workaround_search_project_tags {
                         let mut split_usr_search: Vec<String> = Vec::new();
                         for entry in self.usr_search_project_tags_in.split_whitespace() {
                             split_usr_search.push(entry.to_lowercase());
@@ -1117,6 +1172,7 @@ impl TaskWidget {
                         if self.sorted_tasks_indices.len() < 1 {
                             self.show_no_results_found_text = true;
                         }
+                        self.workaround_search_project_tags = false;
                     }
                     // context tag search
                     let context_in = ui.text_edit_multiline(&mut self.usr_search_context_tags_in);
@@ -1126,7 +1182,7 @@ impl TaskWidget {
                         }
                         self.show_no_results_found_text = false;
                     } 
-                    if context_in.changed() && self.usr_search_context_tags_in.len() > 0 {
+                    if context_in.changed() && self.usr_search_context_tags_in.len() > 0 || self.workaround_search_context_tags {
                         let mut split_usr_search: Vec<String> = Vec::new();
                         for entry in self.usr_search_context_tags_in.split_whitespace() {
                             split_usr_search.push(entry.to_lowercase());
@@ -1136,6 +1192,7 @@ impl TaskWidget {
                         if self.sorted_tasks_indices.len() < 1 {
                             self.show_no_results_found_text = true;
                         }
+                        self.workaround_search_context_tags = false;
                     }
                     // speacial tag search
                     let special_in = ui.text_edit_multiline(&mut self.usr_search_special_tags_in);
@@ -1145,7 +1202,7 @@ impl TaskWidget {
                         }
                         self.show_no_results_found_text = false;
                     } 
-                    if special_in.changed() && self.usr_search_special_tags_in.len() > 0 {
+                    if special_in.changed() && self.usr_search_special_tags_in.len() > 0 || self.workaround_search_special_tags {
                         let mut split_usr_search: Vec<(String, String)> = Vec::new();
                         for entry in self.usr_search_special_tags_in.split_whitespace(){
                             let temp_split = entry.split(":");
@@ -1164,6 +1221,10 @@ impl TaskWidget {
                         }
                         self.search_special_tags = split_usr_search.clone();
                         self.search_special_tags();
+                        if self.sorted_tasks_indices.len() < 1 {
+                            self.show_no_results_found_text = true;
+                        }
+                        self.workaround_search_special_tags = false;
                     }
                     ui.label("");
                     ui.end_row();
@@ -1172,13 +1233,19 @@ impl TaskWidget {
                     }
                 });
                 // WIP: most used tags
-                let mut temp = false;
+                // creating the most used tags:
+                // Project tags
                 ui.horizontal(|ui: &mut Ui| {
-                    ui.label("Most used context tags:");
+                    ui.label("Most used project tags:");
                     // I'm are going to use buttons! -> they don't need Appstate
                     // allocation
-                    ui.button("the first tag");
-                    ui.checkbox(&mut temp, "second tag");
+                    for entry in &self.most_used_project_tags {
+                        let search_tag_button = ui.button(format!("{}", entry.0));
+                        if search_tag_button.clicked() {
+                            self.usr_search_project_tags_in = entry.0.clone();
+                            self.workaround_search_project_tags = true;
+                        }
+                    }
                 });
                 ui.label("Most used context tags:");
                 ui.label("Most used special tags:");
