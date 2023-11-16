@@ -423,6 +423,9 @@ impl TaskWidget {
         }
         self.sorted_tasks_indices = output_indices;
     }
+    fn search_special_tags(&mut self) {
+        
+    }
     /// This helper function, sorts all taskes by completion / creation date / priority.Any
     /// combination of the three is valid, with completion being always first, then creation
     /// date, then priority sorting.
@@ -1122,7 +1125,24 @@ impl TaskWidget {
                         self.show_no_results_found_text = false;
                     } 
                     if special_in.changed() && self.usr_search_special_tags_in.len() > 0 {
-                        println!("Lost focus!")
+                        let mut split_usr_search: Vec<(String, String)> = Vec::new();
+                        for entry in self.usr_search_special_tags_in.split_whitespace(){
+                            let temp_split = entry.split(":");
+                            if temp_split.clone().count() == 1 {
+                                let key = temp_split.clone().nth(0).unwrap().to_string();
+                                let text = "".to_string();
+                                let out = (key, text);
+                                split_usr_search.push(out);
+                            }
+                            if temp_split.clone().count() == 2 {
+                                let key = temp_split.clone().nth(0).unwrap().to_string();
+                                let text = temp_split.clone().last().unwrap().to_string();
+                                let out = (key, text);
+                                split_usr_search.push(out);
+                            }
+                        }
+                        self.search_special_tags = split_usr_search.clone();
+                        println!("{:?}", split_usr_search);
                     }
                     ui.label("");
                     ui.end_row();
