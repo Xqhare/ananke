@@ -817,6 +817,9 @@ impl TaskWidget {
             self.project_tags_vec = project_tags;
             self.context_tags_vec = context_tags;
             self.special_tags_vec = special_tags;
+            self.searchable_task_text = searchable_task_text;
+            self.searchable_project_tags = searchable_project_tags;
+            self.searchable_context_tags = searchable_context_tags;
             self.searchable_special_tags = searchable_special_tags;
             self.most_used_project_tags = word_counts(temp_p_search_tags);
             self.most_used_context_tags = word_counts(temp_c_search_tags);
