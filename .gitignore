@@ -13,11 +13,13 @@ target/
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
 
+known-bugs.txt
 todo-test-*.txt
 *.vim
 ananke_*
 .anankeconfig
 old_ananke_versions/
+ananke_releases/
 testing_env/
 # Added by cargo
 
