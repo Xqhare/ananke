@@ -1485,7 +1485,7 @@ impl App for TaskWidget {
                 self.tasks_vec.insert(new_pos, task_widget);
                 let completion = self.completed_vec.remove(old_pos);
                 self.completed_vec.insert(new_pos, completion);
-                let prio = self.priority_vec.remove(new_pos);
+                let prio = self.priority_vec.remove(old_pos);
                 self.priority_vec.insert(new_pos, prio);
                 let comp_date = self.complete_date_vec.remove(old_pos);
                 self.complete_date_vec.insert(new_pos, comp_date);
