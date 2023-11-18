@@ -957,10 +957,10 @@ impl TaskWidget {
             // Show the task creation area
             if self.show_main_task_creation_area {
                 Grid::new(ui_main_area.id).show(ui, |ui: &mut Ui| {
-                    let vec_strings = vec!["Create new task".to_string(), "Inception  date".to_string(), "Priority".to_string(), "Task".to_string()];
+                    let vec_strings = vec!["How to create a new task".to_string(), "Inception  date".to_string(), "Priority".to_string(), "Task".to_string()];
                     // Drawing the collum names
                     for mut name in vec_strings {
-                        if name.contains("Create new task") {
+                        if name.contains("How to create a new task") {
                             let padded_name = Self::left_and_rightpad(25, name.clone());
                             name = padded_name;
                         }
@@ -1040,40 +1040,70 @@ impl TaskWidget {
                                 None => self.priority_vec.insert(index, String::new()),
                             }
                             // task is always some value!
-                            self.task_text.insert(index, decoded_task.task);
+                            self.task_text.insert(index, decoded_task.task.clone());
+                            let task_split = decoded_task.task.split_whitespace();
+                            let mut task_text_split_out: Vec<String> = Vec::new();
+                            for text in task_split {
+                                task_text_split_out.push(text.to_string().to_lowercase());
+                            }
+                            self.searchable_task_text.insert(index, task_text_split_out);
                             // Da tags!
                             match decoded_task.project_tags {
                                 Some(tag) => {
                                     let mut out = String::new();
+                                    let mut searchable_project_out: Vec<String> = Vec::new();
                                     for entry in tag {
                                         out.push_str(&entry);
                                         out.push_str(" ");
+                                        searchable_project_out.push(entry.to_lowercase());
                                     }
+                                    self.searchable_project_tags.insert(index, searchable_project_out);
                                     self.project_tags_vec.insert(index, out);
                                 },
-                                None => self.project_tags_vec.insert(index, String::new()),
+                                None => {
+                                    self.project_tags_vec.insert(index, String::new());
+                                    self.searchable_project_tags.insert(index, Vec::new());
+                                },
                             }
                             match decoded_task.context_tags {
                                 Some(tag) => {
                                     let mut out = String::new();
+                                    let mut searchable_context_out: Vec<String> = Vec::new();
                                     for entry in tag {
                                         out.push_str(&entry);
                                         out.push_str(" ");
+                                        searchable_context_out.push(entry.to_lowercase());
                                     }
+                                    self.searchable_context_tags.insert(index, searchable_context_out);
                                     self.context_tags_vec.insert(index, out);
                                 },
-                                None => self.context_tags_vec.insert(index, String::new()),
+                                None => {
+                                    self.context_tags_vec.insert(index, String::new());
+                                    self.searchable_context_tags.insert(index, Vec::new());
+                                },
                             }
                             match decoded_task.special_tags {
                                 Some(tag) => {
                                     let mut out = String::new();
+                                    let mut special_decoded_out: Vec<(String, String)> = Vec::new();
                                     for entry in tag {
                                         out.push_str(&entry);
                                         out.push_str(" ");
+                                        let mut special_decoded = (String::new(), String::new());
+                                        let temp_val = entry.split_once(":");
+                                        if temp_val.is_some() {
+                                            special_decoded.0.push_str(temp_val.unwrap().0.to_lowercase().as_str());
+                                            special_decoded.1.push_str(temp_val.unwrap().1.to_lowercase().as_str());
+                                            special_decoded_out.push(special_decoded.clone());
+                                        }
                                     }
                                     self.special_tags_vec.insert(index, out);
+                                    self.searchable_special_tags.insert(index, special_decoded_out);
                                 },
-                                None => self.special_tags_vec.insert(index, String::new()),
+                                None => {
+                                    self.special_tags_vec.insert(index, String::new());
+                                    self.searchable_special_tags.insert(index, Vec::new());
+                                },
                             }
                             // after saving logic, clear new task:
                             self.new_create_date_in = self.date.clone();
