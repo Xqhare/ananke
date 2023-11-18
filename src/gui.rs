@@ -1162,6 +1162,8 @@ impl TaskWidget {
                     if ui.radio(self.usr_search_completion, "By completion").clicked() {
                         if !self.usr_search_completion {
                             self.usr_search_completion = true;
+                            self.usr_search_priority = false;
+                            self.usr_search_create_date = false;
                         } else {
                             self.usr_search_completion = false;
                         }
@@ -1169,6 +1171,8 @@ impl TaskWidget {
                     if ui.radio(self.usr_search_create_date, "By inception date").clicked() {
                         if !self.usr_search_create_date {
                             self.usr_search_create_date = true;
+                            self.usr_search_priority = false;
+                            self.usr_search_completion = false;
                         } else {
                             self.usr_search_create_date = false;
                         }
@@ -1176,6 +1180,8 @@ impl TaskWidget {
                     if ui.radio(self.usr_search_priority, "By priority").clicked() {
                         if !self.usr_search_priority {
                             self.usr_search_priority = true;
+                            self.usr_search_completion = false;
+                            self.usr_search_create_date = false;
                         } else {
                             self.usr_search_priority = false;
                         }
@@ -1426,6 +1432,7 @@ impl TaskWidget {
                                     self.usr_change_pos_in[entry] = String::new();
                                 }
                             } else {
+                                // If the completion checkbox is checked, JUST the bool for completion AND the completion date (if applicable) are inserted, at their correct indicies, for the current task.
                                 if ui.checkbox(&mut self.completed_vec[entry], text).clicked() {
                                     if self.completed_vec[entry] {
                                         if !self.create_date_vec[entry].is_empty() {
@@ -1499,6 +1506,10 @@ impl App for TaskWidget {
                 self.project_tags_vec.remove(position);
                 self.context_tags_vec.remove(position);
                 self.special_tags_vec.remove(position);
+                self.searchable_task_text.remove(position);
+                self.searchable_project_tags.remove(position);
+                self.searchable_context_tags.remove(position);
+                self.searchable_special_tags.remove(position);
                 counter += 1;
             }
             // resetting the delete task buffer
@@ -1532,6 +1543,14 @@ impl App for TaskWidget {
                 self.context_tags_vec.insert(new_pos, context_tag);
                 let special_tag = self.special_tags_vec.remove(old_pos);
                 self.special_tags_vec.insert(new_pos, special_tag);
+                let searchable_text = self.searchable_task_text.remove(old_pos);
+                self.searchable_task_text.insert(new_pos, searchable_text);
+                let searchable_project_tags = self.searchable_project_tags.remove(old_pos);
+                self.searchable_project_tags.insert(new_pos, searchable_project_tags);
+                let searchable_context_tags = self.searchable_context_tags.remove(old_pos);
+                self.searchable_context_tags.insert(new_pos, searchable_context_tags);
+                let searchable_special_tags = self.searchable_special_tags.remove(old_pos);
+                self.searchable_special_tags.insert(new_pos, searchable_special_tags);
                 counter += 1;
             }
             // resetting the move buffer
