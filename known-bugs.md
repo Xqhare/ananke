@@ -5,6 +5,7 @@
 - Deletion doesn't touch the searchable state as well.
 
 ## OPEN
+- boolean search should reset if another bool search was on
 
 
 # Major
