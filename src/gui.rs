@@ -835,7 +835,6 @@ impl TaskWidget {
             self.most_used_context_tags = word_counts(temp_c_search_tags);
             self.most_used_special_tags = word_counts(temp_s_search_tags);
             self.usr_change_pos_in = change_usr_pos;
-            self.file_path_all.push(path_out);
         }
     }
     /// This gui function  creates the main window with the title, author, version. And
@@ -850,13 +849,27 @@ impl TaskWidget {
                         let _ = TaskEncoder::save(temp, path);
                         self.show_saving_sucess_text = true;
                     }
-                    if ui.button("Choose file location").clicked() {
+                    if ui.button("Add todo file").clicked() {
                         if self.show_file_drop_area {
                             self.show_file_drop_area = false;
                         } else {
                             self.show_file_drop_area = true;
                         }
                     }
+                    ui.menu_button("Change file", |ui| {
+                        ui.label("Main file:");
+                        if ui.button(self.file_path.clone().file_name().unwrap().to_str().unwrap()).clicked() {
+                            self.update_from_path(self.file_path.clone());
+                        }
+                        ui.separator();
+                        ui.label("All known files:");
+                        for file in self.file_path_all.clone() {
+                            let name = file.file_name().unwrap();
+                            if ui.button(name.to_str().unwrap()).clicked() {
+                                self.update_from_path(file);
+                            }
+                        }
+                    });
                 });
                 ui.menu_button("Task", |ui| {
                     if ui.button("New").clicked() {
@@ -965,6 +978,7 @@ impl TaskWidget {
                                         self.update_from_path(thing.path.clone().expect("No Path!"));
                                         create_persistant_appstate(appstate_answer.1.clone(), self.file_path_all.clone());
                                         println!("APPCONFIG WROTE");
+                                        self.file_path_all.push(thing.path.clone().expect("No Path!"));
                                     }
                                     self.show_file_drop_area = false;
                                 }
