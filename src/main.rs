@@ -70,10 +70,15 @@ pub fn check_for_persistant_appstate() -> (bool, PathBuf) {
 /// Creates a file, and writes the data needed for the persistant appstate, in this case only the
 /// path to the todo.txt file of the user. Takes in the path (filename) and thing to be written,
 /// the todo file path.
-pub fn create_persistant_appstate(full_appstate_path_name: PathBuf, todo_file_path: PathBuf) {
+pub fn create_persistant_appstate(full_appstate_path_name: PathBuf, todo_file_paths: Vec<PathBuf>) {
     let mut new_appstate = File::create(full_appstate_path_name).expect("Something went terribly wrong, main.rs create_persistant_appstate");
-    let out = todo_file_path.into_os_string();
-    let _ignore_errot = new_appstate.write_all(out.as_bytes());
+    for path in todo_file_paths {
+        let out = path.into_os_string();
+        let _ignore_error0 = new_appstate.write_all(out.as_bytes());
+        // for the newline
+        let _ignore_error1 = new_appstate.write_all(b"\n");
+    }
+    
 }
 /// Takes in a `String` and returns a Vector containing all words and the amount of times they were
 /// used ordered by that amount.
