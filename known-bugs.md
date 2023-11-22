@@ -6,6 +6,7 @@
 
 ## OPEN
 - boolean search should reset if another bool search was on
+- New file location doesn't work if a completly empty file was dropped in OR .anankeconfig exists but is empty. -> Does work if new task was made.
 
 
 # Major
