@@ -862,13 +862,23 @@ impl TaskWidget {
                             self.update_from_path(self.file_path.clone());
                         }
                         ui.separator();
-                        ui.label("All known files:");
-                        for file in self.file_path_all.clone() {
-                            let name = file.file_name().unwrap();
-                            if ui.button(name.to_str().unwrap()).clicked() {
-                                self.update_from_path(file);
+                        let all_files_ui = ui.label("All known files:");
+                        Grid::new(all_files_ui.id).show(ui, |ui: &mut Ui| {
+                            let mut counter: usize = 0;
+                            for file in self.file_path_all.clone() {
+                                let name = file.file_name().unwrap();
+                                if ui.button(name.to_str().unwrap()).clicked() {
+                                    self.update_from_path(file);
+                                }
+                                if ui.button("delete").clicked() {
+                                    self.file_path_all.remove(counter);
+                                    let persistant_appstate = check_for_persistant_appstate();
+                                    create_persistant_appstate(persistant_appstate.1, self.file_path_all.clone());
+                                }
+                                ui.end_row();
+                                counter += 1;
                             }
-                        }
+                        });
                     });
                 });
                 ui.menu_button("Task", |ui| {
@@ -1195,6 +1205,7 @@ impl TaskWidget {
                         self.usr_search_special_tags_in = "Enter Special:Tags to search".to_string();
                         self.sorted_tasks_indices = Vec::new();
                     }
+                    ui.separator();
                     // Radio buttons for true / false sorting.
                     // By completion: First by if completed, then by completion date if
                     // applicable.
@@ -1230,6 +1241,7 @@ impl TaskWidget {
                         self.sort_true_false();
                         self.show_no_results_found_text = false;
                     }
+                    ui.separator();
                     // Text input for field searching
                     // Task text search
                     let task_text_in = ui.text_edit_multiline(&mut self.usr_search_task_text_in);
@@ -1329,6 +1341,7 @@ impl TaskWidget {
                     }
                 });
                 // creating the most used tags:
+                ui.separator();
                 ui.horizontal(|ui: &mut Ui| {
                     ui.label("Most used project tags:");
                     // I'm are going to use buttons! -> they don't need Appstate
@@ -1341,6 +1354,7 @@ impl TaskWidget {
                         }
                     }
                 });
+                ui.separator();
                 ui.horizontal(|ui: &mut Ui| {
                     ui.label("Most used context tags:");
                     for entry in &self.most_used_context_tags {
@@ -1351,6 +1365,7 @@ impl TaskWidget {
                         }
                     }
                 });
+                ui.separator();
                 ui.horizontal(|ui: &mut Ui| {
                     ui.label("Most used special tag keys:");
                     for entry in &self.most_used_special_tags {
