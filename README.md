@@ -5,6 +5,7 @@ Built on a solid foundation of cutting-edge technologies, rust; Ananke is design
 
 ## Features
 - Support for the todo.txt format
+- Support for more than one todo.txt file location at a time; Switchable from Ananke itself!
 - Natural language processing for task creation and editing
 - Task completion
 - Task sorting
@@ -60,7 +61,3 @@ Ananke wasn't designed to work with the windows backend, and was never tested to
 
 Ananke has a built in help page, where most of the application as well as the concept of a todo.txt file is explained.
 There are more help texts in other submenus of Ananke.
-
-## Future Plans
-- Support for more than one todo.txt file location at a time; Switchable from Ananke itself!
-
