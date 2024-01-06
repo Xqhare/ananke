@@ -57,6 +57,15 @@ The name Ananke is a reverse acronym: Ananke Never Abandons Needs Known Early.
 
 Ananke wasn't designed to work with the windows backend, and was never tested to work there. It might, but it probably wont. Good luck!
 
+
+## Acknowledgments
+Thanks to the open-source community for providing invaluable tools and libraries.
+Used in this project:
+- [unicode-segmentation](https://crates.io/crates/unicode-segmentation)
+- [chrono](https://crates.io/crates/chrono)
+- [mexprp](https://crates.io/crates/mexprp/0.1.0)
+- [eframe](https://crates.io/crates/eframe)
+
 ## Usage
 
 Ananke has a built in help page, where most of the application as well as the concept of a todo.txt file is explained.
