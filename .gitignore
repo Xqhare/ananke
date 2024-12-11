@@ -21,6 +21,7 @@ ananke_*
 old_ananke_versions/
 ananke_releases/
 testing_env/
+test_todo-lists/
 # Added by cargo
 
 /target
