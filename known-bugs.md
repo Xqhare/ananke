@@ -19,4 +19,4 @@
 		-> I am not updating the searchable appstate when creating a new task!
 
 ## OPEN
-
+- text search is broken again. This time ananke crashes when a string is search that does not exist.
