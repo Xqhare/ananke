@@ -69,5 +69,5 @@ Thanks to the open-source community for providing invaluable tools and libraries
 Used in this project:
 - [unicode-segmentation](https://crates.io/crates/unicode-segmentation)
 - [chrono](https://crates.io/crates/chrono)
-- [mexprp](https://crates.io/crates/mexprp/0.1.0)
+- [mexprp](https://crates.io/crates/mexprp)
 - [eframe](https://crates.io/crates/eframe)
