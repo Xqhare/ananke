@@ -1,6 +1,9 @@
+use gui::gui_startup;
+
 mod gui;
 mod util;
+mod state;
 
 fn main() {
-    println!("Hello, world!");
+    gui_startup();
 }
