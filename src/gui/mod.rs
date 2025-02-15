@@ -15,7 +15,7 @@ fn get_app_name() -> String {
     app_name
 }
 
-pub fn gui_startup() {
+pub fn gui_startup(persistent_state: PersistentState) {
     let app_name = get_app_name();
-    let state = State::new(PersistentState::new());
+    let state = State::new(persistent_state);
 }
