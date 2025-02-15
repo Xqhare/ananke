@@ -135,12 +135,14 @@ version = "3.0.0"
 dependencies = [
  "anansi",
  "eframe",
+ "horae",
+ "nabu",
 ]
 
 [[package]]
 name = "anansi"
-version = "0.2.0"
-source = "git+https://github.com/Xqhare/anansi#3cc5974119ddfcee1e9943fb140469594b1f36a0"
+version = "0.2.1"
+source = "git+https://github.com/Xqhare/anansi#0d7e4c25e21853d10ac6350d95360636e13e0f58"
 
 [[package]]
 name = "android-activity"
@@ -568,9 +570,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.13"
+version = "1.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7777341816418c02e033934a09f20dc0ccaf65a5201ef8a450ae0105a573fda"
+checksum = "0c3d1b2e905a3a7b00a6141adb0e4c0bb941d11caf55349d863942a1cc44e3c9"
 dependencies = [
  "jobserver",
  "libc",
@@ -971,9 +973,9 @@ checksum = "9343d356d7cac894dacafc161b4654e0881301097bdf32a122ed503d97cb94b6"
 
 [[package]]
 name = "equivalent"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
+checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "errno"
@@ -1358,6 +1360,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "horae"
+version = "0.6.3"
+source = "git+https://github.com/Xqhare/horae#7a14aed02c302e0157e5be32dcc8362339cd3b84"
+
+[[package]]
 name = "icu_collections"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1710,6 +1717,11 @@ dependencies = [
  "adler2",
  "simd-adler32",
 ]
+
+[[package]]
+name = "nabu"
+version = "1.3.4"
+source = "git+https://github.com/Xqhare/nabu#cffa87162cb198bc82eb1997c5c959d1646cc561"
 
 [[package]]
 name = "naga"

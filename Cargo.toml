@@ -5,4 +5,6 @@ edition = "2021"
 
 [dependencies]
 anansi = { git = "https://github.com/Xqhare/anansi" }
+nabu = { git = "https://github.com/Xqhare/nabu" }
+horae = { git = "https://github.com/Xqhare/horae" }
 eframe = "0"
