@@ -8,3 +8,16 @@ anansi = { git = "https://github.com/Xqhare/anansi" }
 nabu = { git = "https://github.com/Xqhare/nabu" }
 horae = { git = "https://github.com/Xqhare/horae" }
 eframe = "0"
+# for more perfomance a custom allocator could be used:
+# mimalloc = "0"
+# then add to main.rs:
+# #[global_allocator]
+# static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
+# all performance, high comp time, smallish size
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = "s"
+panic = "abort"
+strip = "symbols"
