@@ -1,18 +1,20 @@
 use horae::TimeZone;
 use nabu::{Object, XffValue};
 
-use crate::error::AnankeError;
+use crate::{error::AnankeError, PERSISTENT_STATE_PATH};
 
 pub struct PersistentState {
     pub timezone: TimeZone,
-    pub file_path: String,
+    pub todo_file_path: String,
+    pub config_file_path: String,
 }
 
 impl PersistentState {
-    pub fn new(timezone: TimeZone, file_path: String) -> PersistentState {
+    pub fn new(timezone: TimeZone, todo_file_path: String, config_file_path: String) -> PersistentState {
         PersistentState {
             timezone,
-            file_path,
+            todo_file_path,
+            config_file_path,
         }
     }
 
@@ -34,7 +36,8 @@ impl PersistentState {
             let timezone = TimeZone::from(obj.get("timezone").unwrap().into_string().unwrap());
             Ok(PersistentState {
                 timezone,
-                file_path: obj.get("file_path").unwrap().into_string().unwrap(),
+                todo_file_path: obj.get("todo_file_path").unwrap().into_string().unwrap(),
+                config_file_path: PERSISTENT_STATE_PATH.to_string(),
             })
         } else {
             Err(AnankeError::new(
@@ -47,7 +50,7 @@ impl PersistentState {
 
     pub fn make_persistent(&self) -> Result<(), AnankeError> {
         let serialized = self.serialize();
-        let save_state = nabu::serde::write(&self.file_path, serialized);
+        let save_state = nabu::serde::write(&self.config_file_path, serialized);
         if let Err(e) = save_state {
             Err(AnankeError::new(
                 "Writing file error",
@@ -62,7 +65,7 @@ impl PersistentState {
     fn serialize(&self) -> XffValue {
         let mut obj = Object::new();
         obj.insert("timezone", self.timezone.to_string());
-        obj.insert("file_path", self.file_path.clone());
+        obj.insert("todo_file_path", self.todo_file_path.clone());
 
         XffValue::from(obj)
     }
@@ -72,7 +75,8 @@ impl Default for PersistentState {
     fn default() -> PersistentState {
         PersistentState {
             timezone: TimeZone::CoordinatedUniversalTime,
-            file_path: "todo.txt".to_string(),
+            todo_file_path: "todo.txt".to_string(),
+            config_file_path: PERSISTENT_STATE_PATH.to_string(),
         }
     }
 }
