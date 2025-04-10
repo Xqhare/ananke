@@ -14,7 +14,7 @@ impl Ananke {
                     self.state.error = Some(AnankeError::new("Test title", "Test message", Some("Test context")));
                 };
                 if ui.button("Load").clicked() {
-                    
+                    self.load_file = true;
                 }
                 if ui.button("Save").clicked() {
                     self.save();

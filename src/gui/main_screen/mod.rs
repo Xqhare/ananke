@@ -1,3 +1,4 @@
+mod load_file;
 
 use eframe::egui::{CentralPanel, ScrollArea};
 
