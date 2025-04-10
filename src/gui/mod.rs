@@ -8,9 +8,11 @@ mod menu_bar;
 mod error;
 
 pub struct Ananke {
-    pub first_run: bool,
-    pub state: State,
-    pub entire_list: List,
+    first_run: bool,
+    load_file: bool,
+    state: State,
+    entire_list: List,
+    display_list: List,
 }
 
 impl App for Ananke {
@@ -21,6 +23,9 @@ impl App for Ananke {
             if self.first_run {
                 // TODO: Add a welcome screen
                 self.first_run = false;
+            } else if self.load_file {
+                self.menu_bar(ctx, frame);
+                self.load_file(ctx, frame);
             } else {
                 self.menu_bar(ctx, frame);
                 self.main_screen(ctx, frame);
@@ -40,7 +45,8 @@ pub fn gui_startup(startup_state: StartupState) {
     let app_name = get_app_name();
     let state = State::new(startup_state.persistent_state);
     let native_options = NativeOptions::default();
+    let list = List::new(state.persistent_state.todo_file_path.clone());
     run_native(&app_name, native_options, Box::new(|_| {
-        Ok(Box::<Ananke>::new(Ananke { entire_list: List::new(state.persistent_state.todo_file_path.clone()), first_run: startup_state.first_run, state }))
+        Ok(Box::<Ananke>::new(Ananke { entire_list: list.clone(), first_run: startup_state.first_run, state, load_file: false , display_list: list}))
     })).unwrap()
 }
