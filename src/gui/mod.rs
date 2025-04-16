@@ -1,7 +1,7 @@
 use anansi::List;
-use eframe::{egui::{CentralPanel, TextBuffer}, run_native, App, NativeOptions};
+use eframe::{run_native, App, NativeOptions};
 
-use crate::state::{startup_state::StartupState, State};
+use crate::{state::{startup_state::StartupState, State}, util::NewTask};
 
 mod main_screen;
 mod menu_bar;
@@ -13,6 +13,7 @@ pub struct Ananke {
     state: State,
     entire_list: List,
     display_list: List,
+    new_task: NewTask,
 }
 
 impl App for Ananke {
@@ -47,6 +48,6 @@ pub fn gui_startup(startup_state: StartupState) {
     let native_options = NativeOptions::default();
     let list = List::new(state.persistent_state.todo_file_path.clone());
     run_native(&app_name, native_options, Box::new(|_| {
-        Ok(Box::<Ananke>::new(Ananke { entire_list: list.clone(), first_run: startup_state.first_run, state, load_file: false , display_list: list}))
+        Ok(Box::<Ananke>::new(Ananke { entire_list: list.clone(), first_run: startup_state.first_run, load_file: false , display_list: list, new_task: NewTask::new(state.persistent_state.timezone), state }))
     })).unwrap()
 }
