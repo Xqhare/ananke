@@ -1,5 +1,5 @@
 use anansi::List;
-use eframe::{run_native, App, NativeOptions};
+use eframe::{egui::Vec2, run_native, App, NativeOptions};
 
 use crate::{state::{startup_state::StartupState, State}, util::NewTask};
 
@@ -45,7 +45,8 @@ fn get_app_name() -> String {
 pub fn gui_startup(startup_state: StartupState) {
     let app_name = get_app_name();
     let state = State::new(startup_state.persistent_state);
-    let native_options = NativeOptions::default();
+    let mut native_options = NativeOptions::default();
+    native_options.viewport.inner_size = Some(Vec2::new(900.0, 600.0));
     let list = List::new(state.persistent_state.todo_file_path.clone());
     run_native(&app_name, native_options, Box::new(|_| {
         Ok(Box::<Ananke>::new(Ananke { entire_list: list.clone(), first_run: startup_state.first_run, load_file: false , display_list: list, new_task: NewTask::new(state.persistent_state.timezone), state }))
