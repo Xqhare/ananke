@@ -1,8 +1,8 @@
-use eframe::egui::{ComboBox, Response, Ui, Vec2};
+use eframe::egui::{ComboBox, Response, Ui};
 
 use crate::{gui::Ananke, util::NewTask};
 
-const PRIOS: [&str; 27] = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+pub const PRIOS: [&str; 27] = ["", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 
 impl Ananke {
     pub fn editor(&mut self, ui: &mut eframe::egui::Ui) -> Response {
