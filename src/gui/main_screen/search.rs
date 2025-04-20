@@ -1,6 +1,7 @@
-use eframe::egui::{ComboBox, Response, Sides, Ui};
+use eframe::egui::{ComboBox, Response, Ui};
 
-use crate::{gui::Ananke, state::{Show, SortBy}};
+use crate::{gui::Ananke, state::{SearchState, Show}};
+use anansi::{SortBy, Task};
 
 use super::editor::PRIOS;
 
@@ -61,12 +62,21 @@ impl Ananke {
                 ui.separator();
                 ui.horizontal(|ui| {
                     if ui.button("Reset").clicked() {
+                        self.state.search_state = SearchState::default();
                     };
                     if ui.button("Search").clicked() {
+                        self.execute_search();
                     };
                 });
             });
         }).response
+    }
+
+    fn execute_search(&mut self) {
+        let mut tmp_search_state: Vec<Task> = Vec::new();
+        if !self.state.search_state.search_text.is_empty() {
+            let t = self.entire_list.b
+        }
     }
 }
 
