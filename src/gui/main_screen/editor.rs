@@ -16,14 +16,35 @@ impl Ananke {
                             }
                         }
                     });
-                    ui.add_sized((75.0, ui.available_height()), |ui: &mut Ui| {
-                        ui.text_edit_singleline(&mut self.new_task.inception_date)
+                    ui.add_enabled(self.state.gui_state.editor_gui_state.edit_date, |ui: &mut Ui| {
+                        ui.add_sized((75.0, ui.available_height()), |ui: &mut Ui| {
+                            ui.text_edit_singleline(&mut self.new_task.inception_date)
+                        })
                     });
-                    if ui.button("Edit date").clicked() {
-                    };
-                    if ui.button("Reset").clicked() {
-                        self.new_task = NewTask::new(self.state.persistent_state.timezone);
-                    };
+                    if self.state.gui_state.editor_gui_state.edit_date {
+                        if ui.button("Lock date").clicked() {
+                            self.state.gui_state.editor_gui_state.edit_date = false;
+                        }
+                    } else {
+                        if ui.button("Edit date").clicked() {
+                            self.state.gui_state.editor_gui_state.edit_date = true;
+                        }
+                    }
+                    if !self.state.gui_state.editor_gui_state.confirm_reset {
+                        if ui.button("Reset").clicked() {
+                            self.state.gui_state.editor_gui_state.confirm_reset = true;
+                        };
+                    } else {
+                        ui.separator();
+                        if ui.button("Confirm").clicked() {
+                            self.state.gui_state.editor_gui_state.confirm_reset = false;
+                            self.new_task = NewTask::new(self.state.persistent_state.timezone);
+                        };
+                        if ui.button("Cancel").clicked() {
+                            self.state.gui_state.editor_gui_state.confirm_reset = false;
+                        };
+                        ui.separator();
+                    }
                     if ui.button("Create").clicked() {
                         self.entire_list.add(format!("({}) {} {}", self.new_task.prio, self.new_task.inception_date, self.new_task.text));
                         self.new_task = NewTask::new(self.state.persistent_state.timezone);
