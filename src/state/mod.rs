@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use persistent_state::PersistentState;
+use anansi::SortBy;
 
 use crate::error::AnankeError;
 
@@ -11,6 +12,7 @@ pub struct State {
     pub persistent_state: PersistentState,
     pub search_state: SearchState,
     pub error: Option<AnankeError>,
+    pub gui_state: GuiState,
 }
 
 impl State {
@@ -19,6 +21,33 @@ impl State {
             persistent_state,
             error: None,
             search_state: SearchState::default(),
+            gui_state: GuiState::default(),
+        }
+    }
+}
+
+pub struct GuiState {
+    pub editor_gui_state: EditorGuiState,
+}
+
+impl GuiState {
+    pub fn default() -> GuiState {
+        GuiState {
+            editor_gui_state: EditorGuiState::default(),
+        }
+    }
+}
+
+pub struct EditorGuiState {
+    pub edit_date: bool,
+    pub confirm_reset: bool,
+}
+
+impl EditorGuiState {
+    pub fn default() -> EditorGuiState {
+        EditorGuiState {
+            edit_date: false,
+            confirm_reset: false,
         }
     }
 }
@@ -43,33 +72,6 @@ impl SearchState {
             search_project: String::default(),
             search_context: String::default(),
             search_special: String::default(),
-        }
-    }
-}
-
-#[derive(PartialEq, Clone, Copy)]
-pub enum SortBy {
-    InceptionDate,
-    CompletionDate,
-    Priority,
-}
-
-impl Into<String> for SortBy {
-    fn into(self) -> String {
-        match self {
-            SortBy::InceptionDate => "Inception date".to_string(),
-            SortBy::CompletionDate => "Completion date".to_string(),
-            SortBy::Priority => "Priority".to_string(),
-        }
-    }
-}
-
-impl Display for SortBy {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SortBy::InceptionDate => write!(f, "Inception date"),
-            SortBy::CompletionDate => write!(f, "Completion date"),
-            SortBy::Priority => write!(f, "Priority"),
         }
     }
 }
