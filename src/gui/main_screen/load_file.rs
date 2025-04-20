@@ -1,3 +1,4 @@
+use anansi::List;
 use eframe::egui::CentralPanel;
 
 use crate::{error::AnankeError, gui::Ananke};
@@ -30,6 +31,12 @@ impl Ananke {
                                     break;
                                 } else {
                                     self.state.persistent_state.todo_file_path = path_str.unwrap().to_string();
+                                    let new_list = List::new(path_str.unwrap());
+                                    self.display_list = new_list.clone();
+                                    self.entire_list = new_list;
+                                    if let Err(e) = self.state.persistent_state.make_persistent() {
+                                        self.state.error = Some(e);
+                                    }
                                     self.load_file = false;
                                 }
                             }
