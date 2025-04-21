@@ -1,3 +1,5 @@
+use anansi::AnansiError;
+
 
 #[derive(Debug)]
 pub struct AnankeError {
@@ -12,6 +14,16 @@ impl AnankeError {
             title: title.into(),
             message: message.into(),
             context: context.map(|s| s.into()),
+        }
+    }
+}
+
+impl From<AnansiError> for AnankeError {
+    fn from(e: AnansiError) -> Self {
+        AnankeError {
+            title: e.title,
+            message: e.message,
+            context: None,
         }
     }
 }
