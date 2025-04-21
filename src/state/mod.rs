@@ -65,8 +65,8 @@ pub struct SearchState {
 impl SearchState {
     pub fn default() -> SearchState {
         SearchState {
-            show: Show::All,
-            sort_by: SortBy::InceptionDate,
+            show: Show::Open,
+            sort_by: SortBy::Priority,
             search_text: String::default(),
             search_priority: String::default(),
             search_project: String::default(),
