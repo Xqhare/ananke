@@ -1,6 +1,7 @@
 mod load_file;
 mod editor;
 mod search;
+mod task_list;
 
 use eframe::egui::{CentralPanel, Grid, ScrollArea, Ui};
 
@@ -20,5 +21,4 @@ impl Ananke {
         });
     }
 
-    fn task_list(&mut self, ui: &mut eframe::egui::Ui) {}
 }
