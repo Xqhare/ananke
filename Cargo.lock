@@ -142,7 +142,7 @@ dependencies = [
 [[package]]
 name = "anansi"
 version = "0.3.2"
-source = "git+https://github.com/Xqhare/anansi#74d49c022212a95f5575328ead75682798e7fc56"
+source = "git+https://github.com/Xqhare/anansi#7547665e6e63836c85702f082e379583837af4a9"
 
 [[package]]
 name = "android-activity"
