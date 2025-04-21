@@ -1,7 +1,7 @@
 use eframe::egui::{ComboBox, Response, Ui};
 
 use crate::{gui::Ananke, state::{SearchState, Show}};
-use anansi::{SortBy, Task};
+use anansi::{List, SortBy};
 
 use super::editor::PRIOS;
 
@@ -63,6 +63,7 @@ impl Ananke {
                 ui.horizontal(|ui| {
                     if ui.button("Reset").clicked() {
                         self.state.search_state = SearchState::default();
+                        self.execute_search();
                     };
                     if ui.button("Search").clicked() {
                         self.execute_search();
@@ -73,10 +74,32 @@ impl Ananke {
     }
 
     fn execute_search(&mut self) {
-        let mut tmp_search_state: Vec<Task> = Vec::new();
+        let mut tmp_search_state: List = self.entire_list.clone();
         if !self.state.search_state.search_text.is_empty() {
-            let t = self.entire_list.b
+            tmp_search_state = tmp_search_state.by_text(self.state.search_state.search_text.clone()).into();
         }
+        if !self.state.search_state.search_project.is_empty() {
+            tmp_search_state = tmp_search_state.by_project(self.state.search_state.search_project.clone()).into();
+        }
+        if !self.state.search_state.search_context.is_empty() {
+            tmp_search_state = tmp_search_state.by_context(self.state.search_state.search_context.clone()).into();
+        }
+        if !self.state.search_state.search_special.is_empty() {
+            tmp_search_state = tmp_search_state.by_special(self.state.search_state.search_special.clone()).into();
+        }
+        if !self.state.search_state.search_priority.is_empty() {
+            tmp_search_state = tmp_search_state.by_prio(self.state.search_state.search_priority.clone()).into();
+        }
+
+        tmp_search_state = tmp_search_state.sort(self.state.search_state.sort_by).into();
+
+        match self.state.search_state.show {
+            Show::All => (),
+            Show::Open => tmp_search_state = tmp_search_state.open().into(),
+            Show::Done => tmp_search_state = tmp_search_state.done().into(),
+        }
+
+        self.display_list = tmp_search_state;
     }
 }
 
