@@ -131,7 +131,7 @@ dependencies = [
 
 [[package]]
 name = "ananke"
-version = "3.0.1"
+version = "3.0.0"
 dependencies = [
  "anansi",
  "eframe",
@@ -142,7 +142,7 @@ dependencies = [
 [[package]]
 name = "anansi"
 version = "0.3.2"
-source = "git+https://github.com/Xqhare/anansi#7547665e6e63836c85702f082e379583837af4a9"
+source = "git+https://github.com/Xqhare/anansi#f7ea35521ac967fd9e81a6287d0832e7c92f6349"
 
 [[package]]
 name = "android-activity"
