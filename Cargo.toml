@@ -2,6 +2,7 @@
 name = "ananke"
 version = "3.0.0"
 edition = "2021"
+rust-version = "1.93.0"
 
 [dependencies]
 anansi = { git = "https://github.com/Xqhare/anansi" }
