@@ -1,36 +1,33 @@
-use anansi::AnansiError;
+use std::fmt;
 
+pub type AnankeResult<T> = Result<T, AnankeError>;
 
 #[derive(Debug)]
-pub struct AnankeError {
-    pub title: String,
-    pub message: String,
-    pub context: Option<String>,
+pub enum AnankeError {
+    Generic(String),
+    Io(std::io::Error),
 }
 
-impl AnankeError {
-    pub fn new<S: Into<String>>(title: S, message: S, context: Option<S>) -> AnankeError {
-        AnankeError {
-            title: title.into(),
-            message: message.into(),
-            context: context.map(|s| s.into()),
+impl fmt::Display for AnankeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AnankeError::Generic(msg) => write!(f, "{}", msg),
+            AnankeError::Io(err) => write!(f, "{}", err),
         }
     }
 }
 
-impl From<AnansiError> for AnankeError {
-    fn from(e: AnansiError) -> Self {
-        AnankeError {
-            title: e.title,
-            message: e.message,
-            context: None,
+impl std::error::Error for AnankeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            AnankeError::Generic(_) => None,
+            AnankeError::Io(err) => Some(err),
         }
     }
 }
 
-// Display trait
-impl std::fmt::Display for AnankeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}\n{} - {}", self.title, self.message, self.context.clone().unwrap_or("".to_string()))
+impl From<std::io::Error> for AnankeError {
+    fn from(err: std::io::Error) -> Self {
+        AnankeError::Io(err)
     }
 }

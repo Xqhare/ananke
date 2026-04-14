@@ -1,21 +1,17 @@
 [package]
 name = "ananke"
 version = "3.0.0"
-edition = "2021"
+edition = "2024"
 rust-version = "1.93.0"
 
 [dependencies]
 anansi = { git = "https://github.com/Xqhare/anansi" }
 nabu = { git = "https://github.com/Xqhare/nabu" }
 horae = { git = "https://github.com/Xqhare/horae" }
-eframe = "0"
-# for more perfomance a custom allocator could be used:
-# mimalloc = "0"
-# then add to main.rs:
-# #[global_allocator]
-# static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
+talos = { git = "https://github.com/Xqhare/talos" }
+areia = { git = "https://github.com/Xqhare/areia" }
+brigid = { git = "https://github.com/Xqhare/brigid" }
 
-# all performance, high comp time, smallish size
 [profile.release]
 codegen-units = 1
 lto = "fat"
