@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 
 use talos::{atlases::LayoutAtlas, layout::Rect, render::Canvas};
 
+use crate::startup::Environment;
+
 /// Renders the application
 ///
 /// # Arguments
@@ -15,7 +17,7 @@ pub fn render_app(
     layout_atlas: &LayoutAtlas,
     clickable_regions: &mut BTreeMap<String, Rect>,
     last_frame_dur: u128,
-    path_amount: usize,
+    env: &Environment,
 ) -> BTreeMap<String, Rect> {
     todo!()
 }

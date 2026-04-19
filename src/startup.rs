@@ -18,19 +18,23 @@ use crate::{
     state::make_state,
 };
 
-pub struct State {
+pub struct Environment<'a> {
     pub list: List,
-    pub env: Environment,
+    pub disk_env: DiskEnvironment,
     pub styles: StyleAtlas,
+    pub path_amount: usize,
+    pub gen_layout: Layout,
+    pub states: BTreeMap<String, States<'a>>,
+    pub run: bool,
 }
 
-pub struct Environment {
+pub struct DiskEnvironment {
     pub brigid: Brigid,
 }
 
-impl Environment {
-    pub fn new() -> AnankeResult<Environment> {
-        Ok(Environment {
+impl DiskEnvironment {
+    pub fn new() -> AnankeResult<DiskEnvironment> {
+        Ok(DiskEnvironment {
             brigid: setup_env()?,
         })
     }
@@ -44,46 +48,55 @@ impl Environment {
 /// - `Talos` - The talos instance
 /// - `Layout` - The layout of the application
 /// - `usize` - The amount of paths
-pub fn startup<'a>() -> AnankeResult<(State, Talos, Layout, usize, BTreeMap<String, States<'a>>)> {
-    let env = Environment::new()?;
-    let (list, amount) = if let Some(conf) = env.brigid.get_file("config.xff")?.into_object() {
-        if let Some(paths) = conf.get("paths") {
-            if let Some(ary) = paths.as_array() {
-                if ary.len() == 0 {
-                    Err(AnankeError::Startup("Paths array is empty".to_string()))?
-                } else {
-                    let path = &ary[ary.len().saturating_sub(1)];
-                    if let Some(path) = path.as_string() {
-                        (
-                            List::load(path).map_err(|e| Into::<AnankeError>::into(e))?,
-                            ary.len(),
-                        )
+pub fn startup<'a>() -> AnankeResult<(Environment<'a>, Talos)> {
+    let disk_env = DiskEnvironment::new()?;
+    let (list, path_amount) =
+        if let Some(conf) = disk_env.brigid.get_file("config.xff")?.into_object() {
+            if let Some(paths) = conf.get("paths") {
+                if let Some(ary) = paths.as_array() {
+                    if ary.len() == 0 {
+                        Err(AnankeError::Startup("Paths array is empty".to_string()))?
                     } else {
-                        Err(AnankeError::Startup(
-                            "Paths array first element is not a string".to_string(),
-                        ))?
+                        let path = &ary[ary.len().saturating_sub(1)];
+                        if let Some(path) = path.as_string() {
+                            (
+                                List::load(path).map_err(|e| Into::<AnankeError>::into(e))?,
+                                ary.len(),
+                            )
+                        } else {
+                            Err(AnankeError::Startup(
+                                "Paths array first element is not a string".to_string(),
+                            ))?
+                        }
                     }
+                } else {
+                    Err(AnankeError::Startup("Paths is not an array".to_string()))?
                 }
             } else {
-                Err(AnankeError::Startup("Paths is not an array".to_string()))?
+                // Should never happen because of fallback in Brigid
+                Err(AnankeError::Startup("Missing paths".to_string()))?
             }
         } else {
             // Should never happen because of fallback in Brigid
-            Err(AnankeError::Startup("Missing paths".to_string()))?
-        }
-    } else {
-        // Should never happen because of fallback in Brigid
-        Err(AnankeError::Startup("Missing config.xff".to_string()))?
-    };
+            Err(AnankeError::Startup("Missing config.xff".to_string()))?
+        };
     let styles = style_atlas();
     let talos = Talos::builder()
         .build()
         .map_err(|e| Into::<AnankeError>::into(e))?;
-    let layout = make_layout();
-    let state = State { list, env, styles };
-    let widget_state = make_state(&state, amount, talos.codex());
+    let gen_layout = make_layout();
+    let states = make_state(path_amount, &list, talos.codex());
+    let env = Environment {
+        run: true,
+        list,
+        disk_env,
+        styles,
+        path_amount,
+        gen_layout,
+        states,
+    };
 
-    Ok((state, talos, layout, amount, widget_state))
+    Ok((env, talos))
 }
 
 fn style_atlas() -> StyleAtlas {
