@@ -9,5 +9,4 @@ pub fn process_input(
     env: &mut Environment,
     clickable_regions: &BTreeMap<String, Rect>,
 ) {
-    todo!()
 }

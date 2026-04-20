@@ -29,19 +29,20 @@ fn main() -> AnankeResult<()> {
 
     while env.run {
         talos.begin_frame();
-        let (canvas, _) = talos.render_ctx();
+        let (canvas, codex) = talos.render_ctx();
         let frame_layout = make_frame_layout(&canvas.size_rect(), &env.gen_layout);
 
         // TODO: Consider the ordering of rendering and processing
         // Could also process first and use the region of last frame to process clicks
         //
         // Lets keep it this way until I know why its stupid
-        clickable_regions = render_app(
+        render_app(
             canvas,
+            codex,
             &frame_layout,
             &mut clickable_regions,
             last_frame_dur,
-            &env,
+            &mut env,
         );
         process_input(
             talos.poll_input().expect("Failed to poll input"),
