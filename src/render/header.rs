@@ -105,7 +105,7 @@ fn render_header_file_menu_button(
     let mut new_file_button_state = None;
     let mut new_file_textbox_state = None;
     let mut load_file_button_state = None;
-    let mut load_file_textbox_state = None;
+    let mut load_file_sub_button_states = Vec::with_capacity(path_amount);
     let mut forget_file_button_state = None;
     let mut forget_file_sub_button_states = Vec::with_capacity(path_amount);
 
@@ -123,16 +123,16 @@ fn render_header_file_menu_button(
             "header_file_menu_sub_load_button_state" => {
                 load_file_button_state = Some(state.as_button_mut().expect("Must be a button"))
             }
-            "header_file_menu_sub_load_textbox_state" => {
-                load_file_textbox_state = Some(state.as_text_box_mut().expect("Must be a textbox"))
-            }
             "header_file_menu_sub_forget_button_state" => {
                 forget_file_button_state = Some(state.as_button_mut().expect("Must be a button"))
             }
             _ => {
                 if key.starts_with("header_file_menu_sub_forget_button_") {
-                    let button = state.as_button_mut().expect("Must be a textbox");
+                    let button = state.as_button_mut().expect("Must be a button");
                     forget_file_sub_button_states.push(button);
+                } else if key.starts_with("header_file_menu_sub_load_button_") {
+                    let button = state.as_button_mut().expect("Must be a button");
+                    load_file_sub_button_states.push(button);
                 }
             }
         }
@@ -145,7 +145,7 @@ fn render_header_file_menu_button(
     let new_file_textbox_state = new_file_textbox_state.expect("Key must exist");
     let load_file_button_state = load_file_button_state.expect("Key must exist");
     let load_file_button_clicked = load_file_button_state.clicked;
-    let load_file_textbox_state = load_file_textbox_state.expect("Key must exist");
+    debug_assert!(load_file_sub_button_states.len() == path_amount);
     let forget_file_button_state = forget_file_button_state.expect("Key must exist");
     let forget_file_button_clicked = forget_file_button_state.clicked;
     debug_assert!(forget_file_sub_button_states.len() == path_amount);
@@ -180,9 +180,13 @@ fn render_header_file_menu_button(
     new_file_textbox.style(editable_active);
     let mut new_menu = vec![new_file_textbox];
 
-    let mut load_file_textbox = TextBox::new(load_file_textbox_state);
-    load_file_textbox.style(editable_active);
-    let mut load_menu = vec![load_file_textbox];
+    let mut load_menu = Vec::with_capacity(path_amount);
+    for (index, sub_button_state) in load_file_sub_button_states.iter_mut().enumerate() {
+        let mut button = Button::new(all_paths[index].clone(), sub_button_state, codex)
+            .with_clicked_style(default_clicked_style);
+        button.style(default_style);
+        load_menu.push(button);
+    }
 
     let mut forget_menu = Vec::with_capacity(path_amount);
     for (index, sub_button_state) in forget_file_sub_button_states.iter_mut().enumerate() {
@@ -274,15 +278,17 @@ fn update_clickable_regions(
             ),
         );
         if load_file_button_clicked {
-            clickable_regions.insert(
-                "header_file_menu_sub_load_textbox".to_string(),
-                Rect::new(
-                    rect.x.saturating_add(rect.width),
-                    rect.y.saturating_add(3 * 2),
-                    rect.width,
-                    rect.height,
-                ),
-            );
+            for n in 0..path_amount {
+                clickable_regions.insert(
+                    format!("header_file_menu_sub_load_button_{}", n),
+                    Rect::new(
+                        rect.x.saturating_add(rect.width * n as u16 + 1),
+                        rect.y.saturating_add(3 * 2),
+                        rect.width,
+                        rect.height,
+                    ),
+                );
+            }
         }
         clickable_regions.insert(
             "header_file_menu_sub_forget_button".to_string(),
@@ -293,5 +299,18 @@ fn update_clickable_regions(
                 rect.height,
             ),
         );
+        if forget_file_button_clicked {
+            for n in 0..path_amount {
+                clickable_regions.insert(
+                    format!("header_file_menu_sub_forget_button_{}", n),
+                    Rect::new(
+                        rect.x.saturating_add(rect.width * n as u16 + 1),
+                        rect.y.saturating_add(3 * 3),
+                        rect.width,
+                        rect.height,
+                    ),
+                );
+            }
+        }
     }
 }

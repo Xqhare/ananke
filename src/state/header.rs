@@ -62,16 +62,16 @@ fn make_header_file_menu_state(
         States::from(button_state),
     );
     out.insert(
-        "header_file_menu_sub_load_textbox_state".to_string(),
-        States::from(path_state),
-    );
-    out.insert(
         "header_file_menu_sub_forget_button_state".to_string(),
         States::from(button_state),
     );
     for i in 0..path_amount {
         out.insert(
             format!("header_file_menu_sub_forget_button_{i}"),
+            States::from(button_state),
+        );
+        out.insert(
+            format!("header_file_menu_sub_load_button_{i}"),
             States::from(button_state),
         );
     }
