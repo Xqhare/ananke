@@ -1,14 +1,14 @@
-use std::{
-    collections::BTreeMap,
-    thread::sleep,
-    time::{Duration, Instant},
-};
+use std::{collections::BTreeMap, time::Instant};
 
 use talos::layout::Rect;
 
 use crate::{
-    error::AnankeResult, input::process_input, layout::make_frame_layout, render::render_app,
-    startup::startup, state::make_state, utils::fps_sleeper,
+    error::{AnankeError, AnankeResult},
+    input::process_input,
+    layout::make_frame_layout,
+    render::render_app,
+    startup::startup,
+    utils::fps_sleeper,
 };
 
 mod error;
@@ -20,22 +20,26 @@ mod state;
 mod utils;
 
 fn main() -> AnankeResult<()> {
+    // Create the environment, state, and determine the state and whether this is the first run
     let (mut env, mut talos) = startup()?;
 
+    // The clickable regions of the current frame
     let mut clickable_regions: BTreeMap<String, Rect> = BTreeMap::new();
 
+    // Metadata of the last frame
     let mut last_frame = Instant::now();
     let mut last_frame_dur = 0;
 
+    // Render loop
     while env.run {
+        // Reset the canvas
         talos.begin_frame();
+
+        // Construct frame dependent layout
         let (canvas, codex) = talos.render_ctx();
         let frame_layout = make_frame_layout(&canvas.size_rect(), &env.gen_layout);
 
-        // TODO: Consider the ordering of rendering and processing
-        // Could also process first and use the region of last frame to process clicks
-        //
-        // Lets keep it this way until I know why its stupid
+        // Render the app
         render_app(
             canvas,
             codex,
@@ -44,12 +48,24 @@ fn main() -> AnankeResult<()> {
             last_frame_dur,
             &mut env,
         );
+
+        // Process input (Both clicks and key events)
+        // This is also the place where state mutations happen
         process_input(
-            talos.poll_input().expect("Failed to poll input"),
+            talos
+                .poll_input()
+                .map_err(|err| Into::<AnankeError>::into(err))?,
             &mut env,
             &clickable_regions,
         );
 
+        // Actual render of the canvas to the Terminal
+        talos
+            .present()
+            .map_err(|err| Into::<AnankeError>::into(err))?;
+
+        // Sleep until next frame, if needed.
+        // Cap to specified fps
         (last_frame, last_frame_dur) = fps_sleeper(last_frame);
     }
     Ok(())

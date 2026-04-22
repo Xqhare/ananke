@@ -160,9 +160,9 @@ fn make_header_layout(header_rect: &Rect) -> Vec<(String, Rect)> {
     debug_assert!(buttons.len() == 4);
     let stats = LayoutBuilder::new()
         .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(10))
         .add_constraint(Constraint::Percentage(20))
-        .add_constraint(Constraint::Percentage(40))
-        .add_constraint(Constraint::Percentage(40))
+        .add_constraint(Constraint::Percentage(70))
         .build()
         .split(layout[1]);
     debug_assert!(stats.len() == 3);

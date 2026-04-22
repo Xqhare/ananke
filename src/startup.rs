@@ -53,7 +53,6 @@ pub fn startup<'a>() -> AnankeResult<(Environment<'a>, Talos)> {
     let (list, path_amount) =
         if let Some(conf) = disk_env.brigid.get_file("config.xff")?.into_object() {
             if let Some(paths) = conf.get("paths") {
-                println!("Starting main loop");
                 if let Some(ary) = paths.as_array() {
                     if ary.len() == 0 {
                         Err(AnankeError::Startup("Paths array is empty".to_string()))?
@@ -106,10 +105,11 @@ pub fn startup<'a>() -> AnankeResult<(Environment<'a>, Talos)> {
 
 fn style_atlas() -> StyleAtlas {
     let default_bg = Colour::Extended(Extended::TrueColour(TrueColour::RGB(
-        30, 25, 20, // Dark Grey Blue
+        12, 11, 10, // Very Dark Brown
+           // 30, 25, 20, // Brown
     )));
     let default_fg = Colour::Extended(Extended::TrueColour(TrueColour::RGB(
-        200, 170, 160, // Light Purpleish Grey
+        255, 220, 195, // Cream
     )));
     let default = Style::builder().set_bg(default_bg).set_fg(default_fg);
     let mut atlas = StyleAtlas::new(Some(default.build()));

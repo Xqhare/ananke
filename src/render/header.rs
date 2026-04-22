@@ -38,7 +38,7 @@ fn render_header_fps(
         if last_frame_dur == 0 {
             0
         } else {
-            1000 / last_frame_dur
+            1_000_000 / last_frame_dur
         }
     };
     let rect = layout_atlas.get_known_rect("header_fps");
@@ -100,8 +100,6 @@ fn render_header_file_menu_button(
     let default_clicked_style = env.styles.get_known_style("default_inverted");
     let editable_active = env.styles.get_known_style("editable_active");
 
-    clickable_regions.insert("header_file_menu_button".to_string(), rect);
-
     // Borrow checker fix: Iterate once to gather multiple mutable references from the same map.
     let mut file_button_state = None;
     let mut new_file_button_state = None;
@@ -151,6 +149,16 @@ fn render_header_file_menu_button(
     let forget_file_button_state = forget_file_button_state.expect("Key must exist");
     let forget_file_button_clicked = forget_file_button_state.clicked;
     debug_assert!(forget_file_sub_button_states.len() == path_amount);
+
+    update_clickable_regions(
+        clickable_regions,
+        rect,
+        file_button_clicked,
+        new_file_button_clicked,
+        load_file_button_clicked,
+        forget_file_button_clicked,
+        path_amount,
+    );
 
     let mut file_button =
         Button::new("File", file_button_state, codex).with_clicked_style(default_clicked_style);
@@ -222,4 +230,68 @@ fn render_header_file_menu_button(
     }
 
     file_menu_button.render(canvas, rect, codex);
+}
+
+fn update_clickable_regions(
+    clickable_regions: &mut BTreeMap<String, Rect>,
+    rect: Rect,
+    file_button_clicked: bool,
+    new_file_button_clicked: bool,
+    load_file_button_clicked: bool,
+    forget_file_button_clicked: bool,
+    path_amount: usize,
+) {
+    clickable_regions.insert("header_file_menu_button".to_string(), rect);
+
+    if file_button_clicked {
+        clickable_regions.insert(
+            "header_file_menu_sub_new_button".to_string(),
+            Rect::new(
+                rect.x,
+                rect.y.saturating_add(3 * 1),
+                rect.width,
+                rect.height,
+            ),
+        );
+        if new_file_button_clicked {
+            clickable_regions.insert(
+                "header_file_menu_sub_new_textbox".to_string(),
+                Rect::new(
+                    rect.x.saturating_add(rect.width),
+                    rect.y.saturating_add(3 * 1),
+                    rect.width,
+                    rect.height,
+                ),
+            );
+        }
+        clickable_regions.insert(
+            "header_file_menu_sub_load_button".to_string(),
+            Rect::new(
+                rect.x,
+                rect.y.saturating_add(3 * 2),
+                rect.width,
+                rect.height,
+            ),
+        );
+        if load_file_button_clicked {
+            clickable_regions.insert(
+                "header_file_menu_sub_load_textbox".to_string(),
+                Rect::new(
+                    rect.x.saturating_add(rect.width),
+                    rect.y.saturating_add(3 * 2),
+                    rect.width,
+                    rect.height,
+                ),
+            );
+        }
+        clickable_regions.insert(
+            "header_file_menu_sub_forget_button".to_string(),
+            Rect::new(
+                rect.x,
+                rect.y.saturating_add(3 * 3),
+                rect.width,
+                rect.height,
+            ),
+        );
+    }
 }

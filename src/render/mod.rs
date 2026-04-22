@@ -1,6 +1,12 @@
 use std::collections::BTreeMap;
 
-use talos::{atlases::LayoutAtlas, codex::Codex, layout::Rect, render::Canvas};
+use talos::{
+    atlases::LayoutAtlas,
+    codex::Codex,
+    layout::Rect,
+    render::Canvas,
+    widgets::{Area, traits::Widget},
+};
 
 use crate::{render::header::render_header, startup::Environment};
 
@@ -25,6 +31,12 @@ pub fn render_app(
     env: &mut Environment,
 ) {
     clickable_regions.clear();
+    let entire_canvas = canvas.size_rect();
+    let default_style = env.styles.get_default();
+    // TODO: Remove `Area` below and see exactly where I need to draw the BG manually to save on draw calls
+    Area::new()
+        .with_style(default_style)
+        .render(canvas, entire_canvas, codex);
     render_header(
         canvas,
         codex,
