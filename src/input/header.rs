@@ -138,6 +138,15 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
 
 /// Handles the mouse events for the forget button
 fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Object) {
+    // Close the forget menu
+    let button = env
+        .states
+        .get_mut("header_file_menu_sub_forget_button_state")
+        .unwrap()
+        .as_button_mut()
+        .unwrap();
+    button.clicked = false;
+
     let index = name.split("_").last().unwrap().parse::<u32>().unwrap();
     let paths_ary = obj.get_mut("paths").unwrap();
     let path = paths_ary.as_array().unwrap().get(index as usize).unwrap();
@@ -146,7 +155,8 @@ fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Objec
     // Don't forget the default list - never delete that!
     if !path.contains("/Ananke/default-list.txt") {
         // Remove the button states
-        env.states.remove_entry(name);
+        env.states
+            .remove_entry(&format!("header_file_menu_sub_forget_button_{index}"));
         env.states
             .remove_entry(&format!("header_file_menu_sub_load_button_{index}"));
 
@@ -156,7 +166,7 @@ fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Objec
         debug_assert!(paths_ary.len() > 0);
 
         // Update the environment & config
-        env.list = List::new(paths_ary.get(0).unwrap().as_string().unwrap());
+        env.list = List::load(paths_ary.get(0).unwrap().as_string().unwrap()).unwrap();
         env.path_amount -= 1;
         let _ = env
             .disk_env
@@ -187,7 +197,7 @@ fn handle_mouse_load_button(name: &str, env: &mut Environment, obj: &mut Object)
 
     // Load the new list if it's different and update the config
     if env.list.get_path() != path {
-        env.list = List::new(path);
+        env.list = List::load(path).unwrap();
     }
     let _ = env
         .disk_env

@@ -43,11 +43,11 @@ pub fn add_load_n_forget_button_states(env: &mut Environment) {
         let mut j = 0;
 
         for k in map {
-            if k.contains("header_file_menu_sub_forget_button_") {
+            if k.contains("header_file_menu_sub_forget_button_") && !k.contains("state") {
                 i += 1;
             }
             #[cfg(debug_assertions)]
-            if k.contains("header_file_menu_sub_load_button") {
+            if k.contains("header_file_menu_sub_load_button") && !k.contains("state") {
                 j += 1;
             }
         }
