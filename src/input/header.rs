@@ -8,14 +8,18 @@ use talos::{
 
 use crate::{input::Focus, startup::Environment, utils::toggle_button};
 
+/// Handles the key events for the new file text box
 pub fn handle_key_textbox_newfile(
     name: &str,
     key_event: &KeyEvent,
     env: &mut Environment,
     codex: &Codex,
 ) -> Option<()> {
+    // First get the state once
     let state = env.states.get_mut(name).unwrap().as_text_box_mut().unwrap();
     let mut content = state.text.get_content().to_string();
+
+    // Now handle the key
     match key_event.code {
         KeyCode::Enter => {
             // As there is only one text box inside the header, we don't need to check
@@ -58,6 +62,7 @@ pub fn handle_key_textbox_newfile(
     None
 }
 
+/// Handles the mouse events for the header
 pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
     match name {
         "header_file_menu_button" => {
@@ -91,6 +96,7 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
             Focus::HeaderFileNewTextBox
         }
         _ => {
+            // Handle the buttons with an arbitrary amount
             if name.contains("header_file_menu_sub_forget_button_") {
                 let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
                 let obj = path.as_object_mut().unwrap();
@@ -105,6 +111,7 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
     }
 }
 
+/// Handles the mouse events for the forget button
 fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Object) {
     let index = name.split("_").last().unwrap().parse::<u32>().unwrap();
     let paths_ary = obj.get_mut("paths").unwrap();
@@ -133,7 +140,9 @@ fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Objec
     }
 }
 
+/// Handles the mouse events for the load button
 fn handle_mouse_load_button(name: &str, env: &mut Environment, obj: &mut Object) {
+    // Close the load menu
     let button = env
         .states
         .get_mut("header_file_menu_sub_load_button_state")
@@ -141,11 +150,17 @@ fn handle_mouse_load_button(name: &str, env: &mut Environment, obj: &mut Object)
         .as_button_mut()
         .unwrap();
     button.clicked = false;
+
+    // Save the current list
     let _ = env.list.save().unwrap();
+
+    // Construct the path
     let index = name.split("_").last().unwrap().parse::<u32>().unwrap();
     let path = obj.get("paths").unwrap();
     let path = path.as_array().unwrap().get(index as usize).unwrap();
     let path = path.as_string().unwrap();
+
+    // Load the new list if it's different and update the config
     if env.list.get_path() != path {
         env.list = List::new(path);
     }

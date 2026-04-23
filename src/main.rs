@@ -76,5 +76,8 @@ fn main() -> AnankeResult<()> {
         // Sleep until next frame, if needed & cap to specified fps
         (last_frame, last_frame_dur) = fps_sleeper(last_frame);
     }
+    // Save the list before exiting
+    let _ = env.list.save();
+    // Talos cleanup is automatic when dropping talos
     Ok(())
 }
