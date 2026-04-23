@@ -198,11 +198,15 @@ fn update_clickable_regions(
     forget_file_button_clicked: bool,
     path_amount: usize,
 ) {
-    clickable_regions.insert("header_file_menu_button".to_string(), rect);
+    // Names are prepended with "a0_" to ensure they are first in the BTreeMap
+    //
+    // Some buttons are drawn over other clickable regions, this way ensures they are looped over
+    // (and 'clicked on') first inside the input processing
+    clickable_regions.insert("a0_header_file_menu_button".to_string(), rect);
 
     if file_button_clicked {
         clickable_regions.insert(
-            "header_file_menu_sub_new_button".to_string(),
+            "a0_header_file_menu_sub_new_button".to_string(),
             Rect::new(
                 rect.x,
                 rect.y.saturating_add(3 * 1),
@@ -212,7 +216,7 @@ fn update_clickable_regions(
         );
         if new_file_button_clicked {
             clickable_regions.insert(
-                "header_file_menu_sub_new_textbox".to_string(),
+                "a0_header_file_menu_sub_new_textbox".to_string(),
                 Rect::new(
                     rect.x.saturating_add(rect.width),
                     rect.y.saturating_add(3 * 1),
@@ -222,7 +226,7 @@ fn update_clickable_regions(
             );
         }
         clickable_regions.insert(
-            "header_file_menu_sub_load_button".to_string(),
+            "a0_header_file_menu_sub_load_button".to_string(),
             Rect::new(
                 rect.x,
                 rect.y.saturating_add(3 * 2),
@@ -233,7 +237,7 @@ fn update_clickable_regions(
         if load_file_button_clicked {
             for n in 0..path_amount {
                 clickable_regions.insert(
-                    format!("header_file_menu_sub_load_button_{}", n),
+                    format!("a0_header_file_menu_sub_load_button_{}", n),
                     Rect::new(
                         rect.x.saturating_add(rect.width * (n as u16 + 1)),
                         rect.y.saturating_add(3 * 2),
@@ -244,7 +248,7 @@ fn update_clickable_regions(
             }
         }
         clickable_regions.insert(
-            "header_file_menu_sub_forget_button".to_string(),
+            "a0_header_file_menu_sub_forget_button".to_string(),
             Rect::new(
                 rect.x,
                 rect.y.saturating_add(3 * 3),
@@ -255,7 +259,7 @@ fn update_clickable_regions(
         if forget_file_button_clicked {
             for n in 0..path_amount {
                 clickable_regions.insert(
-                    format!("header_file_menu_sub_forget_button_{}", n),
+                    format!("a0_header_file_menu_sub_forget_button_{}", n),
                     Rect::new(
                         rect.x.saturating_add(rect.width * (n as u16 + 1)),
                         rect.y.saturating_add(3 * 3),

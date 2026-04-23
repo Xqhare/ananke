@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use talos::{
     LayoutBuilder,
     atlases::LayoutAtlas,
@@ -49,11 +47,13 @@ fn render_inner_help(canvas: &mut Canvas, codex: &Codex, area: Rect, env: &Envir
         .build()
         .split(area);
 
-    let mut left_text = Text::new("Welcome to Ananke!\nThis is a todo list manager.\nIt uses the 'todo.txt' format.\n \nThe currently loaded file is shown in the top right.\nLeft of it is the current FPS.\nThis is followed by the 'Exit' button. This not only exits Ananke, but also saves the state of the list.", codex).with_style(style);
+    let mut left_text = Text::new("Welcome to Ananke!\nThis is a todo list manager using the 'todo.txt'\nformat.\n \nThe currently loaded file is shown in the top right.\nLeft of it is the current FPS.\nThis is followed by the 'Exit' button. This not only exits Ananke, but also saves the state of the list.", codex).with_style(style);
     left_text.render(canvas, layout[0], codex);
-    let mut middle_text = Text::new("The 'Help' Button shows this text, and the 'Save' button to the left of it saves the current state of the list.\n\nThe 'File' button on the very left is used to load, create or forget todo lists.\nAnanke will never delete a list from your system under any circumstances.", codex).with_style(style);
+
+    let mut middle_text = Text::new("The 'Help' Button shows this text, and the 'Save' button to the left of it saves the current state of the list. Ananke also autosaves your changes.\n\nThe 'File' button on the very left is used to load, create or forget todo lists.\nAnanke will never delete a list from your system under any circumstance.", codex).with_style(style);
     middle_text.render(canvas, layout[1], codex);
-    let mut right_text = Text::new("To load an existing list, import it by clicking on the 'File' Button, then clicking on the 'New' Button and entering the full path to the file in the text field. Hit enter to load.", codex).with_style(style);
+
+    let mut right_text = Text::new("To load an existing list, import it by clicking on the 'File' Button, then clicking on the 'New' Button and entering the full path to the file in the text field. Hit enter to confirm and load.\n\nAnanke always loads the list most recently added when starting up. The default list will always be recreated if deleted and cannot be forgotten.", codex).with_style(style);
     right_text.render(canvas, layout[2], codex);
 }
 

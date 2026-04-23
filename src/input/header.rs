@@ -69,11 +69,11 @@ pub fn handle_key_textbox_newfile(
 /// Handles the mouse events for the header
 pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
     match name {
-        "header_file_menu_button" => {
+        "a0_header_file_menu_button" => {
             toggle_button(env, "header_file_menu_button_main_button_state");
             Focus::None
         }
-        "header_file_menu_sub_new_button" => {
+        "a0_header_file_menu_sub_new_button" => {
             if toggle_button(env, "header_file_menu_sub_new_button_state") {
                 let state = env
                     .states
@@ -87,15 +87,15 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
                 Focus::None
             }
         }
-        "header_file_menu_sub_load_button" => {
+        "a0_header_file_menu_sub_load_button" => {
             toggle_button(env, "header_file_menu_sub_load_button_state");
             Focus::None
         }
-        "header_file_menu_sub_forget_button" => {
+        "a0_header_file_menu_sub_forget_button" => {
             toggle_button(env, "header_file_menu_sub_forget_button_state");
             Focus::None
         }
-        "header_file_menu_sub_new_textbox" => {
+        "a0_header_file_menu_sub_new_textbox" => {
             let state = env
                 .states
                 .get_mut("header_file_menu_sub_new_textbox_state")
@@ -122,11 +122,11 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
         }
         _ => {
             // Handle the buttons with an arbitrary amount
-            if name.contains("header_file_menu_sub_forget_button_") {
+            if name.contains("a0_header_file_menu_sub_forget_button_") {
                 let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
                 let obj = path.as_object_mut().unwrap();
                 handle_mouse_forget_button(name, env, obj);
-            } else if name.contains("header_file_menu_sub_load_button_") {
+            } else if name.contains("a0_header_file_menu_sub_load_button_") {
                 let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
                 let obj = path.as_object_mut().unwrap();
                 handle_mouse_load_button(name, env, obj);
