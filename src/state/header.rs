@@ -40,7 +40,7 @@ fn make_header_file_menu_state(
     out: &mut BTreeMap<String, States>,
 ) {
     let button_state = ButtonState { clicked: false };
-    let text = Text::new("path/to/file.txt", codex)
+    let text = Text::new("path_to/file.txt", codex)
         .align_center()
         .align_vertically();
     let path_state = TextBoxState {
