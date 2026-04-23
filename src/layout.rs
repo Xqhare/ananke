@@ -170,7 +170,7 @@ fn make_header_layout(header_rect: &Rect) -> Vec<(String, Rect)> {
         ("header_file_button".to_string(), buttons[0]),
         ("header_save_button".to_string(), buttons[1]),
         ("header_help_button".to_string(), buttons[2]),
-        ("header_quit_button".to_string(), buttons[3]),
+        ("header_exit_button".to_string(), buttons[3]),
         ("header_fps".to_string(), stats[1]),
         ("header_file_path".to_string(), stats[2]),
     ]

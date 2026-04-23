@@ -45,7 +45,7 @@ fn make_header_file_menu_state(
         .align_vertically();
     let path_state = TextBoxState {
         active: false,
-        cursor: Some(text.len().saturating_sub(1)),
+        cursor: Some(text.len()),
         text,
     };
     out.insert(

@@ -4,7 +4,7 @@ use talos::{
     atlases::LayoutAtlas,
     codex::Codex,
     layout::Rect,
-    render::Canvas,
+    render::{Canvas, Colour, Normal},
     widgets::{
         Block,
         stateful::{BlockBox, Button, MenuButton, TextBox},
@@ -125,9 +125,9 @@ pub fn render_header_file_menu_button(
         .with_clicked_style(default_clicked_style);
     forget_file_button.style(default_style);
 
-    let test_style = default_style.new_from_self().set_blink(true).build();
+    let cursor_style = env.styles.get_known_style("cursor");
     let mut new_file_textbox =
-        TextBox::new(new_file_textbox_state).with_highlight_style(test_style);
+        TextBox::new(new_file_textbox_state).with_highlight_style(cursor_style);
     new_file_textbox.style(editable_active);
     let mut block = Block::new().with_bg_fill().with_style(editable_active);
     let block_box = BlockBox::new(&mut block, &mut new_file_textbox);

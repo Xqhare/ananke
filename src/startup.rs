@@ -141,6 +141,18 @@ fn style_atlas() -> StyleAtlas {
         default.set_fg(default_bg).set_bg(default_fg).build(),
     );
     atlas.insert(
+        "cursor".to_string(),
+        default
+            .set_fg(Colour::Extended(Extended::TrueColour(TrueColour::RGB(
+                255, 255, 255,
+            ))))
+            .set_bg(Colour::Extended(Extended::TrueColour(TrueColour::RGB(
+                0, 0, 0,
+            ))))
+            .set_blink(true)
+            .build(),
+    );
+    atlas.insert(
         "editable_active".to_string(),
         default
             .set_fg(Colour::Extended(Extended::TrueColour(TrueColour::RGB(

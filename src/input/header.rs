@@ -6,7 +6,11 @@ use talos::{
     input::{KeyCode, KeyEvent},
 };
 
-use crate::{input::Focus, startup::Environment, utils::toggle_button};
+use crate::{
+    input::Focus,
+    startup::Environment,
+    utils::{goto_exit, toggle_button},
+};
 
 /// Handles the key events for the new file text box
 pub fn handle_key_textbox_newfile(
@@ -58,7 +62,7 @@ pub fn handle_key_textbox_newfile(
     }
     // Update the text with the new content
     state.text.set_content(content, codex);
-    state.cursor = Some(state.text.len().saturating_sub(1));
+    state.cursor = Some(state.text.len());
     None
 }
 
@@ -71,6 +75,13 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
         }
         "header_file_menu_sub_new_button" => {
             if toggle_button(env, "header_file_menu_sub_new_button_state") {
+                let state = env
+                    .states
+                    .get_mut("header_file_menu_sub_new_textbox_state")
+                    .unwrap()
+                    .as_text_box_mut()
+                    .unwrap();
+                state.active = true;
                 Focus::HeaderFileNewTextBox
             } else {
                 Focus::None
@@ -94,6 +105,20 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
             state.active = !state.active;
             // If a user clicks into the textbox directly, we want to always focus it
             Focus::HeaderFileNewTextBox
+        }
+        "header_save_button" => {
+            // Save the list - Nothing else to do; More of a pseudo button
+            env.list.save().unwrap();
+            Focus::None
+        }
+        "header_help_button" => {
+            toggle_button(env, "header_help_menu_button_state");
+            Focus::None
+        }
+        "header_exit_button" => {
+            // No need to set the button state; just exit this frame
+            goto_exit(env);
+            Focus::None
         }
         _ => {
             // Handle the buttons with an arbitrary amount

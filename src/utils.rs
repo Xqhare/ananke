@@ -18,6 +18,16 @@ pub fn fps_sleeper(last_frame: Instant) -> (Instant, u128) {
     (now, last_frame_dur)
 }
 
+/// Call the exit the program
+///
+/// Saves the state and sets run flag to false
+pub fn goto_exit(env: &mut Environment) {
+    // Set the flag
+    env.run = false;
+    // Save the list to be save and not loose data
+    env.list.save().unwrap();
+}
+
 pub fn add_load_n_forget_button_states(env: &mut Environment) {
     // Create the forget & load button
     let i = {
