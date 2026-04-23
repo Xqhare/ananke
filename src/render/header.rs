@@ -6,8 +6,8 @@ use talos::{
     layout::Rect,
     render::Canvas,
     widgets::{
-        Text,
-        stateful::{Button, MenuButton, TextBox},
+        Block, Text,
+        stateful::{BlockBox, Button, MenuButton, TextBox},
         traits::Widget,
     },
 };
@@ -176,9 +176,12 @@ fn render_header_file_menu_button(
         .with_clicked_style(default_clicked_style);
     forget_file_button.style(default_style);
 
-    let mut new_file_textbox = TextBox::new(new_file_textbox_state);
+    let mut new_file_textbox =
+        TextBox::new(new_file_textbox_state).with_highlight_style(default_style);
     new_file_textbox.style(editable_active);
-    let mut new_menu = vec![new_file_textbox];
+    let mut block = Block::new().with_bg_fill().with_style(editable_active);
+    let block_box = BlockBox::new(&mut block, &mut new_file_textbox);
+    let mut new_menu = vec![block_box];
 
     let mut load_menu = Vec::with_capacity(path_amount);
     for (index, sub_button_state) in load_file_sub_button_states.iter_mut().enumerate() {
@@ -282,7 +285,7 @@ fn update_clickable_regions(
                 clickable_regions.insert(
                     format!("header_file_menu_sub_load_button_{}", n),
                     Rect::new(
-                        rect.x.saturating_add(rect.width * n as u16 + 1),
+                        rect.x.saturating_add(rect.width * (n as u16 + 1)),
                         rect.y.saturating_add(3 * 2),
                         rect.width,
                         rect.height,
@@ -304,7 +307,7 @@ fn update_clickable_regions(
                 clickable_regions.insert(
                     format!("header_file_menu_sub_forget_button_{}", n),
                     Rect::new(
-                        rect.x.saturating_add(rect.width * n as u16 + 1),
+                        rect.x.saturating_add(rect.width * (n as u16 + 1)),
                         rect.y.saturating_add(3 * 3),
                         rect.width,
                         rect.height,

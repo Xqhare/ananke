@@ -4,7 +4,7 @@ use talos::layout::Rect;
 
 use crate::{
     error::{AnankeError, AnankeResult},
-    input::process_input,
+    input::{Focus, process_input},
     layout::make_frame_layout,
     render::render_app,
     startup::startup,
@@ -30,13 +30,18 @@ fn main() -> AnankeResult<()> {
     let mut last_frame = Instant::now();
     let mut last_frame_dur = 0;
 
+    // This is for the borrow checker complaining about mutability
+    let codex = &talos.codex().clone();
+
+    // This is needed for persistent focus of entry fields inside the input processing
+    let mut focus = Focus::None;
     // Render loop
     while env.run {
         // Reset the canvas
         talos.begin_frame();
 
         // Construct frame dependent layout
-        let (canvas, codex) = talos.render_ctx();
+        let (canvas, _) = talos.render_ctx();
         let frame_layout = make_frame_layout(&canvas.size_rect(), &env.gen_layout);
 
         // Render the app
@@ -51,21 +56,24 @@ fn main() -> AnankeResult<()> {
 
         // Process input (Both clicks and key events)
         // This is also the place where state mutations happen
-        process_input(
+        if let Some(f) = process_input(
+            codex,
             talos
                 .poll_input()
                 .map_err(|err| Into::<AnankeError>::into(err))?,
             &mut env,
             &clickable_regions,
-        );
+            &focus,
+        ) {
+            focus = f;
+        }
 
         // Actual render of the canvas to the Terminal
         talos
             .present()
             .map_err(|err| Into::<AnankeError>::into(err))?;
 
-        // Sleep until next frame, if needed.
-        // Cap to specified fps
+        // Sleep until next frame, if needed & cap to specified fps
         (last_frame, last_frame_dur) = fps_sleeper(last_frame);
     }
     Ok(())
