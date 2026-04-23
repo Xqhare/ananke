@@ -11,12 +11,17 @@ mod header;
 use crate::{
     input::header::{handle_header_mouse, handle_key_textbox_newfile},
     startup::Environment,
-    utils::add_load_n_forget_button_states,
+    utils::{add_load_n_forget_button_states, ensure_focus_on_active_textfield},
 };
 
+/// The focus of the program
+///
+/// Used for keyboard input capture and ensuring that the focus is on the active textfield
 #[derive(Clone, Copy, Debug)]
 pub enum Focus {
+    /// No focus
     None,
+    /// Focus on the header new-file textbox
     HeaderFileNewTextBox,
 }
 
@@ -71,13 +76,15 @@ pub fn process_input(
             }
         }
     }
+    ensure_focus_on_active_textfield(env, focus);
     None
 }
 
+/// Handles the key events for the normal mode
 fn handle_key_normal(key_event: &KeyEvent, env: &mut Environment) {
     match key_event.code {
         KeyCode::Char(c) => match c {
-            'q' => {
+            'q' | 'Q' => {
                 env.run = false;
             }
             _ => {}
@@ -86,6 +93,7 @@ fn handle_key_normal(key_event: &KeyEvent, env: &mut Environment) {
     }
 }
 
+/// Handles the mouse events
 fn handle_mouse(
     mouse_event: &MouseEvent,
     env: &mut Environment,

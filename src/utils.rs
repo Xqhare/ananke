@@ -5,17 +5,17 @@ use std::{
 
 use talos::widgets::stateful::{ButtonState, States};
 
-use crate::startup::Environment;
+use crate::{input::Focus, startup::Environment};
 
 pub fn fps_sleeper(last_frame: Instant) -> (Instant, u128) {
     let fps_goal = 2_000;
     let ms_goal = 1_000_000 / fps_goal;
-    let now = Instant::now();
-    let last_frame_dur = now.duration_since(last_frame).as_micros();
+    let last_frame_dur = Instant::now().duration_since(last_frame).as_micros();
     if last_frame_dur < ms_goal {
         sleep(Duration::from_micros((ms_goal - last_frame_dur) as u64));
     }
-    (now, last_frame_dur)
+    let now = Instant::now();
+    (now, now.duration_since(last_frame).as_micros())
 }
 
 /// Call the exit the program
@@ -51,6 +51,7 @@ pub fn add_load_n_forget_button_states(env: &mut Environment) {
                 j += 1;
             }
         }
+        #[cfg(debug_assertions)]
         debug_assert!(i == j);
         i
     };
@@ -81,4 +82,33 @@ pub fn toggle_button(env: &mut Environment, name: &str) -> bool {
     let state = env.states.get_mut(name).unwrap().as_button_mut().unwrap();
     state.clicked = !state.clicked;
     state.clicked
+}
+
+/// Ensures that the focus is on the active textfield only
+///
+/// Does so by hooking into the `Focus` enum used for keyboard input capture
+pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
+    match focus {
+        Focus::None => {
+            // Clear the focus of any textfield
+            let states = vec!["header_file_menu_sub_new_textbox_state"];
+            for state in states {
+                env.states
+                    .get_mut(state)
+                    .unwrap()
+                    .as_text_box_mut()
+                    .unwrap()
+                    .active = false;
+            }
+        }
+        Focus::HeaderFileNewTextBox => {
+            // Ensure that the focus is on the textfield
+            env.states
+                .get_mut("header_file_menu_sub_new_textbox_state")
+                .unwrap()
+                .as_text_box_mut()
+                .unwrap()
+                .active = true;
+        }
+    }
 }
