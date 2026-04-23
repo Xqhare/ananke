@@ -81,12 +81,20 @@ fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
         .split(*creator_rect);
     debug_assert!(layout.len() == 4);
 
-    let row0 = LayoutBuilder::new()
+    let row00 = LayoutBuilder::new()
         .direction(Direction::Horizontal)
-        .add_constraint(Constraint::Min(1))
-        .add_constraint(Constraint::Length(10))
+        .add_constraint(Constraint::Percentage(10))
+        .add_constraint(Constraint::Percentage(90))
         .build()
         .split(layout[0]);
+    debug_assert!(row00.len() == 2);
+
+    let row0 = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(50))
+        .build()
+        .split(row00[0]);
     debug_assert!(row0.len() == 2);
 
     let row1 = LayoutBuilder::new()
@@ -133,14 +141,15 @@ fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
 
     vec![
         ("creator_rect".to_string(), *creator_rect),
-        ("creator_textbox_task".to_string(), row0[0]),
-        ("creator_button_prio".to_string(), row0[1]),
+        ("creator_textbox_task".to_string(), row00[1]),
+        ("creator_prio_text".to_string(), row0[0]),
+        ("creator_textbox_prio".to_string(), row0[1]),
         ("creator_textbox_inception".to_string(), row1[0]),
-        ("creator_textbox_context_tags".to_string(), row1[1]),
-        ("creator_textbox_project_tags".to_string(), row2[0]),
-        ("creator_textbox_special_tags".to_string(), row2[1]),
+        ("creator_text_context_tags".to_string(), row1[1]),
+        ("creator_text_project_tags".to_string(), row2[0]),
+        ("creator_text_special_tags".to_string(), row2[1]),
         (
-            "creator_button_forget_new_task".to_string(),
+            "creator_button_reset_new_task".to_string(),
             row3_middle_buttons[0],
         ),
         (

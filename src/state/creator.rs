@@ -11,9 +11,13 @@ use talos::{
 
 pub fn make_creator_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
     make_creator_task_entry_textbox_state(codex, out);
+    make_creator_task_prio_entry_textbox_state(codex, out);
     make_creator_task_creation_date_entry_textbox_state(codex, out);
-    create_creator_task_forget_button_state(codex, out);
-    make_creator_task_save_button_state(codex, out);
+    make_creator_task_project_tags_text_state(codex, out);
+    make_creator_task_context_tags_text_state(codex, out);
+    make_creator_task_special_tags_text_state(codex, out);
+    create_creator_task_forget_button_state(out);
+    make_creator_task_save_button_state(out);
 }
 
 // TODO: Need for process management later, when save button is hit, recreate the default state for
@@ -33,22 +37,66 @@ pub fn make_creator_task_creation_date_entry_textbox_state(
         States::from(TextBoxState {
             active: false,
             cursor: Some(0),
-            text: Text::new(now.date().to_string(), codex),
+            text: Text::new(now.date().to_string(), codex).align_center(),
         }),
     );
 }
 
-fn make_creator_task_save_button_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
+fn make_creator_task_save_button_state(out: &mut BTreeMap<String, States>) {
     out.insert(
         "creator_task_save_button_state".to_string(),
         States::from(ButtonState { clicked: false }),
     );
 }
 
-fn create_creator_task_forget_button_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
+fn create_creator_task_forget_button_state(out: &mut BTreeMap<String, States>) {
     out.insert(
         "creator_task_forget_button_state".to_string(),
         States::from(ButtonState { clicked: false }),
+    );
+}
+
+fn make_creator_task_prio_entry_textbox_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
+    out.insert(
+        "creator_task_prio_entry_textbox_state".to_string(),
+        States::from(TextBoxState {
+            active: false,
+            cursor: Some(0),
+            text: Text::new("", codex).align_center(),
+        }),
+    );
+}
+
+fn make_creator_task_context_tags_text_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
+    out.insert(
+        "creator_text_context_tags".to_string(),
+        States::from(TextBoxState {
+            active: false,
+            cursor: Some(0),
+            text: Text::new("", codex).align_center(),
+        }),
+    );
+}
+
+fn make_creator_task_project_tags_text_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
+    out.insert(
+        "creator_text_project_tags".to_string(),
+        States::from(TextBoxState {
+            active: false,
+            cursor: Some(0),
+            text: Text::new("", codex).align_center(),
+        }),
+    );
+}
+
+fn make_creator_task_special_tags_text_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
+    out.insert(
+        "creator_text_special_tags".to_string(),
+        States::from(TextBoxState {
+            active: false,
+            cursor: Some(0),
+            text: Text::new("", codex).align_center(),
+        }),
     );
 }
 
@@ -58,7 +106,7 @@ fn make_creator_task_entry_textbox_state(codex: &Codex, out: &mut BTreeMap<Strin
         States::from(TextBoxState {
             active: false,
             cursor: Some(0),
-            text: Text::new("Enter task with tags here!", codex),
+            text: Text::new("Enter task with tags here!", codex).align_center(),
         }),
     );
 }
