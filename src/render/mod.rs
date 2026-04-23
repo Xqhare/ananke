@@ -8,8 +8,12 @@ use talos::{
     widgets::{Area, traits::Widget},
 };
 
-use crate::{render::header::render_header, startup::Environment};
+use crate::{
+    render::{creator::render_creator, header::render_header},
+    startup::Environment,
+};
 
+mod creator;
 mod header;
 
 /// Renders the application
@@ -37,6 +41,8 @@ pub fn render_app(
     Area::new()
         .with_style(default_style)
         .render(canvas, entire_canvas, codex);
+    render_creator(canvas, codex, layout_atlas, clickable_regions, env);
+    // Render header after creator to ensure its buttons are on top
     render_header(
         canvas,
         codex,

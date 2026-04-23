@@ -3,6 +3,9 @@ name = "ananke"
 version = "3.0.0"
 edition = "2024"
 rust-version = "1.93.0"
+repository = "https://github.com/Xqhare/ananke"
+authors = ["Xqhare"]
+license = "MIT"
 
 [dependencies]
 anansi = { git = "https://github.com/Xqhare/anansi" }

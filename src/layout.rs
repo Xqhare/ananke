@@ -122,6 +122,15 @@ fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
         .split(row3[1]);
     debug_assert!(row3_middle_buttons.len() == 2);
 
+    let help_page = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .margin(1)
+        .add_constraint(Constraint::Percentage(70))
+        .add_constraint(Constraint::Percentage(30))
+        .build()
+        .split(*creator_rect);
+    debug_assert!(help_page.len() == 2);
+
     vec![
         ("creator_rect".to_string(), *creator_rect),
         ("creator_textbox_task".to_string(), row0[0]),
@@ -138,6 +147,8 @@ fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
             "creator_button_add_new_task".to_string(),
             row3_middle_buttons[1],
         ),
+        ("creator_help_page_left".to_string(), help_page[0]),
+        ("creator_help_page_right".to_string(), help_page[1]),
     ]
 }
 
