@@ -16,7 +16,7 @@ pub fn make_layout() -> Layout {
     LayoutBuilder::new()
         .direction(Direction::Vertical)
         .add_constraint(Constraint::Length(3))
-        .add_constraint(Constraint::Length(14))
+        .add_constraint(Constraint::Length(16))
         .add_constraint(Constraint::Length(5))
         .add_constraint(Constraint::Min(1))
         .build()
@@ -73,29 +73,13 @@ fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
     let layout = LayoutBuilder::new()
         .direction(Direction::Vertical)
         .margin(1)
-        .add_constraint(Constraint::Length(3))
+        .add_constraint(Constraint::Length(5))
         .add_constraint(Constraint::Length(3))
         .add_constraint(Constraint::Length(3))
         .add_constraint(Constraint::Length(3))
         .build()
         .split(*creator_rect);
     debug_assert!(layout.len() == 4);
-
-    let row00 = LayoutBuilder::new()
-        .direction(Direction::Horizontal)
-        .add_constraint(Constraint::Percentage(10))
-        .add_constraint(Constraint::Percentage(90))
-        .build()
-        .split(layout[0]);
-    debug_assert!(row00.len() == 2);
-
-    let row0 = LayoutBuilder::new()
-        .direction(Direction::Horizontal)
-        .add_constraint(Constraint::Percentage(50))
-        .add_constraint(Constraint::Percentage(50))
-        .build()
-        .split(row00[0]);
-    debug_assert!(row0.len() == 2);
 
     let row1 = LayoutBuilder::new()
         .direction(Direction::Horizontal)
@@ -105,30 +89,62 @@ fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
         .split(layout[1]);
     debug_assert!(row1.len() == 2);
 
-    let row2 = LayoutBuilder::new()
+    let mut row1_sub = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(25))
+        .add_constraint(Constraint::Percentage(75))
+        .build()
+        .split(row1[0]);
+    debug_assert!(row1_sub.len() == 2);
+    row1_sub[0].width -= 1;
+    row1_sub[1].x -= 1;
+    row1_sub[1].width += 1;
+
+    let row_1_prio = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(35))
+        .add_constraint(Constraint::Percentage(65))
+        .build()
+        .split(row1_sub[0]);
+    debug_assert!(row_1_prio.len() == 2);
+
+    let mut row_1_inception = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(30))
+        .add_constraint(Constraint::Percentage(70))
+        .build()
+        .split(row1_sub[1]);
+    debug_assert!(row_1_inception.len() == 2);
+    row_1_inception[1].x += 3;
+    row_1_inception[1].width -= 3;
+
+    let mut row2 = LayoutBuilder::new()
         .direction(Direction::Horizontal)
         .add_constraint(Constraint::Percentage(50))
         .add_constraint(Constraint::Percentage(50))
         .build()
         .split(layout[2]);
     debug_assert!(row2.len() == 2);
+    row2[0].width -= 2;
 
     let row3 = LayoutBuilder::new()
         .direction(Direction::Horizontal)
-        .add_constraint(Constraint::Percentage(20))
-        .add_constraint(Constraint::Percentage(60))
-        .add_constraint(Constraint::Percentage(20))
+        .add_constraint(Constraint::Percentage(25))
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(25))
         .build()
         .split(layout[3]);
     debug_assert!(row3.len() == 3);
 
-    let row3_middle_buttons = LayoutBuilder::new()
+    let mut row3_middle_buttons = LayoutBuilder::new()
         .direction(Direction::Horizontal)
         .add_constraint(Constraint::Percentage(50))
         .add_constraint(Constraint::Percentage(50))
         .build()
         .split(row3[1]);
     debug_assert!(row3_middle_buttons.len() == 2);
+    row3_middle_buttons[0].x -= 1;
+    row3_middle_buttons[1].x += 1;
 
     let help_page = LayoutBuilder::new()
         .direction(Direction::Horizontal)
@@ -141,10 +157,11 @@ fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
 
     vec![
         ("creator_rect".to_string(), *creator_rect),
-        ("creator_textbox_task".to_string(), row00[1]),
-        ("creator_prio_text".to_string(), row0[0]),
-        ("creator_textbox_prio".to_string(), row0[1]),
-        ("creator_textbox_inception".to_string(), row1[0]),
+        ("creator_textbox_task".to_string(), layout[0]),
+        ("creator_prio_text".to_string(), row_1_prio[0]),
+        ("creator_textbox_prio".to_string(), row_1_prio[1]),
+        ("creator_inception_text".to_string(), row_1_inception[0]),
+        ("creator_textbox_inception".to_string(), row_1_inception[1]),
         ("creator_text_context_tags".to_string(), row1[1]),
         ("creator_text_project_tags".to_string(), row2[0]),
         ("creator_text_special_tags".to_string(), row2[1]),

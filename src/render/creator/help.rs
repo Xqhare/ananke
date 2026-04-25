@@ -47,13 +47,17 @@ fn render_inner_help(canvas: &mut Canvas, codex: &Codex, area: Rect, env: &Envir
         .build()
         .split(area);
 
-    let mut left_text = Text::new("Welcome to Ananke!\nThis is a todo list manager using the 'todo.txt'\nformat.\n \nThe currently loaded file is shown in the top right.\nLeft of it is the current FPS.\nThis is followed by the 'Exit' button. This not only exits Ananke, but also saves the state of the list.", codex).with_style(style);
+    let mut left_text = Text::new(
+        "Welcome to Ananke!\nThis is a todo list manager using the 'todo.txt'\nformat.\n\nIt features:\n\n- Several todo files; Switchable from the app itself\n- Task sorting\n- Task deletion\n- Task creation",
+        codex,
+    )
+    .with_style(style);
     left_text.render(canvas, layout[0], codex);
 
-    let mut middle_text = Text::new("The 'Help' Button shows this text, and the 'Save' button to the left of it saves the current state of the list. Ananke also autosaves your changes.\n\nThe 'File' button on the very left is used to load, create or forget todo lists.\nAnanke will never delete a list from your system under any circumstance.", codex).with_style(style);
+    let mut middle_text = Text::new("The currently loaded file is shown in the top right.\nLeft of it is the current FPS.\nThis is followed by the 'Exit' button. This not only exits Ananke, but also saves the state of the list.\nThe 'Help' Button shows this text, and the 'Save' button to the left of it saves the todo list.\nThe 'File' button on the very left is used to load, create or forget todo lists.\nAnanke will never delete a list from your system under any circumstance.", codex).with_style(style);
     middle_text.render(canvas, layout[1], codex);
 
-    let mut right_text = Text::new("To load an existing list, import it by clicking on the 'File' Button, then clicking on the 'New' Button and entering the full path to the file in the text field. Hit enter to confirm and load.\n\nAnanke always loads the list most recently added when starting up. The default list will always be recreated if deleted and cannot be forgotten.", codex).with_style(style);
+    let mut right_text = Text::new("Ananke also autosaves your changes.\n\nTo load an existing list, import it by clicking on the 'File' Button, then clicking on the 'New' Button and entering the full path to the file in the text field. Hit enter to confirm and load.\n\nAnanke always loads the list most recently added when starting up. The default list will always be recreated if deleted and cannot be forgotten.", codex).with_style(style);
     right_text.render(canvas, layout[2], codex);
 }
 
@@ -71,9 +75,11 @@ fn render_about(canvas: &mut Canvas, codex: &Codex, layout_atlas: &LayoutAtlas, 
         .with_style(style)
         .with_beautify_border_breaks();
     block.render(canvas, area, codex);
-    let area = block.inner(area);
-    let mut text = Text::new(format!(" Version: {} \n Author: {} \n License: {} \n \n Source code is available at: {} \n \n Ananke uses the 'todo.txt' format as specified in: \n {}", VERSION, AUTHOR, LICENSE, SOURCE, TODO), codex)
-        .with_style(style)
-        .align_vertically();
+    let mut area = block.inner(area);
+    area.x += 1;
+    area.y += 1;
+    area.height -= 2;
+    let mut text = Text::new(format!("Version: {}\nAuthor: {}\nLicense: {}\n\nSource code is available at: {}\n\nAnanke uses the 'todo.txt' format as specified in:\n{}\n\nAll code is written by me, part of rusts standard library or libc.", VERSION, AUTHOR, LICENSE, SOURCE, TODO), codex)
+        .with_style(style);
     text.render(canvas, area, codex);
 }

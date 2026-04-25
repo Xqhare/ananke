@@ -56,7 +56,7 @@ fn main() -> AnankeResult<()> {
 
         // Process input (Both clicks and key events)
         // This is also the place where state mutations happen
-        if let Some(f) = process_input(
+        if let Some(foci) = process_input(
             codex,
             talos
                 .poll_input()
@@ -65,7 +65,7 @@ fn main() -> AnankeResult<()> {
             &clickable_regions,
             &focus,
         ) {
-            focus = f;
+            focus = foci;
         }
 
         // Actual render of the canvas to the Terminal

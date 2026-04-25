@@ -129,7 +129,10 @@ pub fn render_header_file_menu_button(
     let mut new_file_textbox =
         TextBox::new(new_file_textbox_state).with_highlight_style(cursor_style);
     new_file_textbox.style(editable_active);
-    let mut block = Block::new().with_bg_fill().with_style(editable_active);
+    let mut block = Block::new()
+        .with_bg_fill()
+        .with_style(editable_active)
+        .with_fat_border();
     let block_box = BlockBox::new(&mut block, &mut new_file_textbox);
     let mut new_menu = vec![block_box];
 
