@@ -32,12 +32,13 @@ pub fn make_creator_task_creation_date_entry_textbox_state(
     let mut now = Utc::now();
     // automatic time zone detection
     now.with_auto_offset();
+    let str = now.date().to_string();
     out.insert(
         "creator_task_creation_date_entry_textbox_state".to_string(),
         States::from(TextBoxState {
             active: false,
-            cursor: Some(0),
-            text: Text::new(now.date().to_string(), codex).align_center(),
+            cursor: Some(str.chars().count()),
+            text: Text::new(str, codex).align_center(),
         }),
     );
 }

@@ -32,12 +32,15 @@ pub struct Environment<'a> {
 
 pub struct DiskEnvironment {
     pub brigid: Brigid,
+    pub home_path: PathBuf,
 }
 
 impl DiskEnvironment {
     pub fn new() -> AnankeResult<DiskEnvironment> {
+        let tmp = setup_env()?;
         Ok(DiskEnvironment {
-            brigid: setup_env()?,
+            brigid: tmp.0,
+            home_path: tmp.1,
         })
     }
 }
@@ -91,7 +94,7 @@ pub fn startup<'a>() -> AnankeResult<(Environment<'a>, Talos)> {
         .build()
         .map_err(|e| Into::<AnankeError>::into(e))?;
     let gen_layout = make_layout();
-    let states = make_state(path_amount, &list, talos.codex());
+    let states = make_state(path_amount, &list, talos.codex(), &disk_env.home_path);
     let new_task = Task::new("", list.max_id());
     let render_tasks = list.tasks();
     let env = Environment {
@@ -188,18 +191,20 @@ fn default_config(root: &PathBuf) -> XffValue {
     xff!(obj)
 }
 
-fn setup_env() -> AnankeResult<Brigid> {
-    let root = BaseDirs::new()
-        .map_err(|e| Into::<AnankeError>::into(e))?
-        .config_local_dir()
-        .join("Ananke");
+fn setup_env() -> AnankeResult<(Brigid, PathBuf)> {
+    let dirs = BaseDirs::new().map_err(|e| Into::<AnankeError>::into(e))?;
+    let root = dirs.config_local_dir().join("Ananke");
+    let home = dirs.home_dir();
 
-    Brigid::new(&root)
-        .file("config.xff", |file| {
-            file.with_default_content(Content::XFF(default_config(&root)))
-                .with_fallback();
-        })
-        .add_license(include_str!("../LICENSE"), root.join("LICENSE.txt"))
-        .establish()
-        .map_err(|e| e.into())
+    Ok((
+        Brigid::new(&root)
+            .file("config.xff", |file| {
+                file.with_default_content(Content::XFF(default_config(&root)))
+                    .with_fallback();
+            })
+            .add_license(include_str!("../LICENSE"), root.join("LICENSE.txt"))
+            .establish()
+            .map_err(|e| Into::<AnankeError>::into(e))?,
+        home.to_path_buf(),
+    ))
 }

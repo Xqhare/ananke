@@ -138,8 +138,8 @@ fn render_row0(
 
     blockbox1.render(canvas, rect1, codex);
 
-    clickable_regions.insert("creator_textbox_task".to_string(), rect0);
-    clickable_regions.insert("creator_textbox_prio".to_string(), rect1);
+    clickable_regions.insert("creator_textbox_task".to_string(), rect1);
+    clickable_regions.insert("creator_textbox_prio".to_string(), rect0);
 }
 
 fn render_row1(

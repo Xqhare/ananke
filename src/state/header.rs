@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, path::PathBuf};
 
 use talos::{
     codex::Codex,
@@ -8,8 +8,13 @@ use talos::{
     },
 };
 
-pub fn make_header_state(path_amount: usize, codex: &Codex, out: &mut BTreeMap<String, States>) {
-    make_header_file_menu_state(path_amount, codex, out);
+pub fn make_header_state(
+    path_amount: usize,
+    codex: &Codex,
+    out: &mut BTreeMap<String, States>,
+    home: &PathBuf,
+) {
+    make_header_file_menu_state(path_amount, codex, out, home);
     make_header_save_menu_state(out);
     make_header_help_menu_state(out);
     make_header_exit_menu_state(out);
@@ -38,9 +43,10 @@ fn make_header_file_menu_state(
     path_amount: usize,
     codex: &Codex,
     out: &mut BTreeMap<String, States>,
+    home: &PathBuf,
 ) {
     let button_state = ButtonState { clicked: false };
-    let text = Text::new("path_to/file.txt", codex)
+    let text = Text::new(home.to_string_lossy(), codex)
         .align_center()
         .align_vertically();
     let path_state = TextBoxState {

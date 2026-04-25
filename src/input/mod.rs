@@ -6,10 +6,14 @@ use talos::{
     layout::Rect,
 };
 
+mod creator;
 mod header;
 
 use crate::{
-    input::header::{handle_header_mouse, handle_key_textbox_newfile},
+    input::{
+        creator::{handle_key_creator, mouse::handle_creator_mouse},
+        header::{handle_header_mouse, handle_key_textbox_newfile},
+    },
     startup::Environment,
     utils::{add_load_n_forget_button_states, ensure_focus_on_active_textfield},
 };
@@ -23,6 +27,19 @@ pub enum Focus {
     None,
     /// Focus on the header new-file textbox
     HeaderFileNewTextBox,
+    /// Focus on some part of the creator
+    Creator(CreatorFocus),
+}
+
+/// The focus of the creator
+#[derive(Clone, Copy, Debug)]
+pub enum CreatorFocus {
+    /// Focus on the creator new-task textbox
+    Task,
+    /// Focus on the creator priority textbox
+    Priority,
+    /// Focus on the creator date textbox
+    CreationDate,
 }
 
 pub fn process_input(
@@ -65,10 +82,19 @@ pub fn process_input(
                             };
                             return None;
                         }
+                        Focus::Creator(any) => {
+                            // Handle the creator. Returns `Some(())` if enter was hit.
+                            // We do not save then, but we loose the focus
+                            //
+                            // The todo.txt format only allows for one line per task.
+                            if handle_key_creator(key_event, env, any, codex).is_some() {
+                                return Some(Focus::None);
+                            }
+                        }
                     }
                 }
                 Event::MouseEvent(mouse_event) => {
-                    return Some(handle_mouse(mouse_event, env, clickable_regions));
+                    return Some(handle_mouse(mouse_event, env, clickable_regions, codex));
                 }
                 _ => {
                     return None;
@@ -98,6 +124,7 @@ fn handle_mouse(
     mouse_event: &MouseEvent,
     env: &mut Environment,
     clickable_regions: &BTreeMap<String, Rect>,
+    codex: &Codex,
 ) -> Focus {
     for (name, rect) in clickable_regions.iter() {
         if rect.contains(mouse_event.column, mouse_event.row) {
@@ -105,6 +132,8 @@ fn handle_mouse(
                 MouseEventKind::Up(MouseButton::Left) => {
                     if name.contains("header") {
                         return handle_header_mouse(env, name);
+                    } else if name.contains("creator") {
+                        return handle_creator_mouse(env, name, codex);
                     }
                 }
                 _ => {}

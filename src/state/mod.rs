@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, path::PathBuf};
 
 use anansi::List;
 use talos::{codex::Codex, widgets::stateful::States};
@@ -20,9 +20,10 @@ pub fn make_state<'a>(
     path_amount: usize,
     list: &List,
     codex: &Codex,
+    home: &PathBuf,
 ) -> BTreeMap<String, States<'a>> {
     let mut out = BTreeMap::new();
-    make_header_state(path_amount, codex, &mut out);
+    make_header_state(path_amount, codex, &mut out, home);
     make_creator_state(codex, &mut out);
     make_menu_state(codex, &mut out);
     make_list_table_state(list, codex, &mut out);

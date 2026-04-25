@@ -5,7 +5,10 @@ use std::{
 
 use talos::widgets::stateful::{ButtonState, States};
 
-use crate::{input::Focus, startup::Environment};
+use crate::{
+    input::{CreatorFocus, Focus},
+    startup::Environment,
+};
 
 pub fn fps_sleeper(last_frame: Instant) -> (Instant, u128) {
     let fps_goal = 2_000;
@@ -91,7 +94,12 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
     match focus {
         Focus::None => {
             // Clear the focus of any textfield
-            let states = vec!["header_file_menu_sub_new_textbox_state"];
+            let states = vec![
+                "header_file_menu_sub_new_textbox_state",
+                "creator_task_entry_textbox_state",
+                "creator_task_prio_entry_textbox_state",
+                "creator_task_creation_date_entry_textbox_state",
+            ];
             for state in states {
                 env.states
                     .get_mut(state)
@@ -105,6 +113,33 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
             // Ensure that the focus is on the textfield
             env.states
                 .get_mut("header_file_menu_sub_new_textbox_state")
+                .unwrap()
+                .as_text_box_mut()
+                .unwrap()
+                .active = true;
+        }
+        Focus::Creator(CreatorFocus::Task) => {
+            // Ensure that the focus is on the textfield
+            env.states
+                .get_mut("creator_task_entry_textbox_state")
+                .unwrap()
+                .as_text_box_mut()
+                .unwrap()
+                .active = true;
+        }
+        Focus::Creator(CreatorFocus::Priority) => {
+            // Ensure that the focus is on the textfield
+            env.states
+                .get_mut("creator_task_prio_entry_textbox_state")
+                .unwrap()
+                .as_text_box_mut()
+                .unwrap()
+                .active = true;
+        }
+        Focus::Creator(CreatorFocus::CreationDate) => {
+            // Ensure that the focus is on the textfield
+            env.states
+                .get_mut("creator_task_creation_date_entry_textbox_state")
                 .unwrap()
                 .as_text_box_mut()
                 .unwrap()

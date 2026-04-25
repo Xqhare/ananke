@@ -48,9 +48,11 @@ pub fn handle_key_textbox_newfile(
 
                 // Reset the text box
                 state.active = false;
-                state.text.set_content("path/to/file.txt", codex);
-                return Some(());
+                state
+                    .text
+                    .set_content(env.disk_env.home_path.to_string_lossy(), codex);
             }
+            return Some(());
         }
         KeyCode::Backspace => {
             content.pop();
