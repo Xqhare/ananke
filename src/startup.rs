@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, path::PathBuf};
 
-use anansi::List;
+use anansi::{List, Task};
 use areia::BaseDirs;
 use brigid::{Brigid, content::Content};
 use nabu::{Object, XffValue, xff};
@@ -26,6 +26,8 @@ pub struct Environment<'a> {
     pub gen_layout: Layout,
     pub states: BTreeMap<String, States<'a>>,
     pub run: bool,
+    pub new_task: Task,
+    pub render_tasks: Vec<Task>,
 }
 
 pub struct DiskEnvironment {
@@ -90,6 +92,8 @@ pub fn startup<'a>() -> AnankeResult<(Environment<'a>, Talos)> {
         .map_err(|e| Into::<AnankeError>::into(e))?;
     let gen_layout = make_layout();
     let states = make_state(path_amount, &list, talos.codex());
+    let new_task = Task::new("", list.max_id());
+    let render_tasks = list.tasks();
     let env = Environment {
         run: true,
         list,
@@ -98,6 +102,8 @@ pub fn startup<'a>() -> AnankeResult<(Environment<'a>, Talos)> {
         path_amount,
         gen_layout,
         states,
+        new_task,
+        render_tasks,
     };
 
     Ok((env, talos))

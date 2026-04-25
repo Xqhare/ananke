@@ -106,9 +106,7 @@ fn make_creator_task_entry_textbox_state(codex: &Codex, out: &mut BTreeMap<Strin
         States::from(TextBoxState {
             active: false,
             cursor: Some(0),
-            text: Text::new("Enter task with tags here!", codex)
-                .align_center()
-                .align_vertically(),
+            text: Text::new("", codex).align_center().align_vertically(),
         }),
     );
 }

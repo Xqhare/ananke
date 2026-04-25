@@ -96,9 +96,14 @@ fn render_row0(
     let state0 = state0.unwrap();
     let state1 = state1.unwrap();
 
+    let hint_text0 = Text::new("[A-Z]", codex)
+        .align_center()
+        .align_vertically()
+        .with_style(style);
     let mut textbox0 = TextBox::new(state0)
         .with_style(style)
-        .with_highlight_style(highlight_style);
+        .with_highlight_style(highlight_style)
+        .with_hint_text(hint_text0);
 
     let mut block = Block::new().with_style(style).with_fat_border();
     let mut blockbox0 = BlockBox::new(&mut block, &mut textbox0).with_style(style);
@@ -110,9 +115,17 @@ fn render_row0(
     blockbox0.render(canvas, rect0, codex);
     text0.render(canvas, rect01, codex);
 
+    let hint_text1 = Text::new(
+        "Enter a task with tags (@context, +project, special_key:value_tag) here!",
+        codex,
+    )
+    .align_center()
+    .align_vertically()
+    .with_style(style);
     let mut textbox1 = TextBox::new(state1)
         .with_style(style)
-        .with_highlight_style(highlight_style);
+        .with_highlight_style(highlight_style)
+        .with_hint_text(hint_text1);
 
     let mut block = Block::new().with_style(style).with_fat_border();
     let mut blockbox1 = BlockBox::new(&mut block, &mut textbox1).with_style(style);

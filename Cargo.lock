@@ -22,7 +22,7 @@ dependencies = [
 [[package]]
 name = "anansi"
 version = "1.0.0"
-source = "git+https://github.com/Xqhare/anansi#86a5d847328f65e2641e302fbabb32e345f00ec0"
+source = "git+https://github.com/Xqhare/anansi#73c7a7a1514530ad3352d3111e1dfc48803e666b"
 
 [[package]]
 name = "areia"
@@ -55,9 +55,9 @@ source = "git+https://github.com/Xqhare/horae#40a4e9067b536b19fafe5e128cc3977785
 
 [[package]]
 name = "libc"
-version = "0.2.185"
+version = "0.2.186"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52ff2c0fe9bc6cb6b14a0592c2ff4fa9ceb83eea9db979b0487cd054946a2b8f"
+checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "mawu"
@@ -77,8 +77,8 @@ dependencies = [
 
 [[package]]
 name = "talos"
-version = "1.3.0"
-source = "git+https://github.com/Xqhare/talos#5b6147ee28185c858fa1c7ab14a271dcb6347c9d"
+version = "1.4.0"
+source = "git+https://github.com/Xqhare/talos#23f53179ca7f011454639fa8174badfb90df646c"
 dependencies = [
  "libc",
 ]
