@@ -241,9 +241,10 @@ fn render_row3_buttons(
     env: &mut Environment,
     clickable_regions: &mut BTreeMap<String, Rect>,
 ) {
-    let rect0 = layout_atlas.get_known_rect("creator_button_reset_new_task");
-    let rect1 = layout_atlas.get_known_rect("creator_button_add_new_task");
-    let style = env.styles.get_default();
+    let rect0 = layout_atlas.get_known_rect("creator_button_add_new_task");
+    let rect1 = layout_atlas.get_known_rect("creator_button_reset_new_task");
+    let style0 = env.styles.get_ok();
+    let style1 = env.styles.get_warning();
     let highlight_style = env.styles.get_known_style("cursor");
 
     let mut state0 = None;
@@ -266,15 +267,15 @@ fn render_row3_buttons(
 
     let mut button0 = Button::new("Save", state0, codex)
         .with_clicked_style(highlight_style)
-        .with_style(style);
+        .with_style(style0);
 
     let mut button1 = Button::new("Clear", state1, codex)
         .with_clicked_style(highlight_style)
-        .with_style(style);
+        .with_style(style1);
 
     button0.render(canvas, rect0, codex);
     button1.render(canvas, rect1, codex);
 
-    clickable_regions.insert("creator_button_reset_new_task".to_string(), rect0);
-    clickable_regions.insert("creator_button_add_new_task".to_string(), rect1);
+    clickable_regions.insert("creator_button_reset_new_task".to_string(), rect1);
+    clickable_regions.insert("creator_button_add_new_task".to_string(), rect0);
 }
