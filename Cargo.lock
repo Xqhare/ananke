@@ -22,7 +22,7 @@ dependencies = [
 [[package]]
 name = "anansi"
 version = "1.0.0"
-source = "git+https://github.com/Xqhare/anansi#73c7a7a1514530ad3352d3111e1dfc48803e666b"
+source = "git+https://github.com/Xqhare/anansi#9f019284853fbf18951f4aa8bf3995cd81d12205"
 
 [[package]]
 name = "areia"
