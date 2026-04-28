@@ -14,7 +14,9 @@ use crate::{
         creator::{handle_key_creator, mouse::handle_creator_mouse},
         header::{handle_header_mouse, handle_key_textbox_newfile},
     },
-    keys::{HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE},
+    keys::{
+        HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE, LIST_STATE,
+    },
     startup::Environment,
     utils::{add_load_n_forget_button_states, ensure_focus_on_active_textfield},
 };
@@ -95,7 +97,13 @@ pub fn process_input(
                     }
                 }
                 Event::MouseEvent(mouse_event) => {
-                    return Some(handle_mouse(mouse_event, env, clickable_regions, codex));
+                    return Some(handle_mouse(
+                        mouse_event,
+                        env,
+                        clickable_regions,
+                        codex,
+                        focus,
+                    ));
                 }
                 _ => {
                     return None;
@@ -126,7 +134,14 @@ fn handle_mouse(
     env: &mut Environment,
     clickable_regions: &BTreeMap<String, Rect>,
     codex: &Codex,
+    current_focus: &Focus,
 ) -> Focus {
+    // Doesn't matter where the mouse is when scrolling, always scroll the list
+    if mouse_event.kind == MouseEventKind::ScrollUp
+        || mouse_event.kind == MouseEventKind::ScrollDown
+    {
+        return handle_scrolling(mouse_event, env, current_focus);
+    }
     for (name, rect) in clickable_regions.iter() {
         if rect.contains(mouse_event.column, mouse_event.row) {
             match mouse_event.kind {
@@ -142,4 +157,37 @@ fn handle_mouse(
         }
     }
     Focus::None
+}
+
+fn handle_scrolling(
+    mouse_event: &MouseEvent,
+    env: &mut Environment,
+    current_focus: &Focus,
+) -> Focus {
+    if mouse_event.kind == MouseEventKind::ScrollUp {
+        let list_state = env
+            .states
+            .get_mut(LIST_STATE)
+            .unwrap()
+            .as_list_mut()
+            .unwrap();
+        let current_offset = list_state.scroll_offset;
+        if current_offset > 0 {
+            list_state.scroll_offset = current_offset - 1;
+        }
+    } else if mouse_event.kind == MouseEventKind::ScrollDown {
+        let list_max = env.list.task_amount();
+        let list_state = env
+            .states
+            .get_mut(LIST_STATE)
+            .unwrap()
+            .as_list_mut()
+            .unwrap();
+        let current_offset = list_state.scroll_offset;
+        if current_offset < list_max - 1 {
+            list_state.scroll_offset = current_offset + 1;
+        }
+    }
+    // Don't change the focus; Don't throw a user out of a text entry just because they scrolled - horrible UX otherwise imho
+    return *current_focus;
 }

@@ -7,15 +7,17 @@ use talos::{
 };
 
 use crate::{
-    input::Focus,
+    input::{Focus, creator::update_new_task_after_key_press},
     keys::{
-        HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON, HEADER_FILE_MENU_BUTTON_STATE,
-        HEADER_FILE_MENU_SUB_FORGET_BUTTON, HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE,
-        HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE, HEADER_FILE_MENU_SUB_LOAD_BUTTON,
-        HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE, HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE,
-        HEADER_FILE_MENU_SUB_NEW_BUTTON, HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE,
-        HEADER_FILE_MENU_SUB_NEW_TEXTBOX, HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
-        HEADER_HELP_BUTTON, HEADER_HELP_BUTTON_STATE, HEADER_SAVE_BUTTON,
+        CREATOR_TASK_ENTRY_TEXTBOX_STATE, CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS,
+        CREATOR_TEXT_SPECIAL_TAGS, HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON,
+        HEADER_FILE_MENU_BUTTON_STATE, HEADER_FILE_MENU_SUB_FORGET_BUTTON,
+        HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE,
+        HEADER_FILE_MENU_SUB_LOAD_BUTTON, HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE,
+        HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_BUTTON,
+        HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX,
+        HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE, HEADER_HELP_BUTTON, HEADER_HELP_BUTTON_STATE,
+        HEADER_SAVE_BUTTON,
     },
     startup::Environment,
     utils::{goto_exit, toggle_button},
@@ -32,6 +34,7 @@ pub fn handle_key_textbox_newfile(
     let state = env.states.get_mut(name).unwrap().as_text_box_mut().unwrap();
     let mut content = state.text.get_content().to_string();
 
+    let mut update_creator_after_key_press = false;
     // Now handle the key
     match key_event.code {
         KeyCode::Enter => {
@@ -68,12 +71,19 @@ pub fn handle_key_textbox_newfile(
         }
         KeyCode::Char(c) => {
             content.push(c);
+            if name == CREATOR_TASK_ENTRY_TEXTBOX_STATE {
+                env.new_task.update_text(&content);
+                update_creator_after_key_press = true;
+            };
         }
         _ => {}
     }
     // Update the text with the new content
-    state.text.set_content(content, codex);
+    state.text.set_content(&content, codex);
     state.cursor = Some(state.text.len());
+    if update_creator_after_key_press {
+        update_new_task_after_key_press(env, name, codex);
+    }
     None
 }
 

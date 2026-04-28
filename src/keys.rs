@@ -50,6 +50,7 @@ pub const LIST_SINGLE_TASK_DONE_BUTTON_STATE: &str = "list_single_task_id_button
 pub const LIST_SINGLE_TASK_DELETE_BUTTON_STATE: &str = "list_single_task_delete_button_state_";
 pub const LIST_SINGLE_TASK_PRIO_TEXTBOX_STATE: &str = "list_single_task_prio_textbox_state_";
 pub const LIST_SINGLE_TASK_TEXT_TEXTBOX_STATE: &str = "list_single_task_text_textbox_state_";
+pub const LIST_STATE: &str = "list_state";
 
 pub const MENU_RECT: &str = "menu_rect";
 pub const MENU_SHOW_DROPDOWN_TEXT: &str = "menu_show_button_text";

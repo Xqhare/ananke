@@ -5,9 +5,11 @@ use talos::codex::Codex;
 use crate::{
     input::{CreatorFocus, Focus},
     keys::{
-        CREATOR_CLEAR_BUTTON, CREATOR_INCEPTION_ENTRY_TEXTBOX, CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE,
-        CREATOR_PRIO_ENTRY_TEXTBOX, CREATOR_PRIO_ENTRY_TEXTBOX_STATE, CREATOR_SAVE_BUTTON,
-        CREATOR_TASK_ENTRY_TEXTBOX, CREATOR_TASK_ENTRY_TEXTBOX_STATE,
+        CREATOR_CLEAR_BUTTON, CREATOR_INCEPTION_ENTRY_TEXTBOX,
+        CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_ENTRY_TEXTBOX,
+        CREATOR_PRIO_ENTRY_TEXTBOX_STATE, CREATOR_SAVE_BUTTON, CREATOR_TASK_ENTRY_TEXTBOX,
+        CREATOR_TASK_ENTRY_TEXTBOX_STATE, CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS,
+        CREATOR_TEXT_SPECIAL_TAGS,
     },
     startup::Environment,
 };
@@ -123,4 +125,26 @@ fn reset_creator(env: &mut Environment, codex: &Codex) {
         .unwrap()
         .text
         .set_content(&now.date().to_string(), codex);
+
+    env.states
+        .get_mut(CREATOR_TEXT_CONTEXT_TAGS)
+        .unwrap()
+        .as_text_box_mut()
+        .unwrap()
+        .text
+        .set_content("", codex);
+    env.states
+        .get_mut(CREATOR_TEXT_PROJECT_TAGS)
+        .unwrap()
+        .as_text_box_mut()
+        .unwrap()
+        .text
+        .set_content("", codex);
+    env.states
+        .get_mut(CREATOR_TEXT_SPECIAL_TAGS)
+        .unwrap()
+        .as_text_box_mut()
+        .unwrap()
+        .text
+        .set_content("", codex);
 }

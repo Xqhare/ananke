@@ -5,19 +5,27 @@ use talos::{
     codex::Codex,
     widgets::{
         Text,
-        stateful::{ButtonState, States, TextBoxState},
+        stateful::{ButtonState, ListState, States, TextBoxState},
     },
 };
 
 use crate::keys::{
     LIST_SINGLE_TASK_DELETE_BUTTON_STATE, LIST_SINGLE_TASK_DONE_BUTTON_STATE,
-    LIST_SINGLE_TASK_PRIO_TEXTBOX_STATE, LIST_SINGLE_TASK_TEXT_TEXTBOX_STATE,
+    LIST_SINGLE_TASK_PRIO_TEXTBOX_STATE, LIST_SINGLE_TASK_TEXT_TEXTBOX_STATE, LIST_STATE,
 };
 
 pub fn make_list_table_state(list: &List, codex: &Codex, out: &mut BTreeMap<String, States>) {
     for task in &list.tasks() {
         make_single_task_state(task, codex, out);
     }
+    out.insert(
+        LIST_STATE.to_string(),
+        ListState {
+            selected: None,
+            scroll_offset: 0,
+        }
+        .into(),
+    );
 }
 
 // TODO: Will need to call that when updating a task.
