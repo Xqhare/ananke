@@ -1,12 +1,11 @@
-use anansi::Task;
-use horae::Utc;
-use talos::{
-    codex::{self, Codex},
-    input::KeyEvent,
-};
+use talos::{codex::Codex, input::KeyEvent};
 
 use crate::{
-    input::{CreatorFocus, Focus, header::handle_key_textbox_newfile},
+    input::{CreatorFocus, header::handle_key_textbox_newfile},
+    keys::{
+        CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
+        CREATOR_TASK_ENTRY_TEXTBOX_STATE,
+    },
     startup::Environment,
 };
 
@@ -19,9 +18,9 @@ pub fn handle_key_creator(
     codex: &Codex,
 ) -> Option<()> {
     let name = match focus {
-        CreatorFocus::Task => "creator_task_entry_textbox_state",
-        CreatorFocus::Priority => "creator_task_prio_entry_textbox_state",
-        CreatorFocus::CreationDate => "creator_task_creation_date_entry_textbox_state",
+        CreatorFocus::Task => CREATOR_TASK_ENTRY_TEXTBOX_STATE,
+        CreatorFocus::Priority => CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
+        CreatorFocus::CreationDate => CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE,
     };
 
     handle_key_textbox_newfile(name, key_event, env, codex)

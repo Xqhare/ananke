@@ -5,6 +5,10 @@ Ananke is a fully featured to-do app written in Rust for all PC platforms.
 - Cross-platform
 - Minimal dependencies
 
+## TODO
+
+- Loading an existing todo file crashes the app only if using the new button
+
 ## Name
 Ananke is named after the Greek goddess embodying destiny and the natural order of things. She is also associated with fulfilling ones obligations.
 

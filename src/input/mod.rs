@@ -14,6 +14,7 @@ use crate::{
         creator::{handle_key_creator, mouse::handle_creator_mouse},
         header::{handle_header_mouse, handle_key_textbox_newfile},
     },
+    keys::{HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE},
     startup::Environment,
     utils::{add_load_n_forget_button_states, ensure_focus_on_active_textfield},
 };
@@ -64,7 +65,7 @@ pub fn process_input(
                         }
                         Focus::HeaderFileNewTextBox => {
                             if let Some(_) = handle_key_textbox_newfile(
-                                "header_file_menu_sub_new_textbox_state",
+                                HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
                                 key_event,
                                 env,
                                 codex,
@@ -74,7 +75,7 @@ pub fn process_input(
                                 // Lastly close the menu
                                 let state = env
                                     .states
-                                    .get_mut("header_file_menu_sub_new_button_state")
+                                    .get_mut(HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE)
                                     .unwrap()
                                     .as_button_mut()
                                     .unwrap();

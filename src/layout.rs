@@ -4,6 +4,17 @@ use talos::{
     layout::{Constraint, Direction, Layout, Rect},
 };
 
+use crate::keys::{
+    CREATOR_CLEAR_BUTTON, CREATOR_HELP_PAGE_LEFT, CREATOR_HELP_PAGE_RIGHT,
+    CREATOR_INCEPTION_ENTRY_TEXTBOX, CREATOR_INCEPTION_TEXT, CREATOR_PRIO_ENTRY_TEXTBOX,
+    CREATOR_PRIO_TEXT, CREATOR_RECT, CREATOR_SAVE_BUTTON, CREATOR_TASK_ENTRY_TEXTBOX,
+    CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS, CREATOR_TEXT_SPECIAL_TAGS,
+    HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON, HEADER_FILE_PATH, HEADER_FPS, HEADER_HELP_BUTTON,
+    HEADER_SAVE_BUTTON, MENU_RECT, MENU_SEARCH_TEXT, MENU_SEARCH_TEXTBOX, MENU_SHOW_DROPDOWN,
+    MENU_SHOW_DROPDOWN_TEXT, MENU_SORT_BUTTON, MENU_SORT_BUTTON_TEXT, MENU_SORT_PRIO_BUTTON_TEXT,
+    MENU_SORT_PRIO_TEXTBOX,
+};
+
 /// Builds the basic layout of Ananke.
 ///
 /// It splits the screen into the 4 needed sectors vertically.
@@ -42,15 +53,18 @@ fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
         .build()
         .split(*menu_rect);
     debug_assert!(layout.len() == 2);
+    // You can think of this as a true flex box. The available space is split into 6 equal parts (or as close as possible)
     let buttons = LayoutBuilder::new()
         .direction(Direction::Horizontal)
-        .add_constraint(Constraint::Percentage(25))
-        .add_constraint(Constraint::Percentage(25))
-        .add_constraint(Constraint::Percentage(25))
-        .add_constraint(Constraint::Percentage(25))
+        .add_constraint(Constraint::Min(1))
+        .add_constraint(Constraint::Min(1))
+        .add_constraint(Constraint::Min(1))
+        .add_constraint(Constraint::Min(1))
+        .add_constraint(Constraint::Min(1))
+        .add_constraint(Constraint::Min(1))
         .build()
         .split(layout[0]);
-    debug_assert!(buttons.len() == 4);
+    debug_assert!(buttons.len() == 6);
     let sort = LayoutBuilder::new()
         .direction(Direction::Horizontal)
         .add_constraint(Constraint::Length(10))
@@ -59,13 +73,15 @@ fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
         .split(layout[1]);
     debug_assert!(sort.len() == 2);
     vec![
-        ("menu_rect".to_string(), *menu_rect),
-        ("menu_sort_button_text".to_string(), buttons[0]),
-        ("menu_sort_button".to_string(), buttons[1]),
-        ("menu_sort_prio_button_text".to_string(), buttons[2]),
-        ("menu_sort_prio_button".to_string(), buttons[3]),
-        ("menu_search_text".to_string(), sort[0]),
-        ("menu_search_textbox".to_string(), sort[1]),
+        (MENU_RECT.to_string(), *menu_rect),
+        (MENU_SHOW_DROPDOWN_TEXT.to_string(), buttons[0]),
+        (MENU_SHOW_DROPDOWN.to_string(), buttons[1]),
+        (MENU_SORT_BUTTON_TEXT.to_string(), buttons[2]),
+        (MENU_SORT_BUTTON.to_string(), buttons[3]),
+        (MENU_SORT_PRIO_BUTTON_TEXT.to_string(), buttons[4]),
+        (MENU_SORT_PRIO_TEXTBOX.to_string(), buttons[5]),
+        (MENU_SEARCH_TEXT.to_string(), sort[0]),
+        (MENU_SEARCH_TEXTBOX.to_string(), sort[1]),
     ]
 }
 
@@ -156,25 +172,22 @@ fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
     debug_assert!(help_page.len() == 2);
 
     vec![
-        ("creator_rect".to_string(), *creator_rect),
-        ("creator_textbox_task".to_string(), layout[0]),
-        ("creator_prio_text".to_string(), row_1_prio[0]),
-        ("creator_textbox_prio".to_string(), row_1_prio[1]),
-        ("creator_inception_text".to_string(), row_1_inception[0]),
-        ("creator_textbox_inception".to_string(), row_1_inception[1]),
-        ("creator_text_context_tags".to_string(), row1[1]),
-        ("creator_text_project_tags".to_string(), row2[0]),
-        ("creator_text_special_tags".to_string(), row2[1]),
+        (CREATOR_RECT.to_string(), *creator_rect),
+        (CREATOR_TASK_ENTRY_TEXTBOX.to_string(), layout[0]),
+        (CREATOR_PRIO_TEXT.to_string(), row_1_prio[0]),
+        (CREATOR_PRIO_ENTRY_TEXTBOX.to_string(), row_1_prio[1]),
+        (CREATOR_INCEPTION_TEXT.to_string(), row_1_inception[0]),
         (
-            "creator_button_reset_new_task".to_string(),
-            row3_middle_buttons[0],
+            CREATOR_INCEPTION_ENTRY_TEXTBOX.to_string(),
+            row_1_inception[1],
         ),
-        (
-            "creator_button_add_new_task".to_string(),
-            row3_middle_buttons[1],
-        ),
-        ("creator_help_page_left".to_string(), help_page[0]),
-        ("creator_help_page_right".to_string(), help_page[1]),
+        (CREATOR_TEXT_CONTEXT_TAGS.to_string(), row1[1]),
+        (CREATOR_TEXT_PROJECT_TAGS.to_string(), row2[0]),
+        (CREATOR_TEXT_SPECIAL_TAGS.to_string(), row2[1]),
+        (CREATOR_CLEAR_BUTTON.to_string(), row3_middle_buttons[0]),
+        (CREATOR_SAVE_BUTTON.to_string(), row3_middle_buttons[1]),
+        (CREATOR_HELP_PAGE_LEFT.to_string(), help_page[0]),
+        (CREATOR_HELP_PAGE_RIGHT.to_string(), help_page[1]),
     ]
 }
 
@@ -204,11 +217,11 @@ fn make_header_layout(header_rect: &Rect) -> Vec<(String, Rect)> {
         .split(layout[1]);
     debug_assert!(stats.len() == 3);
     vec![
-        ("header_file_button".to_string(), buttons[0]),
-        ("header_save_button".to_string(), buttons[1]),
-        ("header_help_button".to_string(), buttons[2]),
-        ("header_exit_button".to_string(), buttons[3]),
-        ("header_fps".to_string(), stats[1]),
-        ("header_file_path".to_string(), stats[2]),
+        (HEADER_FILE_MENU_BUTTON.to_string(), buttons[0]),
+        (HEADER_SAVE_BUTTON.to_string(), buttons[1]),
+        (HEADER_HELP_BUTTON.to_string(), buttons[2]),
+        (HEADER_EXIT_BUTTON.to_string(), buttons[3]),
+        (HEADER_FPS.to_string(), stats[1]),
+        (HEADER_FILE_PATH.to_string(), stats[2]),
     ]
 }

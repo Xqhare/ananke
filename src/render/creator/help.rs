@@ -7,7 +7,10 @@ use talos::{
     widgets::{Block, Text, traits::Widget},
 };
 
-use crate::startup::Environment;
+use crate::{
+    keys::{CREATOR_HELP_PAGE_LEFT, CREATOR_HELP_PAGE_RIGHT},
+    startup::Environment,
+};
 
 pub fn render_help(
     canvas: &mut Canvas,
@@ -25,7 +28,7 @@ fn render_help_block(
     layout_atlas: &LayoutAtlas,
     env: &Environment,
 ) {
-    let area = layout_atlas.get_known_rect("creator_help_page_left");
+    let area = layout_atlas.get_known_rect(CREATOR_HELP_PAGE_LEFT);
     let style = env.styles.get_default();
     let mut block = Block::default()
         .title("Help", codex, false)
@@ -68,7 +71,7 @@ const SOURCE: &str = env!("CARGO_PKG_REPOSITORY");
 const TODO: &str = "https://github.com/todotxt/todo.txt";
 
 fn render_about(canvas: &mut Canvas, codex: &Codex, layout_atlas: &LayoutAtlas, env: &Environment) {
-    let area = layout_atlas.get_known_rect("creator_help_page_right");
+    let area = layout_atlas.get_known_rect(CREATOR_HELP_PAGE_RIGHT);
     let style = env.styles.get_default();
     let mut block = Block::default()
         .title("About", codex, false)

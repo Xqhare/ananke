@@ -8,6 +8,14 @@ use talos::{
     },
 };
 
+use crate::keys::{
+    HEADER_EXIT_BUTTON_STATE, HEADER_FILE_MENU_BUTTON_STATE,
+    HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE,
+    HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE, HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE,
+    HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
+    HEADER_HELP_BUTTON_STATE, HEADER_SAVE_BUTTON_STATE,
+};
+
 pub fn make_header_state(
     path_amount: usize,
     codex: &Codex,
@@ -22,19 +30,19 @@ pub fn make_header_state(
 
 fn make_header_save_menu_state(out: &mut BTreeMap<String, States>) {
     out.insert(
-        "header_save_menu_button_state".to_string(),
+        HEADER_SAVE_BUTTON_STATE.to_string(),
         States::from(ButtonState { clicked: false }),
     );
 }
 fn make_header_help_menu_state(out: &mut BTreeMap<String, States>) {
     out.insert(
-        "header_help_menu_button_state".to_string(),
+        HEADER_HELP_BUTTON_STATE.to_string(),
         States::from(ButtonState { clicked: false }),
     );
 }
 fn make_header_exit_menu_state(out: &mut BTreeMap<String, States>) {
     out.insert(
-        "header_exit_menu_button_state".to_string(),
+        HEADER_EXIT_BUTTON_STATE.to_string(),
         States::from(ButtonState { clicked: false }),
     );
 }
@@ -55,32 +63,32 @@ fn make_header_file_menu_state(
         text,
     };
     out.insert(
-        "header_file_menu_button_main_button_state".to_string(),
+        HEADER_FILE_MENU_BUTTON_STATE.to_string(),
         States::from(button_state),
     );
     out.insert(
-        "header_file_menu_sub_new_button_state".to_string(),
+        HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE.to_string(),
         States::from(button_state),
     );
     out.insert(
-        "header_file_menu_sub_new_textbox_state".to_string(),
+        HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE.to_string(),
         States::from(path_state.clone()),
     );
     out.insert(
-        "header_file_menu_sub_load_button_state".to_string(),
+        HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE.to_string(),
         States::from(button_state),
     );
     out.insert(
-        "header_file_menu_sub_forget_button_state".to_string(),
+        HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE.to_string(),
         States::from(button_state),
     );
     for i in 0..path_amount {
         out.insert(
-            format!("header_file_menu_sub_forget_button_{i}"),
+            format!("{HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE}{i}"),
             States::from(button_state),
         );
         out.insert(
-            format!("header_file_menu_sub_load_button_{i}"),
+            format!("{HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE}{i}"),
             States::from(button_state),
         );
     }

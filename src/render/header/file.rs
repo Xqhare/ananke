@@ -4,7 +4,7 @@ use talos::{
     atlases::LayoutAtlas,
     codex::Codex,
     layout::Rect,
-    render::{Canvas, Colour, Normal},
+    render::Canvas,
     widgets::{
         Block,
         stateful::{BlockBox, Button, MenuButton, TextBox},
@@ -12,7 +12,18 @@ use talos::{
     },
 };
 
-use crate::startup::Environment;
+use crate::{
+    keys::{
+        HEADER_FILE_MENU_BUTTON, HEADER_FILE_MENU_BUTTON_STATE, HEADER_FILE_MENU_SUB_FORGET_BUTTON,
+        HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE,
+        HEADER_FILE_MENU_SUB_LOAD_BUTTON, HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE,
+        HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_BUTTON,
+        HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX,
+        HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
+        styles::{DEFAULT_INVERTED, EDITABLE_ACTIVE},
+    },
+    startup::Environment,
+};
 
 pub fn render_header_file_menu_button(
     canvas: &mut Canvas,
@@ -43,10 +54,10 @@ pub fn render_header_file_menu_button(
         paths
     };
 
-    let rect = layout_atlas.get_known_rect("header_file_button");
+    let rect = layout_atlas.get_known_rect(HEADER_FILE_MENU_BUTTON);
     let default_style = env.styles.get_default();
-    let default_clicked_style = env.styles.get_known_style("default_inverted");
-    let editable_active = env.styles.get_known_style("editable_active");
+    let default_clicked_style = env.styles.get_known_style(DEFAULT_INVERTED);
+    let editable_active = env.styles.get_known_style(EDITABLE_ACTIVE);
 
     // Borrow checker fix: Iterate once to gather multiple mutable references from the same map.
     let mut file_button_state = None;
@@ -59,27 +70,27 @@ pub fn render_header_file_menu_button(
 
     for (key, state) in env.states.iter_mut() {
         match key.as_str() {
-            "header_file_menu_button_main_button_state" => {
+            HEADER_FILE_MENU_BUTTON_STATE => {
                 file_button_state = Some(state.as_button_mut().expect("Must be a button"))
             }
-            "header_file_menu_sub_new_button_state" => {
+            HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE => {
                 new_file_button_state = Some(state.as_button_mut().expect("Must be a button"))
             }
-            "header_file_menu_sub_new_textbox_state" => {
+            HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE => {
                 new_file_textbox_state = Some(state.as_text_box_mut().expect("Must be a textbox"))
             }
-            "header_file_menu_sub_load_button_state" => {
+            HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE => {
                 load_file_button_state = Some(state.as_button_mut().expect("Must be a button"))
             }
-            "header_file_menu_sub_forget_button_state" => {
+            HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE => {
                 forget_file_button_state = Some(state.as_button_mut().expect("Must be a button"))
             }
             _ => {
                 // Keys are sorted lexicographically -> 0 will always be first, 1 second, etc
-                if key.starts_with("header_file_menu_sub_forget_button_") {
+                if key.starts_with(HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE) {
                     let button = state.as_button_mut().expect("Must be a button");
                     forget_file_sub_button_states.push(button);
-                } else if key.starts_with("header_file_menu_sub_load_button_") {
+                } else if key.starts_with(HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE) {
                     let button = state.as_button_mut().expect("Must be a button");
                     load_file_sub_button_states.push(button);
                 }
@@ -205,11 +216,11 @@ fn update_clickable_regions(
     //
     // Some buttons are drawn over other clickable regions, this way ensures they are looped over
     // (and 'clicked on') first inside the input processing
-    clickable_regions.insert("a0_header_file_menu_button".to_string(), rect);
+    clickable_regions.insert(HEADER_FILE_MENU_BUTTON.to_string(), rect);
 
     if file_button_clicked {
         clickable_regions.insert(
-            "a0_header_file_menu_sub_new_button".to_string(),
+            HEADER_FILE_MENU_SUB_NEW_BUTTON.to_string(),
             Rect::new(
                 rect.x,
                 rect.y.saturating_add(3 * 1),
@@ -219,7 +230,7 @@ fn update_clickable_regions(
         );
         if new_file_button_clicked {
             clickable_regions.insert(
-                "a0_header_file_menu_sub_new_textbox".to_string(),
+                HEADER_FILE_MENU_SUB_NEW_TEXTBOX.to_string(),
                 Rect::new(
                     rect.x.saturating_add(rect.width),
                     rect.y.saturating_add(3 * 1),
@@ -229,7 +240,7 @@ fn update_clickable_regions(
             );
         }
         clickable_regions.insert(
-            "a0_header_file_menu_sub_load_button".to_string(),
+            HEADER_FILE_MENU_SUB_LOAD_BUTTON.to_string(),
             Rect::new(
                 rect.x,
                 rect.y.saturating_add(3 * 2),
@@ -240,7 +251,7 @@ fn update_clickable_regions(
         if load_file_button_clicked {
             for n in 0..path_amount {
                 clickable_regions.insert(
-                    format!("a0_header_file_menu_sub_load_button_{}", n),
+                    format!("{HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE}{n}"),
                     Rect::new(
                         rect.x.saturating_add(rect.width * (n as u16 + 1)),
                         rect.y.saturating_add(3 * 2),
@@ -251,7 +262,7 @@ fn update_clickable_regions(
             }
         }
         clickable_regions.insert(
-            "a0_header_file_menu_sub_forget_button".to_string(),
+            HEADER_FILE_MENU_SUB_FORGET_BUTTON.to_string(),
             Rect::new(
                 rect.x,
                 rect.y.saturating_add(3 * 3),
@@ -262,7 +273,7 @@ fn update_clickable_regions(
         if forget_file_button_clicked {
             for n in 0..path_amount {
                 clickable_regions.insert(
-                    format!("a0_header_file_menu_sub_forget_button_{}", n),
+                    format!("{HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE}{n}"),
                     Rect::new(
                         rect.x.saturating_add(rect.width * (n as u16 + 1)),
                         rect.y.saturating_add(3 * 3),

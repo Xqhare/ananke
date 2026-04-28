@@ -13,6 +13,7 @@ use crate::{
 
 mod error;
 mod input;
+mod keys;
 mod layout;
 mod render;
 mod startup;

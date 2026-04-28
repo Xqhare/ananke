@@ -8,7 +8,15 @@ use talos::{
     widgets::{Text, stateful::Button, traits::Widget},
 };
 
-use crate::{render::header::file::render_header_file_menu_button, startup::Environment};
+use crate::{
+    keys::{
+        HEADER_EXIT_BUTTON, HEADER_EXIT_BUTTON_STATE, HEADER_FILE_PATH, HEADER_FPS,
+        HEADER_HELP_BUTTON, HEADER_HELP_BUTTON_STATE, HEADER_SAVE_BUTTON, HEADER_SAVE_BUTTON_STATE,
+        styles::DEFAULT_INVERTED,
+    },
+    render::header::file::render_header_file_menu_button,
+    startup::Environment,
+};
 
 mod file;
 
@@ -35,12 +43,12 @@ fn render_header_help_button(
     clickable_regions: &mut BTreeMap<String, Rect>,
     env: &mut Environment,
 ) {
-    let rect = layout_atlas.get_known_rect("header_help_button");
+    let rect = layout_atlas.get_known_rect(HEADER_HELP_BUTTON);
     let default_style = env.styles.get_default();
-    let default_clicked_style = env.styles.get_known_style("default_inverted");
+    let default_clicked_style = env.styles.get_known_style(DEFAULT_INVERTED);
     let help_button_state = &mut env
         .states
-        .get_mut("header_help_menu_button_state")
+        .get_mut(HEADER_HELP_BUTTON_STATE)
         .unwrap()
         .as_button_mut()
         .unwrap();
@@ -48,7 +56,7 @@ fn render_header_help_button(
         .with_style(default_style)
         .with_clicked_style(default_clicked_style);
     button.render(canvas, rect, codex);
-    clickable_regions.insert("header_help_button".to_string(), rect);
+    clickable_regions.insert(HEADER_HELP_BUTTON.to_string(), rect);
 }
 
 fn render_header_exit_button(
@@ -58,17 +66,17 @@ fn render_header_exit_button(
     clickable_regions: &mut BTreeMap<String, Rect>,
     env: &mut Environment,
 ) {
-    let rect = layout_atlas.get_known_rect("header_exit_button");
+    let rect = layout_atlas.get_known_rect(HEADER_EXIT_BUTTON);
     let default_style = env.styles.get_default();
     let exit_button_state = &mut env
         .states
-        .get_mut("header_exit_menu_button_state")
+        .get_mut(HEADER_EXIT_BUTTON_STATE)
         .unwrap()
         .as_button_mut()
         .unwrap();
     let mut button = Button::new("Exit", exit_button_state, codex).with_style(default_style);
     button.render(canvas, rect, codex);
-    clickable_regions.insert("header_exit_button".to_string(), rect);
+    clickable_regions.insert(HEADER_EXIT_BUTTON.to_string(), rect);
 }
 
 fn render_header_save_button(
@@ -78,17 +86,17 @@ fn render_header_save_button(
     clickable_regions: &mut BTreeMap<String, Rect>,
     env: &mut Environment,
 ) {
-    let rect = layout_atlas.get_known_rect("header_save_button");
+    let rect = layout_atlas.get_known_rect(HEADER_SAVE_BUTTON);
     let default_style = env.styles.get_default();
     let save_button_state = &mut env
         .states
-        .get_mut("header_save_menu_button_state")
+        .get_mut(HEADER_SAVE_BUTTON_STATE)
         .unwrap()
         .as_button_mut()
         .unwrap();
     let mut button = Button::new("Save", save_button_state, codex).with_style(default_style);
     button.render(canvas, rect, codex);
-    clickable_regions.insert("header_save_button".to_string(), rect);
+    clickable_regions.insert(HEADER_SAVE_BUTTON.to_string(), rect);
 }
 
 fn render_header_fps(
@@ -105,7 +113,7 @@ fn render_header_fps(
             1_000_000 / last_frame_dur
         }
     };
-    let rect = layout_atlas.get_known_rect("header_fps");
+    let rect = layout_atlas.get_known_rect(HEADER_FPS);
     let default_style = env.styles.get_default();
     let mut text = Text::new(format!("FPS: {}", fps), codex)
         .align_center()
@@ -120,7 +128,7 @@ fn render_header_file_path(
     layout_atlas: &LayoutAtlas,
     env: &Environment,
 ) {
-    let rect = layout_atlas.get_known_rect("header_file_path");
+    let rect = layout_atlas.get_known_rect(HEADER_FILE_PATH);
     let default_style = env.styles.get_default();
     let path = env.list.get_path();
     let mut text = Text::new(format!("Current file: {}", path.display()), codex)

@@ -8,7 +8,7 @@ use talos::{
     widgets::{Block, traits::Widget},
 };
 
-use crate::startup::Environment;
+use crate::{keys::MENU_RECT, startup::Environment};
 
 pub fn render_menu(
     canvas: &mut Canvas,
@@ -17,7 +17,7 @@ pub fn render_menu(
     clickable_regions: &mut BTreeMap<String, Rect>,
     env: &mut Environment,
 ) {
-    let area = layout_atlas.get_known_rect("menu_rect");
+    let area = layout_atlas.get_known_rect(MENU_RECT);
     let style = env.styles.get_default();
     let mut block = Block::new().with_style(style);
     block.render(canvas, area, codex);

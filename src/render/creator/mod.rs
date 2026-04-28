@@ -12,7 +12,18 @@ use talos::{
     },
 };
 
-use crate::{render::creator::help::render_help, startup::Environment};
+use crate::{
+    keys::{
+        CREATOR_CLEAR_BUTTON, CREATOR_CLEAR_BUTTON_STATE, CREATOR_INCEPTION_ENTRY_TEXTBOX,
+        CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE, CREATOR_INCEPTION_TEXT, CREATOR_PRIO_ENTRY_TEXTBOX,
+        CREATOR_PRIO_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_TEXT, CREATOR_RECT, CREATOR_SAVE_BUTTON,
+        CREATOR_SAVE_BUTTON_STATE, CREATOR_TASK_ENTRY_TEXTBOX, CREATOR_TASK_ENTRY_TEXTBOX_STATE,
+        CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS, CREATOR_TEXT_SPECIAL_TAGS,
+        HEADER_HELP_BUTTON_STATE, styles::CURSOR,
+    },
+    render::creator::help::render_help,
+    startup::Environment,
+};
 
 mod help;
 
@@ -33,13 +44,13 @@ fn render_outer_block(
     clickable_regions: &mut BTreeMap<String, Rect>,
     env: &mut Environment,
 ) {
-    let area = layout_atlas.get_known_rect("creator_rect");
+    let area = layout_atlas.get_known_rect(CREATOR_RECT);
     let style = env.styles.get_default();
     let mut block = Block::new().with_style(style);
     block.render(canvas, area, codex);
     if env
         .states
-        .get("header_help_menu_button_state")
+        .get(HEADER_HELP_BUTTON_STATE)
         .unwrap()
         .as_button()
         .unwrap()
@@ -71,22 +82,22 @@ fn render_row0(
     env: &mut Environment,
     clickable_regions: &mut BTreeMap<String, Rect>,
 ) {
-    let rect0 = layout_atlas.get_known_rect("creator_textbox_prio");
-    let rect01 = layout_atlas.get_known_rect("creator_prio_text");
-    let rect1 = layout_atlas.get_known_rect("creator_textbox_task");
-    let rect10 = layout_atlas.get_known_rect("creator_inception_text");
+    let rect0 = layout_atlas.get_known_rect(CREATOR_PRIO_ENTRY_TEXTBOX);
+    let rect01 = layout_atlas.get_known_rect(CREATOR_PRIO_TEXT);
+    let rect1 = layout_atlas.get_known_rect(CREATOR_TASK_ENTRY_TEXTBOX);
+    let rect10 = layout_atlas.get_known_rect(CREATOR_INCEPTION_TEXT);
     let style = env.styles.get_default();
-    let highlight_style = env.styles.get_known_style("cursor");
+    let highlight_style = env.styles.get_known_style(CURSOR);
 
     let mut state0 = None;
     let mut state1 = None;
 
     for (name, state) in env.states.iter_mut() {
         match name.as_str() {
-            "creator_task_prio_entry_textbox_state" => {
+            CREATOR_PRIO_ENTRY_TEXTBOX_STATE => {
                 state0 = state.as_text_box_mut();
             }
-            "creator_task_entry_textbox_state" => {
+            CREATOR_TASK_ENTRY_TEXTBOX_STATE => {
                 state1 = state.as_text_box_mut();
             }
             _ => {}
@@ -138,8 +149,8 @@ fn render_row0(
 
     blockbox1.render(canvas, rect1, codex);
 
-    clickable_regions.insert("creator_textbox_task".to_string(), rect1);
-    clickable_regions.insert("creator_textbox_prio".to_string(), rect0);
+    clickable_regions.insert(CREATOR_TASK_ENTRY_TEXTBOX.to_string(), rect1);
+    clickable_regions.insert(CREATOR_PRIO_ENTRY_TEXTBOX.to_string(), rect0);
 }
 
 fn render_row1(
@@ -149,20 +160,20 @@ fn render_row1(
     env: &mut Environment,
     clickable_regions: &mut BTreeMap<String, Rect>,
 ) {
-    let rect0 = layout_atlas.get_known_rect("creator_textbox_inception");
-    let rect1 = layout_atlas.get_known_rect("creator_text_context_tags");
+    let rect0 = layout_atlas.get_known_rect(CREATOR_INCEPTION_ENTRY_TEXTBOX);
+    let rect1 = layout_atlas.get_known_rect(CREATOR_TEXT_CONTEXT_TAGS);
     let style = env.styles.get_default();
-    let highlight_style = env.styles.get_known_style("cursor");
+    let highlight_style = env.styles.get_known_style(CURSOR);
 
     let mut state0 = None;
     let mut state1 = None;
 
     for (name, state) in env.states.iter_mut() {
         match name.as_str() {
-            "creator_task_creation_date_entry_textbox_state" => {
+            CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE => {
                 state0 = state.as_text_box_mut();
             }
-            "creator_text_context_tags" => {
+            CREATOR_TEXT_CONTEXT_TAGS => {
                 state1 = state.as_text_box_mut();
             }
             _ => {}
@@ -187,7 +198,7 @@ fn render_row1(
 
     blockbox1.render(canvas, rect1, codex);
 
-    clickable_regions.insert("creator_textbox_inception".to_string(), rect0);
+    clickable_regions.insert(CREATOR_INCEPTION_ENTRY_TEXTBOX.to_string(), rect0);
 }
 
 fn render_row2(
@@ -196,18 +207,18 @@ fn render_row2(
     layout_atlas: &LayoutAtlas,
     env: &mut Environment,
 ) {
-    let rect0 = layout_atlas.get_known_rect("creator_text_project_tags");
-    let rect1 = layout_atlas.get_known_rect("creator_text_special_tags");
+    let rect0 = layout_atlas.get_known_rect(CREATOR_TEXT_PROJECT_TAGS);
+    let rect1 = layout_atlas.get_known_rect(CREATOR_TEXT_SPECIAL_TAGS);
     let style = env.styles.get_default();
     let mut state0 = None;
     let mut state1 = None;
 
     for (name, state) in env.states.iter_mut() {
         match name.as_str() {
-            "creator_text_project_tags" => {
+            CREATOR_TEXT_PROJECT_TAGS => {
                 state0 = state.as_text_box_mut();
             }
-            "creator_text_special_tags" => {
+            CREATOR_TEXT_SPECIAL_TAGS => {
                 state1 = state.as_text_box_mut();
             }
             _ => {}
@@ -241,21 +252,21 @@ fn render_row3_buttons(
     env: &mut Environment,
     clickable_regions: &mut BTreeMap<String, Rect>,
 ) {
-    let rect0 = layout_atlas.get_known_rect("creator_button_add_new_task");
-    let rect1 = layout_atlas.get_known_rect("creator_button_reset_new_task");
+    let rect0 = layout_atlas.get_known_rect(CREATOR_SAVE_BUTTON);
+    let rect1 = layout_atlas.get_known_rect(CREATOR_CLEAR_BUTTON);
     let style0 = env.styles.get_ok();
     let style1 = env.styles.get_warning();
-    let highlight_style = env.styles.get_known_style("cursor");
+    let highlight_style = env.styles.get_known_style(CURSOR);
 
     let mut state0 = None;
     let mut state1 = None;
 
     for (name, state) in env.states.iter_mut() {
         match name.as_str() {
-            "creator_task_save_button_state" => {
+            CREATOR_SAVE_BUTTON_STATE => {
                 state0 = state.as_button_mut();
             }
-            "creator_task_forget_button_state" => {
+            CREATOR_CLEAR_BUTTON_STATE => {
                 state1 = state.as_button_mut();
             }
             _ => {}
@@ -276,6 +287,6 @@ fn render_row3_buttons(
     button0.render(canvas, rect0, codex);
     button1.render(canvas, rect1, codex);
 
-    clickable_regions.insert("creator_button_reset_new_task".to_string(), rect1);
-    clickable_regions.insert("creator_button_add_new_task".to_string(), rect0);
+    clickable_regions.insert(CREATOR_CLEAR_BUTTON.to_string(), rect1);
+    clickable_regions.insert(CREATOR_SAVE_BUTTON.to_string(), rect0);
 }

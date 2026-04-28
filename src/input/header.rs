@@ -8,6 +8,15 @@ use talos::{
 
 use crate::{
     input::Focus,
+    keys::{
+        HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON, HEADER_FILE_MENU_BUTTON_STATE,
+        HEADER_FILE_MENU_SUB_FORGET_BUTTON, HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE,
+        HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE, HEADER_FILE_MENU_SUB_LOAD_BUTTON,
+        HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE, HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE,
+        HEADER_FILE_MENU_SUB_NEW_BUTTON, HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE,
+        HEADER_FILE_MENU_SUB_NEW_TEXTBOX, HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
+        HEADER_HELP_BUTTON, HEADER_HELP_BUTTON_STATE, HEADER_SAVE_BUTTON,
+    },
     startup::Environment,
     utils::{goto_exit, toggle_button},
 };
@@ -71,15 +80,15 @@ pub fn handle_key_textbox_newfile(
 /// Handles the mouse events for the header
 pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
     match name {
-        "a0_header_file_menu_button" => {
-            toggle_button(env, "header_file_menu_button_main_button_state");
+        HEADER_FILE_MENU_BUTTON => {
+            toggle_button(env, HEADER_FILE_MENU_BUTTON_STATE);
             Focus::None
         }
-        "a0_header_file_menu_sub_new_button" => {
-            if toggle_button(env, "header_file_menu_sub_new_button_state") {
+        HEADER_FILE_MENU_SUB_NEW_BUTTON => {
+            if toggle_button(env, HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE) {
                 let state = env
                     .states
-                    .get_mut("header_file_menu_sub_new_textbox_state")
+                    .get_mut(HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE)
                     .unwrap()
                     .as_text_box_mut()
                     .unwrap();
@@ -89,18 +98,18 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
                 Focus::None
             }
         }
-        "a0_header_file_menu_sub_load_button" => {
-            toggle_button(env, "header_file_menu_sub_load_button_state");
+        HEADER_FILE_MENU_SUB_LOAD_BUTTON => {
+            toggle_button(env, HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE);
             Focus::None
         }
-        "a0_header_file_menu_sub_forget_button" => {
-            toggle_button(env, "header_file_menu_sub_forget_button_state");
+        HEADER_FILE_MENU_SUB_FORGET_BUTTON => {
+            toggle_button(env, HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE);
             Focus::None
         }
-        "a0_header_file_menu_sub_new_textbox" => {
+        HEADER_FILE_MENU_SUB_NEW_TEXTBOX => {
             let state = env
                 .states
-                .get_mut("header_file_menu_sub_new_textbox_state")
+                .get_mut(HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE)
                 .unwrap()
                 .as_text_box_mut()
                 .unwrap();
@@ -108,27 +117,29 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
             // If a user clicks into the textbox directly, we want to always focus it
             Focus::HeaderFileNewTextBox
         }
-        "header_save_button" => {
+        HEADER_SAVE_BUTTON => {
             // Save the list - Nothing else to do; More of a pseudo button
             env.list.save().unwrap();
             Focus::None
         }
-        "header_help_button" => {
-            toggle_button(env, "header_help_menu_button_state");
+        HEADER_HELP_BUTTON => {
+            toggle_button(env, HEADER_HELP_BUTTON_STATE);
             Focus::None
         }
-        "header_exit_button" => {
+        HEADER_EXIT_BUTTON => {
             // No need to set the button state; just exit this frame
             goto_exit(env);
             Focus::None
         }
         _ => {
             // Handle the buttons with an arbitrary amount
-            if name.contains("a0_header_file_menu_sub_forget_button_") {
+            //
+            // Also load only if the name contains the base, to minimise IO calls
+            if name.contains(HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE) {
                 let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
                 let obj = path.as_object_mut().unwrap();
                 handle_mouse_forget_button(name, env, obj);
-            } else if name.contains("a0_header_file_menu_sub_load_button_") {
+            } else if name.contains(HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE) {
                 let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
                 let obj = path.as_object_mut().unwrap();
                 handle_mouse_load_button(name, env, obj);
@@ -143,7 +154,7 @@ fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Objec
     // Close the forget menu
     let button = env
         .states
-        .get_mut("header_file_menu_sub_forget_button_state")
+        .get_mut(HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE)
         .unwrap()
         .as_button_mut()
         .unwrap();
@@ -153,14 +164,13 @@ fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Objec
     let paths_ary = obj.get_mut("paths").unwrap();
     let path = paths_ary.as_array().unwrap().get(index as usize).unwrap();
     let path = path.as_string().unwrap();
-
     // Don't forget the default list - never delete that!
     if !path.contains("/Ananke/default-list.txt") {
         // Remove the button states
         env.states
-            .remove_entry(&format!("header_file_menu_sub_forget_button_{index}"));
+            .remove_entry(&format!("{HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE}{index}"));
         env.states
-            .remove_entry(&format!("header_file_menu_sub_load_button_{index}"));
+            .remove_entry(&format!("{HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE}{index}"));
 
         // Remove the path
         let paths_ary = paths_ary.as_array_mut().unwrap();
@@ -182,7 +192,7 @@ fn handle_mouse_load_button(name: &str, env: &mut Environment, obj: &mut Object)
     // Close the load menu
     let button = env
         .states
-        .get_mut("header_file_menu_sub_load_button_state")
+        .get_mut(HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE)
         .unwrap()
         .as_button_mut()
         .unwrap();

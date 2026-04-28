@@ -5,8 +5,15 @@ use std::{
 
 use talos::widgets::stateful::{ButtonState, States};
 
+#[cfg(debug_assertions)]
+use crate::keys::HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE;
 use crate::{
     input::{CreatorFocus, Focus},
+    keys::{
+        CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
+        CREATOR_TASK_ENTRY_TEXTBOX_STATE, HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE,
+        HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
+    },
     startup::Environment,
 };
 
@@ -46,27 +53,28 @@ pub fn add_load_n_forget_button_states(env: &mut Environment) {
         let mut j = 0;
 
         for k in map {
-            if k.contains("header_file_menu_sub_forget_button_") && !k.contains("state") {
+            if k.contains(HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE) {
                 i += 1;
             }
             #[cfg(debug_assertions)]
-            if k.contains("header_file_menu_sub_load_button") && !k.contains("state") {
+            if k.contains(HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE) {
                 j += 1;
             }
         }
+        // If `debug_assert` is used, the compiler still complains about the missing inner attribute
         #[cfg(debug_assertions)]
-        debug_assert!(i == j);
+        assert!(i == j);
         i
     };
 
     // Create the forget & load button + Update the path amount
     env.path_amount = i;
     env.states.insert(
-        format!("header_file_menu_sub_forget_button_{i}"),
+        format!("{HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE}{i}"),
         States::from(ButtonState { clicked: false }),
     );
     env.states.insert(
-        format!("header_file_menu_sub_load_button_{i}"),
+        format!("{HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE}{i}"),
         States::from(ButtonState { clicked: false }),
     );
 }
@@ -95,10 +103,10 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
         Focus::None => {
             // Clear the focus of any textfield
             let states = vec![
-                "header_file_menu_sub_new_textbox_state",
-                "creator_task_entry_textbox_state",
-                "creator_task_prio_entry_textbox_state",
-                "creator_task_creation_date_entry_textbox_state",
+                HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
+                CREATOR_TASK_ENTRY_TEXTBOX_STATE,
+                CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
+                CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE,
             ];
             for state in states {
                 env.states
@@ -112,7 +120,7 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
         Focus::HeaderFileNewTextBox => {
             // Ensure that the focus is on the textfield
             env.states
-                .get_mut("header_file_menu_sub_new_textbox_state")
+                .get_mut(HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE)
                 .unwrap()
                 .as_text_box_mut()
                 .unwrap()
@@ -121,7 +129,7 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
         Focus::Creator(CreatorFocus::Task) => {
             // Ensure that the focus is on the textfield
             env.states
-                .get_mut("creator_task_entry_textbox_state")
+                .get_mut(CREATOR_TASK_ENTRY_TEXTBOX_STATE)
                 .unwrap()
                 .as_text_box_mut()
                 .unwrap()
@@ -130,7 +138,7 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
         Focus::Creator(CreatorFocus::Priority) => {
             // Ensure that the focus is on the textfield
             env.states
-                .get_mut("creator_task_prio_entry_textbox_state")
+                .get_mut(CREATOR_PRIO_ENTRY_TEXTBOX_STATE)
                 .unwrap()
                 .as_text_box_mut()
                 .unwrap()
@@ -139,7 +147,7 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
         Focus::Creator(CreatorFocus::CreationDate) => {
             // Ensure that the focus is on the textfield
             env.states
-                .get_mut("creator_task_creation_date_entry_textbox_state")
+                .get_mut(CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE)
                 .unwrap()
                 .as_text_box_mut()
                 .unwrap()
