@@ -64,6 +64,9 @@ pub fn add_load_n_forget_button_states(env: &mut Environment) {
         // If `debug_assert` is used, the compiler still complains about the missing inner attribute
         #[cfg(debug_assertions)]
         assert!(i == j);
+
+        // `i` is the amount of forget buttons, to add one more, increment by one
+        i += 1;
         i
     };
 
