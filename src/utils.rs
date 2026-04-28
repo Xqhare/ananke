@@ -65,9 +65,9 @@ pub fn add_load_n_forget_button_states(env: &mut Environment) {
         #[cfg(debug_assertions)]
         assert!(i == j);
 
-        // `i` is the amount of forget buttons, to add one more, increment by one
-        i += 1;
-        i
+        // `i` is the current amount of forget and load buttons,
+        // To add one more button, increment `i` by one
+        i + 1
     };
 
     // Create the forget & load button + Update the path amount
