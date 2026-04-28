@@ -8,11 +8,13 @@ use talos::{
 
 mod creator;
 mod header;
+mod menu;
 
 use crate::{
     input::{
         creator::{handle_key_creator, mouse::handle_creator_mouse},
         header::{handle_header_mouse, handle_key_textbox_newfile},
+        menu::handle_menu_mouse,
     },
     keys::{
         HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE, LIST_STATE,
@@ -150,6 +152,8 @@ fn handle_mouse(
                         return handle_header_mouse(env, name);
                     } else if name.contains("creator") {
                         return handle_creator_mouse(env, name, codex);
+                    } else if name.contains("menu") {
+                        return handle_menu_mouse(env, name);
                     }
                 }
                 _ => {}

@@ -4,13 +4,13 @@ use talos::{
     codex::Codex,
     widgets::{
         Text,
-        stateful::{ListState, States, TextBoxState},
+        stateful::{DropdownState, ListState, States, TextBoxState},
     },
 };
 
 use crate::keys::{
-    MENU_SEARCH_TEXTBOX_STATE, MENU_SHOW_DROPDOWN_STATE, MENU_SORT_BUTTON_STATE,
-    MENU_SORT_PRIO_TEXTBOX_STATE,
+    MENU_SEARCH_PRIO_TEXTBOX_STATE, MENU_SEARCH_TEXTBOX_STATE, MENU_SHOW_DROPDOWN_STATE,
+    MENU_SORT_DROPDOWN_STATE,
 };
 
 pub fn make_menu_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
@@ -21,28 +21,36 @@ pub fn make_menu_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
 }
 
 fn make_menu_show_state(out: &mut BTreeMap<String, States>) {
+    let list = ListState {
+        selected: Some(0),
+        scroll_offset: 0,
+    };
     out.insert(
         MENU_SHOW_DROPDOWN_STATE.to_string(),
-        States::from(ListState {
-            selected: None,
-            scroll_offset: 0,
+        States::from(DropdownState {
+            expanded: false,
+            list_state: list,
         }),
     );
 }
 
 fn make_menu_sort_menu_state(out: &mut BTreeMap<String, States>) {
+    let list = ListState {
+        selected: Some(0),
+        scroll_offset: 0,
+    };
     out.insert(
-        MENU_SORT_BUTTON_STATE.to_string(),
-        States::from(ListState {
-            selected: None,
-            scroll_offset: 0,
+        MENU_SORT_DROPDOWN_STATE.to_string(),
+        States::from(DropdownState {
+            expanded: false,
+            list_state: list,
         }),
     );
 }
 
 fn make_menu_sort_prio_text_state(codex: &Codex, out: &mut BTreeMap<String, States>) {
     out.insert(
-        MENU_SORT_PRIO_TEXTBOX_STATE.to_string(),
+        MENU_SEARCH_PRIO_TEXTBOX_STATE.to_string(),
         States::from(TextBoxState {
             active: false,
             cursor: Some(0),

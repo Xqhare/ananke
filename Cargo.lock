@@ -22,7 +22,7 @@ dependencies = [
 [[package]]
 name = "anansi"
 version = "1.0.0"
-source = "git+https://github.com/Xqhare/anansi#94d58a6ceddffee4115d2e697583a2fad3590d3b"
+source = "git+https://github.com/Xqhare/anansi#d850bfa9bd65d0e2c1833f4fd6e85d709094278a"
 
 [[package]]
 name = "areia"
@@ -78,7 +78,7 @@ dependencies = [
 [[package]]
 name = "talos"
 version = "1.4.0"
-source = "git+https://github.com/Xqhare/talos#191a4dc31207ab7411d9a206b46c7a36b45cb6ee"
+source = "git+https://github.com/Xqhare/talos#1ed9051a8706cbe60d2db23404a9947630ccfe77"
 dependencies = [
  "libc",
 ]

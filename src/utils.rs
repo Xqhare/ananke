@@ -98,6 +98,11 @@ pub fn toggle_button(env: &mut Environment, name: &str) -> bool {
     state.clicked
 }
 
+pub fn toggle_dropdown(env: &mut Environment, name: &str) {
+    let state = env.states.get_mut(name).unwrap().as_dropdown_mut().unwrap();
+    state.expanded = !state.expanded;
+}
+
 /// Ensures that the focus is on the active textfield only
 ///
 /// Does so by hooking into the `Focus` enum used for keyboard input capture
