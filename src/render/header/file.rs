@@ -45,7 +45,12 @@ pub fn render_header_file_menu_button(
             .unwrap();
         for path in ary {
             if let Some(path) = path.as_string() {
-                paths.push(path.clone());
+                if path.chars().count() > 25 {
+                    // Path is too long - display only last 23 chars, prepend "..."
+                    paths.push("…".to_string() + &path[path.chars().count() - 25..]);
+                } else {
+                    paths.push(path.clone());
+                }
             } else {
                 // Should be unreachable
                 debug_assert!(false);
