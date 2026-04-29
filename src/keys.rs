@@ -77,4 +77,5 @@ pub mod styles {
     pub const DEFAULT_INVERTED: &str = "default_inverted";
     pub const EDITABLE_ACTIVE: &str = "editable_active";
     pub const EDITABLE_INACTIVE: &str = "editable_inactive";
+    pub const BLUE: &str = "blue";
 }

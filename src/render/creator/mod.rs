@@ -4,7 +4,7 @@ use talos::{
     atlases::LayoutAtlas,
     codex::Codex,
     layout::Rect,
-    render::Canvas,
+    render::{Canvas, Style},
     widgets::{
         Block, Text,
         stateful::{BlockBox, Button, TextBox},
@@ -19,7 +19,8 @@ use crate::{
         CREATOR_PRIO_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_TEXT, CREATOR_RECT, CREATOR_SAVE_BUTTON,
         CREATOR_SAVE_BUTTON_STATE, CREATOR_TASK_ENTRY_TEXTBOX, CREATOR_TASK_ENTRY_TEXTBOX_STATE,
         CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS, CREATOR_TEXT_SPECIAL_TAGS,
-        HEADER_HELP_BUTTON_STATE, styles::CURSOR,
+        HEADER_HELP_BUTTON_STATE,
+        styles::{BLUE, CURSOR},
     },
     render::creator::help::render_help,
     startup::Environment,
@@ -60,6 +61,13 @@ fn render_outer_block(
     } else {
         render_inner_creator(canvas, codex, layout_atlas, clickable_regions, env);
     }
+    render_name(canvas, codex, area.width, env.styles.get_known_style(BLUE));
+}
+
+fn render_name(canvas: &mut Canvas, codex: &Codex, width: u16, style: Style) {
+    let area = Rect::new(width.saturating_div(2).saturating_sub(5), 3, width, 1);
+    let mut text = Text::new(" Ananke ", codex).with_style(style);
+    text.render(canvas, area, codex);
 }
 
 fn render_inner_creator(

@@ -14,7 +14,7 @@ use talos::{
 
 use crate::{
     error::{AnankeError, AnankeResult},
-    keys::styles::{CURSOR, DEFAULT_INVERTED, EDITABLE_ACTIVE, EDITABLE_INACTIVE},
+    keys::styles::{BLUE, CURSOR, DEFAULT_INVERTED, EDITABLE_ACTIVE, EDITABLE_INACTIVE},
     layout::make_layout,
     state::make_state,
 };
@@ -175,6 +175,14 @@ fn style_atlas() -> StyleAtlas {
         default
             .set_fg(Colour::Extended(Extended::TrueColour(TrueColour::RGB(
                 100, 100, 100, // Grey
+            ))))
+            .build(),
+    );
+    atlas.insert(
+        BLUE.to_string(),
+        default
+            .set_fg(Colour::Extended(Extended::TrueColour(TrueColour::RGB(
+                0, 150, 205, // Blue
             ))))
             .build(),
     );

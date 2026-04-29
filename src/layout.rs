@@ -55,28 +55,38 @@ fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
     debug_assert!(layout.len() == 2);
     layout[0].width -= 2;
     // You can think of this as a true flex box. The available space is split into 6 equal parts (or as close as possible)
-    let mut buttons = LayoutBuilder::new()
+    let first_half = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(50))
+        .build()
+        .split(layout[0]);
+    debug_assert!(first_half.len() == 2);
+    let left_half = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Max(9))
+        .add_constraint(Constraint::Max(19))
+        .add_constraint(Constraint::Min(1))
+        .build()
+        .split(first_half[0]);
+    debug_assert!(left_half.len() == 3);
+    let mut right_half = LayoutBuilder::new()
         .direction(Direction::Horizontal)
         .add_constraint(Constraint::Min(1))
         .add_constraint(Constraint::Min(1))
         .add_constraint(Constraint::Min(1))
-        .add_constraint(Constraint::Min(1))
-        .add_constraint(Constraint::Min(1))
-        .add_constraint(Constraint::Min(1))
         .build()
-        .split(layout[0]);
-    debug_assert!(buttons.len() == 6);
-    buttons[2].width -= 1;
-    buttons[3].x -= 1;
-    buttons[4].x -= 1;
+        .split(first_half[1]);
+    debug_assert!(right_half.len() == 3);
+    right_half[2].width += 1;
     vec![
         (MENU_RECT.to_string(), *menu_rect),
-        (MENU_SHOW_DROPDOWN_TEXT.to_string(), buttons[0]),
-        (MENU_SHOW_DROPDOWN.to_string(), buttons[1]),
-        (MENU_SORT_DROPDOWN_TEXT.to_string(), buttons[2]),
-        (MENU_SORT_DROPDOWN.to_string(), buttons[3]),
-        (MENU_SEARCH_PRIO_TEXT.to_string(), buttons[4]),
-        (MENU_SEARCH_PRIO_TEXTBOX.to_string(), buttons[5]),
+        (MENU_SHOW_DROPDOWN_TEXT.to_string(), left_half[0]),
+        (MENU_SHOW_DROPDOWN.to_string(), left_half[1]),
+        (MENU_SORT_DROPDOWN_TEXT.to_string(), left_half[2]),
+        (MENU_SORT_DROPDOWN.to_string(), right_half[0]),
+        (MENU_SEARCH_PRIO_TEXT.to_string(), right_half[1]),
+        (MENU_SEARCH_PRIO_TEXTBOX.to_string(), right_half[2]),
         (MENU_SEARCH_TEXTBOX.to_string(), layout[1]),
     ]
 }
@@ -112,13 +122,14 @@ fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
     row1_sub[1].x -= 1;
     row1_sub[1].width += 1;
 
-    let row_1_prio = LayoutBuilder::new()
+    let mut row_1_prio = LayoutBuilder::new()
         .direction(Direction::Horizontal)
         .add_constraint(Constraint::Percentage(35))
         .add_constraint(Constraint::Percentage(65))
         .build()
         .split(row1_sub[0]);
     debug_assert!(row_1_prio.len() == 2);
+    row_1_prio[1].width += 1;
 
     let mut row_1_inception = LayoutBuilder::new()
         .direction(Direction::Horizontal)
