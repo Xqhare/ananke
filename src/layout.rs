@@ -45,7 +45,7 @@ pub fn make_frame_layout(screen_rect: &Rect, layout: &Layout) -> LayoutAtlas {
 }
 
 fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
-    let layout = LayoutBuilder::new()
+    let mut layout = LayoutBuilder::new()
         .direction(Direction::Horizontal)
         .margin(1)
         .add_constraint(Constraint::Percentage(50))
@@ -53,8 +53,9 @@ fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
         .build()
         .split(*menu_rect);
     debug_assert!(layout.len() == 2);
+    layout[0].width -= 2;
     // You can think of this as a true flex box. The available space is split into 6 equal parts (or as close as possible)
-    let buttons = LayoutBuilder::new()
+    let mut buttons = LayoutBuilder::new()
         .direction(Direction::Horizontal)
         .add_constraint(Constraint::Min(1))
         .add_constraint(Constraint::Min(1))
@@ -65,6 +66,9 @@ fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
         .build()
         .split(layout[0]);
     debug_assert!(buttons.len() == 6);
+    buttons[2].width -= 1;
+    buttons[3].x -= 1;
+    buttons[4].x -= 1;
     vec![
         (MENU_RECT.to_string(), *menu_rect),
         (MENU_SHOW_DROPDOWN_TEXT.to_string(), buttons[0]),

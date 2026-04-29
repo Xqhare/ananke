@@ -54,7 +54,7 @@ fn make_menu_sort_prio_text_state(codex: &Codex, out: &mut BTreeMap<String, Stat
         States::from(TextBoxState {
             active: false,
             cursor: Some(0),
-            text: Text::new("", codex),
+            text: Text::new("", codex).align_center().align_vertically(),
         }),
     );
 }
@@ -65,7 +65,7 @@ fn make_menu_search_text_state(codex: &Codex, out: &mut BTreeMap<String, States>
         States::from(TextBoxState {
             active: false,
             cursor: Some(0),
-            text: Text::new("", codex),
+            text: Text::new("", codex).align_vertically().align_center(),
         }),
     );
 }

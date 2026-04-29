@@ -12,15 +12,16 @@ use crate::{
         creator::{update_new_task_after_key_press, update_render_list},
     },
     keys::{
-        CREATOR_TASK_ENTRY_TEXTBOX_STATE, CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS,
-        CREATOR_TEXT_SPECIAL_TAGS, HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON,
+        CREATOR_PRIO_ENTRY_TEXTBOX, CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
+        CREATOR_TASK_ENTRY_TEXTBOX_STATE, HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON,
         HEADER_FILE_MENU_BUTTON_STATE, HEADER_FILE_MENU_SUB_FORGET_BUTTON,
         HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE,
         HEADER_FILE_MENU_SUB_LOAD_BUTTON, HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE,
         HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_BUTTON,
         HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX,
         HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE, HEADER_HELP_BUTTON, HEADER_HELP_BUTTON_STATE,
-        HEADER_SAVE_BUTTON, MENU_SHOW_DROPDOWN,
+        HEADER_SAVE_BUTTON, MENU_SEARCH_PRIO_TEXTBOX, MENU_SEARCH_PRIO_TEXTBOX_STATE,
+        MENU_SEARCH_TEXTBOX, MENU_SEARCH_TEXTBOX_STATE,
     },
     startup::Environment,
     utils::{goto_exit, toggle_button},
@@ -68,8 +69,7 @@ pub fn handle_key_textbox_newfile(
                 state
                     .text
                     .set_content(env.disk_env.home_path.to_string_lossy(), codex);
-            }
-            if !update_r_list {
+            } else if !update_r_list {
                 return Some(());
             }
         }
@@ -81,13 +81,42 @@ pub fn handle_key_textbox_newfile(
             if name == CREATOR_TASK_ENTRY_TEXTBOX_STATE {
                 env.new_task.update_text(&content);
                 update_creator_after_key_press = true;
-            };
+            }
         }
         _ => {}
     }
+
     // Update the text with the new content
     state.text.set_content(&content, codex);
     state.cursor = Some(state.text.len());
+
+    if name == CREATOR_PRIO_ENTRY_TEXTBOX_STATE {
+        if keep_textbox_at_one_char(env, name, codex) {
+            let state = env
+                .states
+                .get_mut(CREATOR_PRIO_ENTRY_TEXTBOX_STATE)
+                .unwrap()
+                .as_text_box_mut()
+                .unwrap();
+            state.active = false;
+        }
+    } else if name == MENU_SEARCH_PRIO_TEXTBOX_STATE {
+        if keep_textbox_at_one_char(env, name, codex) {
+            let state = env
+                .states
+                .get_mut(MENU_SEARCH_PRIO_TEXTBOX_STATE)
+                .unwrap()
+                .as_text_box_mut()
+                .unwrap();
+            state.active = false;
+        }
+    }
+
+    // Update state after each key entry where it makes sense to make UI feel snappy and
+    // responsive
+    if name == MENU_SEARCH_TEXTBOX_STATE || name == MENU_SEARCH_PRIO_TEXTBOX_STATE {
+        update_render_list(env);
+    }
     if update_creator_after_key_press {
         update_new_task_after_key_press(env, codex);
     }
@@ -96,6 +125,36 @@ pub fn handle_key_textbox_newfile(
         return Some(());
     }
     None
+}
+
+/// # Returns
+/// If the textbox was shrunk to one character or not. True: was shrunk, False: was not
+fn keep_textbox_at_one_char(env: &mut Environment, name: &str, codex: &Codex) -> bool {
+    let state = env.states.get_mut(name).unwrap().as_text_box_mut().unwrap();
+    if state.text.len() > 1 {
+        state.text.set_content(
+            state
+                .text
+                .get_content()
+                .chars()
+                .take(1)
+                .next()
+                .unwrap()
+                .to_uppercase()
+                .take(1)
+                .next()
+                .unwrap(),
+            codex,
+        );
+        true
+    } else if state.text.len() == 1 {
+        state
+            .text
+            .set_content(state.text.get_content().to_uppercase(), codex);
+        false
+    } else {
+        false
+    }
 }
 
 /// Handles the mouse events for the header

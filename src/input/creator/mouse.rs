@@ -34,6 +34,7 @@ pub fn handle_creator_mouse(env: &mut Environment, name: &str, codex: &Codex) ->
                 .as_text_box_mut()
                 .unwrap();
             state.active = true;
+            state.text.set_content("", codex);
             Focus::Creator(CreatorFocus::Priority)
         }
         CREATOR_INCEPTION_ENTRY_TEXTBOX => {

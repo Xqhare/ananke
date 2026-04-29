@@ -10,7 +10,7 @@ use crate::{
         CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
         CREATOR_TASK_ENTRY_TEXTBOX_STATE, CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS,
         CREATOR_TEXT_SPECIAL_TAGS, MENU_SEARCH_PRIO_TEXTBOX_STATE, MENU_SEARCH_TEXTBOX_STATE,
-        MENU_SHOW_DROPDOWN, MENU_SORT_DROPDOWN,
+        MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_STATE, MENU_SORT_DROPDOWN, MENU_SORT_DROPDOWN_STATE,
     },
     startup::Environment,
 };
@@ -35,7 +35,7 @@ pub fn handle_key_creator(
 pub fn update_render_list(env: &mut Environment) {
     let show_state = env
         .states
-        .get(MENU_SHOW_DROPDOWN)
+        .get(MENU_SHOW_DROPDOWN_STATE)
         .unwrap()
         .as_dropdown()
         .unwrap()
@@ -58,7 +58,7 @@ pub fn update_render_list(env: &mut Environment) {
 
     let sort_state = env
         .states
-        .get(MENU_SORT_DROPDOWN)
+        .get(MENU_SORT_DROPDOWN_STATE)
         .unwrap()
         .as_dropdown()
         .unwrap()

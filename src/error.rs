@@ -9,7 +9,6 @@ pub type AnankeResult<T> = Result<T, AnankeError>;
 
 #[derive(Debug)]
 pub enum AnankeError {
-    Generic(String),
     Startup(String),
     Brigid(BrigidError),
     Anansi(AnansiError),
@@ -22,7 +21,6 @@ impl fmt::Display for AnankeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             AnankeError::Talos(err) => write!(f, "{}", err),
-            AnankeError::Generic(msg) => write!(f, "{}", msg),
             AnankeError::Io(err) => write!(f, "{}", err),
             AnankeError::Anansi(err) => write!(f, "{}", err),
             AnankeError::Areia(err) => write!(f, "{}", err),
@@ -35,8 +33,7 @@ impl fmt::Display for AnankeError {
 impl std::error::Error for AnankeError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            AnankeError::Generic(_)
-            | AnankeError::Talos(_)
+            AnankeError::Talos(_)
             | AnankeError::Anansi(_)
             | AnankeError::Startup(_)
             | AnankeError::Areia(_)

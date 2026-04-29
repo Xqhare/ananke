@@ -8,11 +8,12 @@ use talos::widgets::stateful::{ButtonState, States};
 #[cfg(debug_assertions)]
 use crate::keys::HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE;
 use crate::{
-    input::{CreatorFocus, Focus},
+    input::{CreatorFocus, Focus, MenuFocus},
     keys::{
         CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
         CREATOR_TASK_ENTRY_TEXTBOX_STATE, HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE,
-        HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
+        HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE, MENU_SEARCH_PRIO_TEXTBOX,
+        MENU_SEARCH_PRIO_TEXTBOX_STATE, MENU_SEARCH_TEXTBOX, MENU_SEARCH_TEXTBOX_STATE,
     },
     startup::Environment,
 };
@@ -115,6 +116,8 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
                 CREATOR_TASK_ENTRY_TEXTBOX_STATE,
                 CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
                 CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE,
+                MENU_SEARCH_TEXTBOX_STATE,
+                MENU_SEARCH_PRIO_TEXTBOX_STATE,
             ];
             for state in states {
                 env.states
@@ -135,7 +138,6 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
                 .active = true;
         }
         Focus::Creator(CreatorFocus::Task) => {
-            // Ensure that the focus is on the textfield
             env.states
                 .get_mut(CREATOR_TASK_ENTRY_TEXTBOX_STATE)
                 .unwrap()
@@ -144,7 +146,6 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
                 .active = true;
         }
         Focus::Creator(CreatorFocus::Priority) => {
-            // Ensure that the focus is on the textfield
             env.states
                 .get_mut(CREATOR_PRIO_ENTRY_TEXTBOX_STATE)
                 .unwrap()
@@ -153,9 +154,24 @@ pub fn ensure_focus_on_active_textfield(env: &mut Environment, focus: &Focus) {
                 .active = true;
         }
         Focus::Creator(CreatorFocus::CreationDate) => {
-            // Ensure that the focus is on the textfield
             env.states
                 .get_mut(CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE)
+                .unwrap()
+                .as_text_box_mut()
+                .unwrap()
+                .active = true;
+        }
+        Focus::Menu(MenuFocus::Text) => {
+            env.states
+                .get_mut(MENU_SEARCH_TEXTBOX_STATE)
+                .unwrap()
+                .as_text_box_mut()
+                .unwrap()
+                .active = true;
+        }
+        Focus::Menu(MenuFocus::Priority) => {
+            env.states
+                .get_mut(MENU_SEARCH_PRIO_TEXTBOX_STATE)
                 .unwrap()
                 .as_text_box_mut()
                 .unwrap()
