@@ -7,7 +7,10 @@ use talos::{
 };
 
 use crate::{
-    input::{Focus, creator::update_new_task_after_key_press},
+    input::{
+        Focus,
+        creator::{update_new_task_after_key_press, update_render_list},
+    },
     keys::{
         CREATOR_TASK_ENTRY_TEXTBOX_STATE, CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS,
         CREATOR_TEXT_SPECIAL_TAGS, HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON,
@@ -17,7 +20,7 @@ use crate::{
         HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_BUTTON,
         HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX,
         HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE, HEADER_HELP_BUTTON, HEADER_HELP_BUTTON_STATE,
-        HEADER_SAVE_BUTTON,
+        HEADER_SAVE_BUTTON, MENU_SHOW_DROPDOWN,
     },
     startup::Environment,
     utils::{goto_exit, toggle_button},
@@ -35,6 +38,7 @@ pub fn handle_key_textbox_newfile(
     let mut content = state.text.get_content().to_string();
 
     let mut update_creator_after_key_press = false;
+    let mut update_r_list = false;
     // Now handle the key
     match key_event.code {
         KeyCode::Enter => {
@@ -47,6 +51,7 @@ pub fn handle_key_textbox_newfile(
 
                 // Update the list
                 env.list = List::new(&content);
+                update_r_list = true;
 
                 // Save the path
                 let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
@@ -64,7 +69,9 @@ pub fn handle_key_textbox_newfile(
                     .text
                     .set_content(env.disk_env.home_path.to_string_lossy(), codex);
             }
-            return Some(());
+            if !update_r_list {
+                return Some(());
+            }
         }
         KeyCode::Backspace => {
             content.pop();
@@ -82,7 +89,11 @@ pub fn handle_key_textbox_newfile(
     state.text.set_content(&content, codex);
     state.cursor = Some(state.text.len());
     if update_creator_after_key_press {
-        update_new_task_after_key_press(env, name, codex);
+        update_new_task_after_key_press(env, codex);
+    }
+    if update_r_list {
+        update_render_list(env);
+        return Some(());
     }
     None
 }

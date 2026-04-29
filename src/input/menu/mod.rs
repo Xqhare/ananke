@@ -1,5 +1,5 @@
 use crate::{
-    input::Focus,
+    input::{Focus, creator::update_render_list},
     keys::{
         MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_ALL, MENU_SHOW_DROPDOWN_DONE,
         MENU_SHOW_DROPDOWN_OPEN, MENU_SHOW_DROPDOWN_STATE,
@@ -16,17 +16,17 @@ pub fn handle_menu_mouse(env: &mut Environment, name: &str) -> Focus {
         MENU_SHOW_DROPDOWN_ALL => {
             toggle_dropdown(env, MENU_SHOW_DROPDOWN_STATE);
             set_show_dropdown_selected(env, 0);
-            env.render_tasks = env.list.tasks();
+            update_render_list(env);
         }
         MENU_SHOW_DROPDOWN_DONE => {
             toggle_dropdown(env, MENU_SHOW_DROPDOWN_STATE);
             set_show_dropdown_selected(env, 1);
-            env.render_tasks = env.list.done();
+            update_render_list(env);
         }
         MENU_SHOW_DROPDOWN_OPEN => {
             toggle_dropdown(env, MENU_SHOW_DROPDOWN_STATE);
             set_show_dropdown_selected(env, 2);
-            env.render_tasks = env.list.open();
+            update_render_list(env);
         }
         _ => {}
     }
