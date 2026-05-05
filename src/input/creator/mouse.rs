@@ -5,11 +5,8 @@ use talos::codex::Codex;
 use crate::{
     input::{CreatorFocus, Focus},
     keys::{
-        CREATOR_CLEAR_BUTTON, CREATOR_INCEPTION_ENTRY_TEXTBOX,
-        CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_ENTRY_TEXTBOX,
-        CREATOR_PRIO_ENTRY_TEXTBOX_STATE, CREATOR_SAVE_BUTTON, CREATOR_TASK_ENTRY_TEXTBOX,
-        CREATOR_TASK_ENTRY_TEXTBOX_STATE, CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS,
-        CREATOR_TEXT_SPECIAL_TAGS,
+        CREATOR_CLEAR_BUTTON, CREATOR_INCEPTION_ENTRY_TEXTBOX, CREATOR_PRIO_ENTRY_TEXTBOX,
+        CREATOR_SAVE_BUTTON, CREATOR_TASK_ENTRY_TEXTBOX,
     },
     startup::Environment,
 };
@@ -17,34 +14,20 @@ use crate::{
 pub fn handle_creator_mouse(env: &mut Environment, name: &str, codex: &Codex) -> Focus {
     match name {
         CREATOR_TASK_ENTRY_TEXTBOX => {
-            let state = env
-                .states
-                .get_mut(CREATOR_TASK_ENTRY_TEXTBOX_STATE)
-                .unwrap()
-                .as_text_box_mut()
-                .unwrap();
-            state.active = true;
+            env.ui_state.creator.task_entry_textbox.active = true;
             Focus::Creator(CreatorFocus::Task)
         }
         CREATOR_PRIO_ENTRY_TEXTBOX => {
-            let state = env
-                .states
-                .get_mut(CREATOR_PRIO_ENTRY_TEXTBOX_STATE)
-                .unwrap()
-                .as_text_box_mut()
-                .unwrap();
-            state.active = true;
-            state.text.set_content("", codex);
+            env.ui_state.creator.prio_entry_textbox.active = true;
+            env.ui_state
+                .creator
+                .prio_entry_textbox
+                .text
+                .set_content("", codex);
             Focus::Creator(CreatorFocus::Priority)
         }
         CREATOR_INCEPTION_ENTRY_TEXTBOX => {
-            let state = env
-                .states
-                .get_mut(CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE)
-                .unwrap()
-                .as_text_box_mut()
-                .unwrap();
-            state.active = true;
+            env.ui_state.creator.creation_date_entry_textbox.active = true;
             Focus::Creator(CreatorFocus::CreationDate)
         }
         CREATOR_CLEAR_BUTTON => {
@@ -64,14 +47,7 @@ pub fn handle_creator_mouse(env: &mut Environment, name: &str, codex: &Codex) ->
 
 fn update_creator_task(env: &mut Environment) {
     let prio = {
-        let tmp = env
-            .states
-            .get(CREATOR_PRIO_ENTRY_TEXTBOX_STATE)
-            .unwrap()
-            .as_text_box()
-            .unwrap()
-            .text
-            .get_content();
+        let tmp = env.ui_state.creator.prio_entry_textbox.text.get_content();
         if tmp.chars().count() > 0 {
             Some(tmp.chars().next().unwrap().to_uppercase().next().unwrap())
         } else {
@@ -79,21 +55,12 @@ fn update_creator_task(env: &mut Environment) {
         }
     };
     let creation_date = env
-        .states
-        .get(CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE)
-        .unwrap()
-        .as_text_box()
-        .unwrap()
+        .ui_state
+        .creator
+        .creation_date_entry_textbox
         .text
         .get_content();
-    let text = env
-        .states
-        .get(CREATOR_TASK_ENTRY_TEXTBOX_STATE)
-        .unwrap()
-        .as_text_box()
-        .unwrap()
-        .text
-        .get_content();
+    let text = env.ui_state.creator.task_entry_textbox.text.get_content();
     env.new_task.update_text(text);
     if let Some(prio) = prio {
         env.new_task.update_prio(prio);
@@ -103,49 +70,37 @@ fn update_creator_task(env: &mut Environment) {
 
 fn reset_creator(env: &mut Environment, codex: &Codex) {
     env.new_task = Task::new("", env.list.max_id());
-    env.states
-        .get_mut(CREATOR_TASK_ENTRY_TEXTBOX_STATE)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap()
+    env.ui_state
+        .creator
+        .task_entry_textbox
         .text
         .set_content("", codex);
-    env.states
-        .get_mut(CREATOR_PRIO_ENTRY_TEXTBOX_STATE)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap()
+    env.ui_state
+        .creator
+        .prio_entry_textbox
         .text
         .set_content("", codex);
     let mut now = Utc::now();
     now.with_auto_offset();
-    env.states
-        .get_mut(CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap()
+    env.ui_state
+        .creator
+        .creation_date_entry_textbox
         .text
         .set_content(&now.date().to_string(), codex);
 
-    env.states
-        .get_mut(CREATOR_TEXT_CONTEXT_TAGS)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap()
+    env.ui_state
+        .creator
+        .context_tags_text
         .text
         .set_content("", codex);
-    env.states
-        .get_mut(CREATOR_TEXT_PROJECT_TAGS)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap()
+    env.ui_state
+        .creator
+        .project_tags_text
         .text
         .set_content("", codex);
-    env.states
-        .get_mut(CREATOR_TEXT_SPECIAL_TAGS)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap()
+    env.ui_state
+        .creator
+        .special_tags_text
         .text
         .set_content("", codex);
 }

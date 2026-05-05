@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, path::PathBuf};
+use std::path::PathBuf;
 
 use anansi::{List, Task};
 use areia::BaseDirs;
@@ -9,14 +9,13 @@ use talos::{
     atlases::StyleAtlas,
     layout::Layout,
     render::{Colour, Extended, Style, TrueColour},
-    widgets::stateful::States,
 };
 
 use crate::{
     error::{AnankeError, AnankeResult},
     keys::styles::{BLUE, CURSOR, DEFAULT_INVERTED, EDITABLE_ACTIVE, EDITABLE_INACTIVE},
     layout::make_layout,
-    state::make_state,
+    state::{UiState, make_state},
 };
 
 pub struct Environment<'a> {
@@ -25,7 +24,7 @@ pub struct Environment<'a> {
     pub styles: StyleAtlas,
     pub path_amount: usize,
     pub gen_layout: Layout,
-    pub states: BTreeMap<String, States<'a>>,
+    pub ui_state: UiState<'a>,
     pub run: bool,
     pub new_task: Task,
     pub render_tasks: Vec<Task>,
@@ -95,7 +94,7 @@ pub fn startup<'a>() -> AnankeResult<(Environment<'a>, Talos)> {
         .build()
         .map_err(|e| Into::<AnankeError>::into(e))?;
     let gen_layout = make_layout();
-    let states = make_state(path_amount, &list, talos.codex(), &disk_env.home_path);
+    let ui_state = make_state(path_amount, &list, talos.codex(), &disk_env.home_path);
     let new_task = Task::new("", list.max_id());
     let render_tasks = list.tasks();
     let env = Environment {
@@ -105,7 +104,7 @@ pub fn startup<'a>() -> AnankeResult<(Environment<'a>, Talos)> {
         styles,
         path_amount,
         gen_layout,
-        states,
+        ui_state,
         new_task,
         render_tasks,
     };

@@ -14,12 +14,11 @@ use talos::{
 
 use crate::{
     keys::{
-        MENU_RECT, MENU_SEARCH_PRIO_TEXT, MENU_SEARCH_PRIO_TEXTBOX, MENU_SEARCH_PRIO_TEXTBOX_STATE,
-        MENU_SEARCH_TEXTBOX, MENU_SEARCH_TEXTBOX_STATE, MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_ALL,
-        MENU_SHOW_DROPDOWN_DONE, MENU_SHOW_DROPDOWN_OPEN, MENU_SHOW_DROPDOWN_STATE,
-        MENU_SHOW_DROPDOWN_TEXT, MENU_SORT_DROPDOWN, MENU_SORT_DROPDOWN_COMPLETION,
-        MENU_SORT_DROPDOWN_INCEPTION, MENU_SORT_DROPDOWN_NONE, MENU_SORT_DROPDOWN_PRIO,
-        MENU_SORT_DROPDOWN_STATE, MENU_SORT_DROPDOWN_TEXT,
+        MENU_RECT, MENU_SEARCH_PRIO_TEXT, MENU_SEARCH_PRIO_TEXTBOX, MENU_SEARCH_TEXTBOX,
+        MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_ALL, MENU_SHOW_DROPDOWN_DONE,
+        MENU_SHOW_DROPDOWN_OPEN, MENU_SHOW_DROPDOWN_TEXT, MENU_SORT_DROPDOWN,
+        MENU_SORT_DROPDOWN_COMPLETION, MENU_SORT_DROPDOWN_INCEPTION, MENU_SORT_DROPDOWN_NONE,
+        MENU_SORT_DROPDOWN_PRIO, MENU_SORT_DROPDOWN_TEXT,
         styles::{CURSOR, DEFAULT_INVERTED},
     },
     startup::Environment,
@@ -60,19 +59,14 @@ pub fn render_show_dropdown(
         .align_vertically();
     text.render(canvas, rect_text, codex);
 
-    let mut dropdown_state = env
-        .states
-        .get_mut(MENU_SHOW_DROPDOWN_STATE)
-        .unwrap()
-        .as_dropdown_mut()
-        .unwrap();
+    let dropdown_state = &mut env.ui_state.menu.show_dropdown;
     let selected = dropdown_state.list_state.selected;
     let mut items = vec![
         Text::new("All", codex).align_center().with_style(style),
         Text::new("Done", codex).align_center().with_style(style),
         Text::new("Open", codex).align_center().with_style(style),
     ];
-    let mut dropdown = Dropdown::new(&mut dropdown_state, items.iter_mut())
+    let mut dropdown = Dropdown::new(dropdown_state, items.iter_mut())
         .with_style(style)
         .with_active_style(style)
         .with_selected_style(inv_style)
@@ -139,12 +133,7 @@ pub fn render_sort_dropdown(
         .align_vertically();
     text.render(canvas, rect_text, codex);
 
-    let mut dropdown_state = env
-        .states
-        .get_mut(MENU_SORT_DROPDOWN_STATE)
-        .unwrap()
-        .as_dropdown_mut()
-        .unwrap();
+    let dropdown_state = &mut env.ui_state.menu.sort_dropdown;
     let selected = dropdown_state.list_state.selected;
     let mut items = vec![
         Text::new("None", codex).align_center().with_style(style),
@@ -156,7 +145,7 @@ pub fn render_sort_dropdown(
             .align_center()
             .with_style(style),
     ];
-    let mut dropdown = Dropdown::new(&mut dropdown_state, items.iter_mut())
+    let mut dropdown = Dropdown::new(dropdown_state, items.iter_mut())
         .with_style(style)
         .with_active_style(style)
         .with_selected_style(inv_style)
@@ -231,12 +220,7 @@ pub fn render_prio_search(
         .align_vertically();
     text.render(canvas, rect_text, codex);
 
-    let text_box_state = env
-        .states
-        .get_mut(MENU_SEARCH_PRIO_TEXTBOX_STATE)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap();
+    let text_box_state = &mut env.ui_state.menu.sort_prio_textbox;
     let hint_text = Text::new("[A-Z]", codex)
         .align_center()
         .align_vertically()
@@ -262,12 +246,7 @@ pub fn render_text_search(
     let rect = layout_atlas.get_known_rect(MENU_SEARCH_TEXTBOX);
     let style = env.styles.get_default();
     let highlight_style = env.styles.get_known_style(CURSOR);
-    let text_box_state = env
-        .states
-        .get_mut(MENU_SEARCH_TEXTBOX_STATE)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap();
+    let text_box_state = &mut env.ui_state.menu.search_textbox;
     let mut text_box = TextBox::new(text_box_state)
         .with_style(style)
         .with_hint_text(

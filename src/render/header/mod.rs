@@ -10,8 +10,7 @@ use talos::{
 
 use crate::{
     keys::{
-        HEADER_EXIT_BUTTON, HEADER_EXIT_BUTTON_STATE, HEADER_FILE_PATH, HEADER_FPS,
-        HEADER_HELP_BUTTON, HEADER_HELP_BUTTON_STATE, HEADER_SAVE_BUTTON, HEADER_SAVE_BUTTON_STATE,
+        HEADER_EXIT_BUTTON, HEADER_FILE_PATH, HEADER_FPS, HEADER_HELP_BUTTON, HEADER_SAVE_BUTTON,
         styles::DEFAULT_INVERTED,
     },
     render::header::file::render_header_file_menu_button,
@@ -46,12 +45,7 @@ fn render_header_help_button(
     let rect = layout_atlas.get_known_rect(HEADER_HELP_BUTTON);
     let default_style = env.styles.get_default();
     let default_clicked_style = env.styles.get_known_style(DEFAULT_INVERTED);
-    let help_button_state = &mut env
-        .states
-        .get_mut(HEADER_HELP_BUTTON_STATE)
-        .unwrap()
-        .as_button_mut()
-        .unwrap();
+    let help_button_state = &mut env.ui_state.header.help_button;
     let mut button = Button::new("Help", help_button_state, codex)
         .with_style(default_style)
         .with_clicked_style(default_clicked_style);
@@ -68,12 +62,7 @@ fn render_header_exit_button(
 ) {
     let rect = layout_atlas.get_known_rect(HEADER_EXIT_BUTTON);
     let default_style = env.styles.get_default();
-    let exit_button_state = &mut env
-        .states
-        .get_mut(HEADER_EXIT_BUTTON_STATE)
-        .unwrap()
-        .as_button_mut()
-        .unwrap();
+    let exit_button_state = &mut env.ui_state.header.exit_button;
     let mut button = Button::new("Exit", exit_button_state, codex).with_style(default_style);
     button.render(canvas, rect, codex);
     clickable_regions.insert(HEADER_EXIT_BUTTON.to_string(), rect);
@@ -88,12 +77,7 @@ fn render_header_save_button(
 ) {
     let rect = layout_atlas.get_known_rect(HEADER_SAVE_BUTTON);
     let default_style = env.styles.get_default();
-    let save_button_state = &mut env
-        .states
-        .get_mut(HEADER_SAVE_BUTTON_STATE)
-        .unwrap()
-        .as_button_mut()
-        .unwrap();
+    let save_button_state = &mut env.ui_state.header.save_button;
     let mut button = Button::new("Save", save_button_state, codex).with_style(default_style);
     button.render(canvas, rect, codex);
     clickable_regions.insert(HEADER_SAVE_BUTTON.to_string(), rect);

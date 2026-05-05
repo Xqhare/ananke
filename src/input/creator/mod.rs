@@ -5,13 +5,7 @@ use anansi::{
 use talos::{codex::Codex, input::KeyEvent};
 
 use crate::{
-    input::{CreatorFocus, header::handle_key_textbox_newfile},
-    keys::{
-        CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
-        CREATOR_TASK_ENTRY_TEXTBOX_STATE, CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS,
-        CREATOR_TEXT_SPECIAL_TAGS, MENU_SEARCH_PRIO_TEXTBOX_STATE, MENU_SEARCH_TEXTBOX_STATE,
-        MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_STATE, MENU_SORT_DROPDOWN, MENU_SORT_DROPDOWN_STATE,
-    },
+    input::{CreatorFocus, Focus, header::handle_key_textbox_newfile},
     startup::Environment,
 };
 
@@ -23,22 +17,14 @@ pub fn handle_key_creator(
     focus: &CreatorFocus,
     codex: &Codex,
 ) -> Option<()> {
-    let name = match focus {
-        CreatorFocus::Task => CREATOR_TASK_ENTRY_TEXTBOX_STATE,
-        CreatorFocus::Priority => CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
-        CreatorFocus::CreationDate => CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE,
-    };
-
-    handle_key_textbox_newfile(name, key_event, env, codex)
+    handle_key_textbox_newfile(key_event, env, codex, &Focus::Creator(*focus))
 }
 
 pub fn update_render_list(env: &mut Environment) {
     let show_state = env
-        .states
-        .get(MENU_SHOW_DROPDOWN_STATE)
-        .unwrap()
-        .as_dropdown()
-        .unwrap()
+        .ui_state
+        .menu
+        .show_dropdown
         .list_state
         .selected
         .unwrap_or(0); // Default to show all; should be unreachable though
@@ -57,11 +43,9 @@ pub fn update_render_list(env: &mut Environment) {
     }
 
     let sort_state = env
-        .states
-        .get(MENU_SORT_DROPDOWN_STATE)
-        .unwrap()
-        .as_dropdown()
-        .unwrap()
+        .ui_state
+        .menu
+        .sort_dropdown
         .list_state
         .selected
         .unwrap_or(0); // Default to not sort; should be unreachable though
@@ -81,24 +65,10 @@ pub fn update_render_list(env: &mut Environment) {
         _ => unreachable!(),
     }
 
-    let search_prio = env
-        .states
-        .get(MENU_SEARCH_PRIO_TEXTBOX_STATE)
-        .unwrap()
-        .as_text_box()
-        .unwrap()
-        .text
-        .get_content();
+    let search_prio = env.ui_state.menu.sort_prio_textbox.text.get_content();
     env.render_tasks = search_vec_task_prio(&env.render_tasks, search_prio);
 
-    let search_text = env
-        .states
-        .get(MENU_SEARCH_TEXTBOX_STATE)
-        .unwrap()
-        .as_text_box()
-        .unwrap()
-        .text
-        .get_content();
+    let search_text = env.ui_state.menu.search_textbox.text.get_content();
     env.render_tasks = search_vec_task_text(&env.render_tasks, search_text);
 }
 
@@ -110,11 +80,9 @@ pub fn update_new_task_after_key_press(env: &mut Environment, codex: &Codex) {
         .map(|s| format!("@{s}"))
         .collect::<Vec<_>>()
         .join(", ");
-    env.states
-        .get_mut(CREATOR_TEXT_CONTEXT_TAGS)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap()
+    env.ui_state
+        .creator
+        .context_tags_text
         .text
         .set_content(context, codex);
 
@@ -125,11 +93,9 @@ pub fn update_new_task_after_key_press(env: &mut Environment, codex: &Codex) {
         .map(|s| format!("+{s}"))
         .collect::<Vec<_>>()
         .join(", ");
-    env.states
-        .get_mut(CREATOR_TEXT_PROJECT_TAGS)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap()
+    env.ui_state
+        .creator
+        .project_tags_text
         .text
         .set_content(project, codex);
 
@@ -140,11 +106,9 @@ pub fn update_new_task_after_key_press(env: &mut Environment, codex: &Codex) {
         .map(|(k, v)| format!("{k}:{v}"))
         .collect::<Vec<_>>()
         .join(", ");
-    env.states
-        .get_mut(CREATOR_TEXT_SPECIAL_TAGS)
-        .unwrap()
-        .as_text_box_mut()
-        .unwrap()
+    env.ui_state
+        .creator
+        .special_tags_text
         .text
         .set_content(special, codex);
 }

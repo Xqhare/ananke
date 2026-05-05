@@ -16,9 +16,6 @@ use crate::{
         header::{handle_header_mouse, handle_key_textbox_newfile},
         menu::{handle_key_menu, handle_menu_mouse},
     },
-    keys::{
-        HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE, LIST_STATE,
-    },
     startup::Environment,
     utils::{add_load_n_forget_button_states, ensure_focus_on_active_textfield},
 };
@@ -79,21 +76,13 @@ pub fn process_input(
                             return None;
                         }
                         Focus::HeaderFileNewTextBox => {
-                            if let Some(_) = handle_key_textbox_newfile(
-                                HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
-                                key_event,
-                                env,
-                                codex,
-                            ) {
+                            if let Some(_) =
+                                handle_key_textbox_newfile(key_event, env, codex, focus)
+                            {
                                 // Add the load/forget buttons
                                 add_load_n_forget_button_states(env);
                                 // Lastly close the menu
-                                let state = env
-                                    .states
-                                    .get_mut(HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE)
-                                    .unwrap()
-                                    .as_button_mut()
-                                    .unwrap();
+                                let state = &mut env.ui_state.header.file_menu_sub_new_button;
                                 state.clicked = false;
                             };
                             return None;
@@ -185,24 +174,14 @@ fn handle_scrolling(
     current_focus: &Focus,
 ) -> Focus {
     if mouse_event.kind == MouseEventKind::ScrollUp {
-        let list_state = env
-            .states
-            .get_mut(LIST_STATE)
-            .unwrap()
-            .as_list_mut()
-            .unwrap();
+        let list_state = &mut env.ui_state.list;
         let current_offset = list_state.scroll_offset;
         if current_offset > 0 {
             list_state.scroll_offset = current_offset - 1;
         }
     } else if mouse_event.kind == MouseEventKind::ScrollDown {
         let list_max = env.list.task_amount();
-        let list_state = env
-            .states
-            .get_mut(LIST_STATE)
-            .unwrap()
-            .as_list_mut()
-            .unwrap();
+        let list_state = &mut env.ui_state.list;
         let current_offset = list_state.scroll_offset;
         if current_offset < list_max - 1 {
             list_state.scroll_offset = current_offset + 1;

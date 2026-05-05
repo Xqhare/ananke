@@ -14,12 +14,10 @@ use talos::{
 
 use crate::{
     keys::{
-        CREATOR_CLEAR_BUTTON, CREATOR_CLEAR_BUTTON_STATE, CREATOR_INCEPTION_ENTRY_TEXTBOX,
-        CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE, CREATOR_INCEPTION_TEXT, CREATOR_PRIO_ENTRY_TEXTBOX,
-        CREATOR_PRIO_ENTRY_TEXTBOX_STATE, CREATOR_PRIO_TEXT, CREATOR_RECT, CREATOR_SAVE_BUTTON,
-        CREATOR_SAVE_BUTTON_STATE, CREATOR_TASK_ENTRY_TEXTBOX, CREATOR_TASK_ENTRY_TEXTBOX_STATE,
-        CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS, CREATOR_TEXT_SPECIAL_TAGS,
-        HEADER_HELP_BUTTON_STATE,
+        CREATOR_CLEAR_BUTTON, CREATOR_INCEPTION_ENTRY_TEXTBOX, CREATOR_INCEPTION_TEXT,
+        CREATOR_PRIO_ENTRY_TEXTBOX, CREATOR_PRIO_TEXT, CREATOR_RECT, CREATOR_SAVE_BUTTON,
+        CREATOR_TASK_ENTRY_TEXTBOX, CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS,
+        CREATOR_TEXT_SPECIAL_TAGS,
         styles::{BLUE, CURSOR},
     },
     render::creator::help::render_help,
@@ -49,14 +47,7 @@ fn render_outer_block(
     let style = env.styles.get_default();
     let mut block = Block::new().with_style(style);
     block.render(canvas, area, codex);
-    if env
-        .states
-        .get(HEADER_HELP_BUTTON_STATE)
-        .unwrap()
-        .as_button()
-        .unwrap()
-        .clicked
-    {
+    if env.ui_state.header.help_button.clicked {
         render_help(canvas, codex, layout_atlas, env);
     } else {
         render_inner_creator(canvas, codex, layout_atlas, clickable_regions, env);
@@ -97,23 +88,8 @@ fn render_row0(
     let style = env.styles.get_default();
     let highlight_style = env.styles.get_known_style(CURSOR);
 
-    let mut state0 = None;
-    let mut state1 = None;
-
-    for (name, state) in env.states.iter_mut() {
-        match name.as_str() {
-            CREATOR_PRIO_ENTRY_TEXTBOX_STATE => {
-                state0 = state.as_text_box_mut();
-            }
-            CREATOR_TASK_ENTRY_TEXTBOX_STATE => {
-                state1 = state.as_text_box_mut();
-            }
-            _ => {}
-        }
-    }
-
-    let state0 = state0.unwrap();
-    let state1 = state1.unwrap();
+    let state0 = &mut env.ui_state.creator.prio_entry_textbox;
+    let state1 = &mut env.ui_state.creator.task_entry_textbox;
 
     let hint_text0 = Text::new("[A-Z]", codex)
         .align_center()
@@ -173,23 +149,8 @@ fn render_row1(
     let style = env.styles.get_default();
     let highlight_style = env.styles.get_known_style(CURSOR);
 
-    let mut state0 = None;
-    let mut state1 = None;
-
-    for (name, state) in env.states.iter_mut() {
-        match name.as_str() {
-            CREATOR_INCEPTION_ENTRY_TEXTBOX_STATE => {
-                state0 = state.as_text_box_mut();
-            }
-            CREATOR_TEXT_CONTEXT_TAGS => {
-                state1 = state.as_text_box_mut();
-            }
-            _ => {}
-        }
-    }
-
-    let state0 = state0.unwrap();
-    let state1 = state1.unwrap();
+    let state0 = &mut env.ui_state.creator.creation_date_entry_textbox;
+    let state1 = &mut env.ui_state.creator.context_tags_text;
 
     let mut textbox0 = TextBox::new(state0)
         .with_style(style)
@@ -218,23 +179,9 @@ fn render_row2(
     let rect0 = layout_atlas.get_known_rect(CREATOR_TEXT_PROJECT_TAGS);
     let rect1 = layout_atlas.get_known_rect(CREATOR_TEXT_SPECIAL_TAGS);
     let style = env.styles.get_default();
-    let mut state0 = None;
-    let mut state1 = None;
 
-    for (name, state) in env.states.iter_mut() {
-        match name.as_str() {
-            CREATOR_TEXT_PROJECT_TAGS => {
-                state0 = state.as_text_box_mut();
-            }
-            CREATOR_TEXT_SPECIAL_TAGS => {
-                state1 = state.as_text_box_mut();
-            }
-            _ => {}
-        }
-    }
-
-    let state0 = state0.unwrap();
-    let state1 = state1.unwrap();
+    let state0 = &mut env.ui_state.creator.project_tags_text;
+    let state1 = &mut env.ui_state.creator.special_tags_text;
 
     let mut text0 = Text::new(state0.text.get_content(), codex)
         .align_center()
@@ -266,23 +213,8 @@ fn render_row3_buttons(
     let style1 = env.styles.get_warning();
     let highlight_style = env.styles.get_known_style(CURSOR);
 
-    let mut state0 = None;
-    let mut state1 = None;
-
-    for (name, state) in env.states.iter_mut() {
-        match name.as_str() {
-            CREATOR_SAVE_BUTTON_STATE => {
-                state0 = state.as_button_mut();
-            }
-            CREATOR_CLEAR_BUTTON_STATE => {
-                state1 = state.as_button_mut();
-            }
-            _ => {}
-        }
-    }
-
-    let state0 = state0.unwrap();
-    let state1 = state1.unwrap();
+    let state0 = &mut env.ui_state.creator.save_button;
+    let state1 = &mut env.ui_state.creator.clear_button;
 
     let mut button0 = Button::new("Save", state0, codex)
         .with_clicked_style(highlight_style)

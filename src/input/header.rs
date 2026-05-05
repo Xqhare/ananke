@@ -8,34 +8,38 @@ use talos::{
 
 use crate::{
     input::{
-        Focus,
+        CreatorFocus, Focus, MenuFocus,
         creator::{update_new_task_after_key_press, update_render_list},
     },
     keys::{
-        CREATOR_PRIO_ENTRY_TEXTBOX, CREATOR_PRIO_ENTRY_TEXTBOX_STATE,
-        CREATOR_TASK_ENTRY_TEXTBOX_STATE, HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON,
-        HEADER_FILE_MENU_BUTTON_STATE, HEADER_FILE_MENU_SUB_FORGET_BUTTON,
-        HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE,
-        HEADER_FILE_MENU_SUB_LOAD_BUTTON, HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE,
-        HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_BUTTON,
-        HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX,
-        HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE, HEADER_HELP_BUTTON, HEADER_HELP_BUTTON_STATE,
-        HEADER_SAVE_BUTTON, MENU_SEARCH_PRIO_TEXTBOX, MENU_SEARCH_PRIO_TEXTBOX_STATE,
-        MENU_SEARCH_TEXTBOX, MENU_SEARCH_TEXTBOX_STATE,
+        HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON, HEADER_FILE_MENU_SUB_FORGET_BUTTON,
+        HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_LOAD_BUTTON,
+        HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE, HEADER_FILE_MENU_SUB_NEW_BUTTON,
+        HEADER_FILE_MENU_SUB_NEW_TEXTBOX, HEADER_HELP_BUTTON, HEADER_SAVE_BUTTON,
     },
     startup::Environment,
-    utils::{goto_exit, toggle_button},
+    utils::goto_exit,
 };
 
 /// Handles the key events for the new file text box
 pub fn handle_key_textbox_newfile(
-    name: &str,
     key_event: &KeyEvent,
     env: &mut Environment,
     codex: &Codex,
+    focus: &Focus,
 ) -> Option<()> {
     // First get the state once
-    let state = env.states.get_mut(name).unwrap().as_text_box_mut().unwrap();
+    let state = match focus {
+        Focus::HeaderFileNewTextBox => &mut env.ui_state.header.file_menu_sub_new_textbox,
+        Focus::Creator(CreatorFocus::Task) => &mut env.ui_state.creator.task_entry_textbox,
+        Focus::Creator(CreatorFocus::Priority) => &mut env.ui_state.creator.prio_entry_textbox,
+        Focus::Creator(CreatorFocus::CreationDate) => {
+            &mut env.ui_state.creator.creation_date_entry_textbox
+        }
+        Focus::Menu(MenuFocus::Text) => &mut env.ui_state.menu.search_textbox,
+        Focus::Menu(MenuFocus::Priority) => &mut env.ui_state.menu.sort_prio_textbox,
+        _ => unreachable!(),
+    };
     let mut content = state.text.get_content().to_string();
 
     let mut update_creator_after_key_press = false;
@@ -43,9 +47,7 @@ pub fn handle_key_textbox_newfile(
     // Now handle the key
     match key_event.code {
         KeyCode::Enter => {
-            // As there is only one text box inside the header, we don't need to check
-            // the name that thoroughly.
-            if name.contains("header") {
+            if let Focus::HeaderFileNewTextBox = focus {
                 // Just to be sure, flush one last time & save
                 state.text.set_content(&content, codex);
                 let _ = env.list.save().unwrap();
@@ -78,7 +80,7 @@ pub fn handle_key_textbox_newfile(
         }
         KeyCode::Char(c) => {
             content.push(c);
-            if name == CREATOR_TASK_ENTRY_TEXTBOX_STATE {
+            if let Focus::Creator(CreatorFocus::Task) = focus {
                 env.new_task.update_text(&content);
                 update_creator_after_key_press = true;
             }
@@ -90,31 +92,23 @@ pub fn handle_key_textbox_newfile(
     state.text.set_content(&content, codex);
     state.cursor = Some(state.text.len());
 
-    if name == CREATOR_PRIO_ENTRY_TEXTBOX_STATE {
-        if keep_textbox_at_one_char(env, name, codex) {
-            let state = env
-                .states
-                .get_mut(CREATOR_PRIO_ENTRY_TEXTBOX_STATE)
-                .unwrap()
-                .as_text_box_mut()
-                .unwrap();
-            state.active = false;
+    match focus {
+        Focus::Creator(CreatorFocus::Priority) => {
+            if keep_textbox_at_one_char(env, focus, codex) {
+                env.ui_state.creator.prio_entry_textbox.active = false;
+            }
         }
-    } else if name == MENU_SEARCH_PRIO_TEXTBOX_STATE {
-        if keep_textbox_at_one_char(env, name, codex) {
-            let state = env
-                .states
-                .get_mut(MENU_SEARCH_PRIO_TEXTBOX_STATE)
-                .unwrap()
-                .as_text_box_mut()
-                .unwrap();
-            state.active = false;
+        Focus::Menu(MenuFocus::Priority) => {
+            if keep_textbox_at_one_char(env, focus, codex) {
+                env.ui_state.menu.sort_prio_textbox.active = false;
+            }
         }
+        _ => {}
     }
 
     // Update state after each key entry where it makes sense to make UI feel snappy and
     // responsive
-    if name == MENU_SEARCH_TEXTBOX_STATE || name == MENU_SEARCH_PRIO_TEXTBOX_STATE {
+    if let Focus::Menu(_) = focus {
         update_render_list(env);
     }
     if update_creator_after_key_press {
@@ -129,8 +123,12 @@ pub fn handle_key_textbox_newfile(
 
 /// # Returns
 /// If the textbox was shrunk to one character or not. True: was shrunk, False: was not
-fn keep_textbox_at_one_char(env: &mut Environment, name: &str, codex: &Codex) -> bool {
-    let state = env.states.get_mut(name).unwrap().as_text_box_mut().unwrap();
+fn keep_textbox_at_one_char(env: &mut Environment, focus: &Focus, codex: &Codex) -> bool {
+    let state = match focus {
+        Focus::Creator(CreatorFocus::Priority) => &mut env.ui_state.creator.prio_entry_textbox,
+        Focus::Menu(MenuFocus::Priority) => &mut env.ui_state.menu.sort_prio_textbox,
+        _ => unreachable!(),
+    };
     if state.text.len() > 1 {
         state.text.set_content(
             state
@@ -161,39 +159,33 @@ fn keep_textbox_at_one_char(env: &mut Environment, name: &str, codex: &Codex) ->
 pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
     match name {
         HEADER_FILE_MENU_BUTTON => {
-            toggle_button(env, HEADER_FILE_MENU_BUTTON_STATE);
+            env.ui_state.header.file_menu_button.clicked =
+                !env.ui_state.header.file_menu_button.clicked;
             Focus::None
         }
         HEADER_FILE_MENU_SUB_NEW_BUTTON => {
-            if toggle_button(env, HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE) {
-                let state = env
-                    .states
-                    .get_mut(HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE)
-                    .unwrap()
-                    .as_text_box_mut()
-                    .unwrap();
-                state.active = true;
+            env.ui_state.header.file_menu_sub_new_button.clicked =
+                !env.ui_state.header.file_menu_sub_new_button.clicked;
+            if env.ui_state.header.file_menu_sub_new_button.clicked {
+                env.ui_state.header.file_menu_sub_new_textbox.active = true;
                 Focus::HeaderFileNewTextBox
             } else {
                 Focus::None
             }
         }
         HEADER_FILE_MENU_SUB_LOAD_BUTTON => {
-            toggle_button(env, HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE);
+            env.ui_state.header.file_menu_sub_load_button.clicked =
+                !env.ui_state.header.file_menu_sub_load_button.clicked;
             Focus::None
         }
         HEADER_FILE_MENU_SUB_FORGET_BUTTON => {
-            toggle_button(env, HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE);
+            env.ui_state.header.file_menu_sub_forget_button.clicked =
+                !env.ui_state.header.file_menu_sub_forget_button.clicked;
             Focus::None
         }
         HEADER_FILE_MENU_SUB_NEW_TEXTBOX => {
-            let state = env
-                .states
-                .get_mut(HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE)
-                .unwrap()
-                .as_text_box_mut()
-                .unwrap();
-            state.active = !state.active;
+            env.ui_state.header.file_menu_sub_new_textbox.active =
+                !env.ui_state.header.file_menu_sub_new_textbox.active;
             // If a user clicks into the textbox directly, we want to always focus it
             Focus::HeaderFileNewTextBox
         }
@@ -203,7 +195,7 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
             Focus::None
         }
         HEADER_HELP_BUTTON => {
-            toggle_button(env, HEADER_HELP_BUTTON_STATE);
+            env.ui_state.header.help_button.clicked = !env.ui_state.header.help_button.clicked;
             Focus::None
         }
         HEADER_EXIT_BUTTON => {
@@ -232,29 +224,31 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
 /// Handles the mouse events for the forget button
 fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Object) {
     // Close the forget menu
-    let button = env
-        .states
-        .get_mut(HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE)
-        .unwrap()
-        .as_button_mut()
-        .unwrap();
-    button.clicked = false;
+    env.ui_state.header.file_menu_sub_forget_button.clicked = false;
 
-    let index = name.split("_").last().unwrap().parse::<u32>().unwrap();
+    let index = name.split("_").last().unwrap().parse::<usize>().unwrap();
     let paths_ary = obj.get_mut("paths").unwrap();
-    let path = paths_ary.as_array().unwrap().get(index as usize).unwrap();
+    let path = paths_ary.as_array().unwrap().get(index).unwrap();
     let path = path.as_string().unwrap();
     // Don't forget the default list - never delete that!
     if !path.contains("/Ananke/default-list.txt") {
         // Remove the button states
-        env.states
-            .remove_entry(&format!("{HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE}{index}"));
-        env.states
-            .remove_entry(&format!("{HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE}{index}"));
+        if index < env.ui_state.header.file_menu_dynamic_forget_buttons.len() {
+            env.ui_state
+                .header
+                .file_menu_dynamic_forget_buttons
+                .remove(index);
+        }
+        if index < env.ui_state.header.file_menu_dynamic_load_buttons.len() {
+            env.ui_state
+                .header
+                .file_menu_dynamic_load_buttons
+                .remove(index);
+        }
 
         // Remove the path
         let paths_ary = paths_ary.as_array_mut().unwrap();
-        paths_ary.remove(index as usize);
+        paths_ary.remove(index);
         debug_assert!(paths_ary.len() > 0);
 
         // Update the environment & config
@@ -270,21 +264,15 @@ fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Objec
 /// Handles the mouse events for the load button
 fn handle_mouse_load_button(name: &str, env: &mut Environment, obj: &mut Object) {
     // Close the load menu
-    let button = env
-        .states
-        .get_mut(HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE)
-        .unwrap()
-        .as_button_mut()
-        .unwrap();
-    button.clicked = false;
+    env.ui_state.header.file_menu_sub_load_button.clicked = false;
 
     // Save the current list
     let _ = env.list.save().unwrap();
 
     // Construct the path
-    let index = name.split("_").last().unwrap().parse::<u32>().unwrap();
+    let index = name.split("_").last().unwrap().parse::<usize>().unwrap();
     let path = obj.get("paths").unwrap();
-    let path = path.as_array().unwrap().get(index as usize).unwrap();
+    let path = path.as_array().unwrap().get(index).unwrap();
     let path = path.as_string().unwrap();
 
     // Load the new list if it's different and update the config

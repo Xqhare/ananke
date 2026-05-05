@@ -14,12 +14,10 @@ use talos::{
 
 use crate::{
     keys::{
-        HEADER_FILE_MENU_BUTTON, HEADER_FILE_MENU_BUTTON_STATE, HEADER_FILE_MENU_SUB_FORGET_BUTTON,
-        HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE,
-        HEADER_FILE_MENU_SUB_LOAD_BUTTON, HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE,
-        HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_BUTTON,
-        HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE, HEADER_FILE_MENU_SUB_NEW_TEXTBOX,
-        HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE,
+        HEADER_FILE_MENU_BUTTON, HEADER_FILE_MENU_SUB_FORGET_BUTTON,
+        HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_LOAD_BUTTON,
+        HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE, HEADER_FILE_MENU_SUB_NEW_BUTTON,
+        HEADER_FILE_MENU_SUB_NEW_TEXTBOX,
         styles::{DEFAULT_INVERTED, EDITABLE_ACTIVE},
     },
     startup::Environment,
@@ -64,56 +62,16 @@ pub fn render_header_file_menu_button(
     let default_clicked_style = env.styles.get_known_style(DEFAULT_INVERTED);
     let editable_active = env.styles.get_known_style(EDITABLE_ACTIVE);
 
-    // Borrow checker fix: Iterate once to gather multiple mutable references from the same map.
-    let mut file_button_state = None;
-    let mut new_file_button_state = None;
-    let mut new_file_textbox_state = None;
-    let mut load_file_button_state = None;
-    let mut load_file_sub_button_states = Vec::with_capacity(path_amount);
-    let mut forget_file_button_state = None;
-    let mut forget_file_sub_button_states = Vec::with_capacity(path_amount);
-
-    for (key, state) in env.states.iter_mut() {
-        match key.as_str() {
-            HEADER_FILE_MENU_BUTTON_STATE => {
-                file_button_state = Some(state.as_button_mut().expect("Must be a button"))
-            }
-            HEADER_FILE_MENU_SUB_NEW_BUTTON_STATE => {
-                new_file_button_state = Some(state.as_button_mut().expect("Must be a button"))
-            }
-            HEADER_FILE_MENU_SUB_NEW_TEXTBOX_STATE => {
-                new_file_textbox_state = Some(state.as_text_box_mut().expect("Must be a textbox"))
-            }
-            HEADER_FILE_MENU_SUB_LOAD_BUTTON_STATE => {
-                load_file_button_state = Some(state.as_button_mut().expect("Must be a button"))
-            }
-            HEADER_FILE_MENU_SUB_FORGET_BUTTON_STATE => {
-                forget_file_button_state = Some(state.as_button_mut().expect("Must be a button"))
-            }
-            _ => {
-                // Keys are sorted lexicographically -> 0 will always be first, 1 second, etc
-                if key.starts_with(HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE) {
-                    let button = state.as_button_mut().expect("Must be a button");
-                    forget_file_sub_button_states.push(button);
-                } else if key.starts_with(HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE) {
-                    let button = state.as_button_mut().expect("Must be a button");
-                    load_file_sub_button_states.push(button);
-                }
-            }
-        }
-    }
-
-    let file_button_state = file_button_state.expect("Key must exist");
+    let header_state = &mut env.ui_state.header;
+    let file_button_state = &mut header_state.file_menu_button;
     let file_button_clicked = file_button_state.clicked;
-    let new_file_button_state = new_file_button_state.expect("Key must exist");
+    let new_file_button_state = &mut header_state.file_menu_sub_new_button;
     let new_file_button_clicked = new_file_button_state.clicked;
-    let new_file_textbox_state = new_file_textbox_state.expect("Key must exist");
-    let load_file_button_state = load_file_button_state.expect("Key must exist");
+    let new_file_textbox_state = &mut header_state.file_menu_sub_new_textbox;
+    let load_file_button_state = &mut header_state.file_menu_sub_load_button;
     let load_file_button_clicked = load_file_button_state.clicked;
-    debug_assert!(load_file_sub_button_states.len() == path_amount);
-    let forget_file_button_state = forget_file_button_state.expect("Key must exist");
+    let forget_file_button_state = &mut header_state.file_menu_sub_forget_button;
     let forget_file_button_clicked = forget_file_button_state.clicked;
-    debug_assert!(forget_file_sub_button_states.len() == path_amount);
 
     update_clickable_regions(
         clickable_regions,
@@ -153,7 +111,11 @@ pub fn render_header_file_menu_button(
     let mut new_menu = vec![block_box];
 
     let mut load_menu = Vec::with_capacity(path_amount);
-    for (index, sub_button_state) in load_file_sub_button_states.iter_mut().enumerate() {
+    for (index, sub_button_state) in header_state
+        .file_menu_dynamic_load_buttons
+        .iter_mut()
+        .enumerate()
+    {
         let mut button = Button::new(all_paths[index].clone(), sub_button_state, codex)
             .with_clicked_style(default_clicked_style);
         button.style(default_style);
@@ -161,7 +123,11 @@ pub fn render_header_file_menu_button(
     }
 
     let mut forget_menu = Vec::with_capacity(path_amount);
-    for (index, sub_button_state) in forget_file_sub_button_states.iter_mut().enumerate() {
+    for (index, sub_button_state) in header_state
+        .file_menu_dynamic_forget_buttons
+        .iter_mut()
+        .enumerate()
+    {
         let mut button = Button::new(all_paths[index].clone(), sub_button_state, codex)
             .with_clicked_style(default_clicked_style);
         button.style(default_style);

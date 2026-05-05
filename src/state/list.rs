@@ -11,21 +11,21 @@ use talos::{
 
 use crate::keys::{
     LIST_SINGLE_TASK_DELETE_BUTTON_STATE, LIST_SINGLE_TASK_DONE_BUTTON_STATE,
-    LIST_SINGLE_TASK_PRIO_TEXTBOX_STATE, LIST_SINGLE_TASK_TEXT_TEXTBOX_STATE, LIST_STATE,
+    LIST_SINGLE_TASK_PRIO_TEXTBOX_STATE, LIST_SINGLE_TASK_TEXT_TEXTBOX_STATE,
 };
 
-pub fn make_list_table_state(list: &List, codex: &Codex, out: &mut BTreeMap<String, States>) {
+pub fn make_list_table_state(
+    list: &List,
+    codex: &Codex,
+    out: &mut BTreeMap<String, States>,
+) -> ListState {
     for task in &list.tasks() {
         make_single_task_state(task, codex, out);
     }
-    out.insert(
-        LIST_STATE.to_string(),
-        ListState {
-            selected: None,
-            scroll_offset: 0,
-        }
-        .into(),
-    );
+    ListState {
+        selected: None,
+        scroll_offset: 0,
+    }
 }
 
 // TODO: Will need to call that when updating a task.
