@@ -18,13 +18,13 @@ use crate::{
     state::{UiState, make_state},
 };
 
-pub struct Environment<'a> {
+pub struct Environment {
     pub list: List,
     pub disk_env: DiskEnvironment,
     pub styles: StyleAtlas,
     pub path_amount: usize,
     pub gen_layout: Layout,
-    pub ui_state: UiState<'a>,
+    pub ui_state: UiState,
     pub run: bool,
     pub new_task: Task,
     pub render_tasks: Vec<Task>,
@@ -37,11 +37,8 @@ pub struct DiskEnvironment {
 
 impl DiskEnvironment {
     pub fn new() -> AnankeResult<DiskEnvironment> {
-        let tmp = setup_env()?;
-        Ok(DiskEnvironment {
-            brigid: tmp.0,
-            home_path: tmp.1,
-        })
+        let (brigid, home_path) = setup_env()?;
+        Ok(DiskEnvironment { brigid, home_path })
     }
 }
 
@@ -53,7 +50,7 @@ impl DiskEnvironment {
 /// - `Talos` - The talos instance
 /// - `Layout` - The layout of the application
 /// - `usize` - The amount of paths
-pub fn startup<'a>() -> AnankeResult<(Environment<'a>, Talos)> {
+pub fn startup() -> AnankeResult<(Environment, Talos)> {
     let disk_env = DiskEnvironment::new()?;
     let (list, path_amount) =
         if let Some(conf) = disk_env.brigid.get_file("config.xff")?.into_object() {

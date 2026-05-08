@@ -4,10 +4,11 @@ use talos::layout::Rect;
 
 use crate::{
     error::{AnankeError, AnankeResult},
-    input::{Focus, process_input},
+    input::process_input,
     layout::make_frame_layout,
     render::render_app,
     startup::startup,
+    state::Focus,
     utils::fps_sleeper,
 };
 

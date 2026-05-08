@@ -13,6 +13,12 @@ pub struct MenuState {
     pub show_dropdown: DropdownState,
 }
 
+impl MenuState {
+    pub fn get_textboxes_mut(&mut self) -> Vec<&mut TextBoxState> {
+        vec![&mut self.sort_prio_textbox, &mut self.search_textbox]
+    }
+}
+
 pub fn make_menu_state(codex: &Codex) -> MenuState {
     MenuState {
         sort_dropdown: make_menu_sort_menu_state(),

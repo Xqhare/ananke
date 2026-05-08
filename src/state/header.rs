@@ -21,6 +21,12 @@ pub struct HeaderState {
     pub exit_button: ButtonState,
 }
 
+impl HeaderState {
+    pub fn get_textboxes_mut(&mut self) -> Vec<&mut TextBoxState> {
+        vec![&mut self.file_menu_sub_new_textbox]
+    }
+}
+
 pub fn make_header_state(path_amount: usize, codex: &Codex, home: &PathBuf) -> HeaderState {
     let mut state = HeaderState {
         file_menu_button: ButtonState { clicked: false },

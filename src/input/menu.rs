@@ -1,7 +1,7 @@
 use talos::{codex::Codex, input::KeyEvent};
 
 use crate::{
-    input::{Focus, MenuFocus, creator::update_render_list, header::handle_key_textbox_newfile},
+    input::{creator::update_render_list, header::handle_key_textbox_newfile},
     keys::{
         MENU_SEARCH_PRIO_TEXTBOX, MENU_SEARCH_TEXTBOX, MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_ALL,
         MENU_SHOW_DROPDOWN_DONE, MENU_SHOW_DROPDOWN_OPEN, MENU_SORT_DROPDOWN,
@@ -9,6 +9,7 @@ use crate::{
         MENU_SORT_DROPDOWN_PRIO,
     },
     startup::Environment,
+    state::{Focus, MenuFocus},
 };
 
 pub fn handle_key_menu(

@@ -5,8 +5,9 @@ use anansi::{
 use talos::{codex::Codex, input::KeyEvent};
 
 use crate::{
-    input::{CreatorFocus, Focus, header::handle_key_textbox_newfile},
+    input::header::handle_key_textbox_newfile,
     startup::Environment,
+    state::{CreatorFocus, Focus},
 };
 
 pub mod mouse;

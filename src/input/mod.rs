@@ -16,44 +16,10 @@ use crate::{
         header::{handle_header_mouse, handle_key_textbox_newfile},
         menu::{handle_key_menu, handle_menu_mouse},
     },
+    state::Focus,
     startup::Environment,
     utils::{add_load_n_forget_button_states, ensure_focus_on_active_textfield},
 };
-
-/// The focus of the program
-///
-/// Used for keyboard input capture and ensuring that the focus is on the active textfield
-#[derive(Clone, Copy, Debug)]
-pub enum Focus {
-    /// No focus
-    None,
-    /// Focus on the header new-file textbox
-    HeaderFileNewTextBox,
-    /// Focus on some part of the creator
-    Creator(CreatorFocus),
-    /// Focus on some part of the menu
-    Menu(MenuFocus),
-}
-
-/// The focus of the creator
-#[derive(Clone, Copy, Debug)]
-pub enum CreatorFocus {
-    /// Focus on the creator new-task textbox
-    Task,
-    /// Focus on the creator priority textbox
-    Priority,
-    /// Focus on the creator date textbox
-    CreationDate,
-}
-
-/// The focus of the menu
-#[derive(Clone, Copy, Debug)]
-pub enum MenuFocus {
-    /// Focus on the menu search priority textbox
-    Priority,
-    /// Focus on the menu search textbox for text and tags
-    Text,
-}
 
 pub fn process_input(
     codex: &Codex,

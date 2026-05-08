@@ -7,10 +7,7 @@ use talos::{
 };
 
 use crate::{
-    input::{
-        CreatorFocus, Focus, MenuFocus,
-        creator::{update_new_task_after_key_press, update_render_list},
-    },
+    input::creator::{update_new_task_after_key_press, update_render_list},
     keys::{
         HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON, HEADER_FILE_MENU_SUB_FORGET_BUTTON,
         HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_LOAD_BUTTON,
@@ -18,6 +15,7 @@ use crate::{
         HEADER_FILE_MENU_SUB_NEW_TEXTBOX, HEADER_HELP_BUTTON, HEADER_SAVE_BUTTON,
     },
     startup::Environment,
+    state::{CreatorFocus, Focus, MenuFocus},
     utils::goto_exit,
 };
 

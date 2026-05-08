@@ -18,17 +18,44 @@ pub struct CreatorState {
     pub save_button: ButtonState,
 }
 
-pub fn make_creator_state(codex: &Codex) -> CreatorState {
-    CreatorState {
-        task_entry_textbox: make_creator_task_entry_textbox_state(codex),
-        prio_entry_textbox: make_creator_task_prio_entry_textbox_state(codex),
-        creation_date_entry_textbox: make_creator_task_creation_date_entry_textbox_state(codex),
-        project_tags_text: make_creator_task_project_tags_text_state(codex),
-        context_tags_text: make_creator_task_context_tags_text_state(codex),
-        special_tags_text: make_creator_task_special_tags_text_state(codex),
-        clear_button: create_creator_task_forget_button_state(),
-        save_button: make_creator_task_save_button_state(),
+impl CreatorState {
+    pub fn get_textboxes_mut(&mut self) -> Vec<&mut TextBoxState> {
+        vec![
+            &mut self.task_entry_textbox,
+            &mut self.prio_entry_textbox,
+            &mut self.creation_date_entry_textbox,
+            &mut self.project_tags_text,
+            &mut self.context_tags_text,
+            &mut self.special_tags_text,
+        ]
     }
+
+    pub fn reset(&mut self, codex: &Codex) {
+        self.task_entry_textbox = make_creator_task_entry_textbox_state(codex);
+        self.prio_entry_textbox = make_creator_task_prio_entry_textbox_state(codex);
+        self.creation_date_entry_textbox =
+            make_creator_task_creation_date_entry_textbox_state(codex);
+        self.project_tags_text = make_creator_task_project_tags_text_state(codex);
+        self.context_tags_text = make_creator_task_context_tags_text_state(codex);
+        self.special_tags_text = make_creator_task_special_tags_text_state(codex);
+        self.clear_button = create_creator_task_forget_button_state();
+        self.save_button = make_creator_task_save_button_state();
+    }
+}
+
+pub fn make_creator_state(codex: &Codex) -> CreatorState {
+    let mut state = CreatorState {
+        task_entry_textbox: TextBoxState::default(),
+        prio_entry_textbox: TextBoxState::default(),
+        creation_date_entry_textbox: TextBoxState::default(),
+        project_tags_text: TextBoxState::default(),
+        context_tags_text: TextBoxState::default(),
+        special_tags_text: TextBoxState::default(),
+        clear_button: ButtonState::default(),
+        save_button: ButtonState::default(),
+    };
+    state.reset(codex);
+    state
 }
 
 // TODO: Need for process management later, when save button is hit, recreate the default state for
@@ -48,15 +75,15 @@ pub fn make_creator_task_creation_date_entry_textbox_state(codex: &Codex) -> Tex
     }
 }
 
-fn make_creator_task_save_button_state() -> ButtonState {
-    ButtonState { clicked: false }
+pub fn make_creator_task_save_button_state() -> ButtonState {
+    ButtonState::default()
 }
 
-fn create_creator_task_forget_button_state() -> ButtonState {
-    ButtonState { clicked: false }
+pub fn create_creator_task_forget_button_state() -> ButtonState {
+    ButtonState::default()
 }
 
-fn make_creator_task_prio_entry_textbox_state(codex: &Codex) -> TextBoxState {
+pub fn make_creator_task_prio_entry_textbox_state(codex: &Codex) -> TextBoxState {
     TextBoxState {
         active: false,
         cursor: Some(0),
@@ -64,7 +91,7 @@ fn make_creator_task_prio_entry_textbox_state(codex: &Codex) -> TextBoxState {
     }
 }
 
-fn make_creator_task_context_tags_text_state(codex: &Codex) -> TextBoxState {
+pub fn make_creator_task_context_tags_text_state(codex: &Codex) -> TextBoxState {
     TextBoxState {
         active: false,
         cursor: Some(0),
@@ -72,7 +99,7 @@ fn make_creator_task_context_tags_text_state(codex: &Codex) -> TextBoxState {
     }
 }
 
-fn make_creator_task_project_tags_text_state(codex: &Codex) -> TextBoxState {
+pub fn make_creator_task_project_tags_text_state(codex: &Codex) -> TextBoxState {
     TextBoxState {
         active: false,
         cursor: Some(0),
@@ -80,7 +107,7 @@ fn make_creator_task_project_tags_text_state(codex: &Codex) -> TextBoxState {
     }
 }
 
-fn make_creator_task_special_tags_text_state(codex: &Codex) -> TextBoxState {
+pub fn make_creator_task_special_tags_text_state(codex: &Codex) -> TextBoxState {
     TextBoxState {
         active: false,
         cursor: Some(0),
@@ -88,7 +115,7 @@ fn make_creator_task_special_tags_text_state(codex: &Codex) -> TextBoxState {
     }
 }
 
-fn make_creator_task_entry_textbox_state(codex: &Codex) -> TextBoxState {
+pub fn make_creator_task_entry_textbox_state(codex: &Codex) -> TextBoxState {
     TextBoxState {
         active: false,
         cursor: Some(0),
