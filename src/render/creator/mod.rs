@@ -124,7 +124,7 @@ fn render_row0(
 
     let mut block = Block::new().with_style(style).with_fat_border();
     let mut blockbox1 = BlockBox::new(&mut block, &mut textbox1).with_style(style);
-    let mut text1 = Text::new("Creation Date:", codex)
+    let mut text1 = Text::new("Inception Date:", codex)
         .align_center()
         .align_vertically()
         .with_style(style);
