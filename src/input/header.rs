@@ -7,7 +7,6 @@ use talos::{
 };
 
 use crate::{
-    input::creator::{update_new_task_after_key_press, update_render_list},
     keys::{
         HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON, HEADER_FILE_MENU_SUB_FORGET_BUTTON,
         HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE, HEADER_FILE_MENU_SUB_LOAD_BUTTON,
@@ -19,101 +18,39 @@ use crate::{
     utils::goto_exit,
 };
 
-/// Handles the key events for the new file text box
-pub fn handle_key_textbox_newfile(
+/// Handles the key events for the header new file logic
+pub fn handle_header_newfile_input(
     key_event: &KeyEvent,
     env: &mut Environment,
     codex: &Codex,
-    focus: &Focus,
 ) -> Option<()> {
-    // First get the state once
-    let state = match focus {
-        Focus::HeaderFileNewTextBox => &mut env.ui_state.header.file_menu_sub_new_textbox,
-        Focus::Creator(CreatorFocus::Task) => &mut env.ui_state.creator.task_entry_textbox,
-        Focus::Creator(CreatorFocus::Priority) => &mut env.ui_state.creator.prio_entry_textbox,
-        Focus::Creator(CreatorFocus::CreationDate) => {
-            &mut env.ui_state.creator.creation_date_entry_textbox
-        }
-        Focus::Menu(MenuFocus::Text) => &mut env.ui_state.menu.search_textbox,
-        Focus::Menu(MenuFocus::Priority) => &mut env.ui_state.menu.sort_prio_textbox,
-        _ => unreachable!(),
-    };
-    let mut content = state.text.get_content().to_string();
+    if key_event.code == KeyCode::Enter {
+        let state = &mut env.ui_state.header.file_menu_sub_new_textbox;
+        let content = state.text.get_content().to_string();
 
-    let mut update_creator_after_key_press = false;
-    let mut update_r_list = false;
-    // Now handle the key
-    match key_event.code {
-        KeyCode::Enter => {
-            if let Focus::HeaderFileNewTextBox = focus {
-                // Just to be sure, flush one last time & save
-                state.text.set_content(&content, codex);
-                let _ = env.list.save().unwrap();
+        // Just to be sure, flush one last time & save
+        state.text.set_content(&content, codex);
+        let _ = env.list.save().unwrap();
 
-                // Update the list
-                env.list = List::new(&content);
-                update_r_list = true;
+        // Update the list
+        env.list = List::new(&content);
 
-                // Save the path
-                let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
-                let obj = path.as_object_mut().unwrap();
-                let paths_ary = obj.get_mut("paths").unwrap();
-                paths_ary.as_array_mut().unwrap().push(xff!(&content));
-                let _ = env
-                    .disk_env
-                    .brigid
-                    .update_file("config.xff", Content::XFF(xff!(obj.clone())));
+        // Save the path
+        let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
+        let obj = path.as_object_mut().unwrap();
+        let paths_ary = obj.get_mut("paths").unwrap();
+        paths_ary.as_array_mut().unwrap().push(xff!(&content));
+        let _ = env
+            .disk_env
+            .brigid
+            .update_file("config.xff", Content::XFF(xff!(obj.clone())));
 
-                // Reset the text box
-                state.active = false;
-                state
-                    .text
-                    .set_content(env.disk_env.home_path.to_string_lossy(), codex);
-            } else if !update_r_list {
-                return Some(());
-            }
-        }
-        KeyCode::Backspace => {
-            content.pop();
-        }
-        KeyCode::Char(c) => {
-            content.push(c);
-            if let Focus::Creator(CreatorFocus::Task) = focus {
-                env.new_task.update_text(&content);
-                update_creator_after_key_press = true;
-            }
-        }
-        _ => {}
-    }
-
-    // Update the text with the new content
-    state.text.set_content(&content, codex);
-    state.cursor = Some(state.text.len());
-
-    match focus {
-        Focus::Creator(CreatorFocus::Priority) => {
-            if keep_textbox_at_one_char(env, focus, codex) {
-                env.ui_state.creator.prio_entry_textbox.active = false;
-            }
-        }
-        Focus::Menu(MenuFocus::Priority) => {
-            if keep_textbox_at_one_char(env, focus, codex) {
-                env.ui_state.menu.sort_prio_textbox.active = false;
-            }
-        }
-        _ => {}
-    }
-
-    // Update state after each key entry where it makes sense to make UI feel snappy and
-    // responsive
-    if let Focus::Menu(_) = focus {
-        update_render_list(env);
-    }
-    if update_creator_after_key_press {
-        update_new_task_after_key_press(env, codex);
-    }
-    if update_r_list {
-        update_render_list(env);
+        // Reset the text box
+        state.active = false;
+        state
+            .text
+            .set_content(env.disk_env.home_path.to_string_lossy(), codex);
+        
         return Some(());
     }
     None
@@ -121,7 +58,7 @@ pub fn handle_key_textbox_newfile(
 
 /// # Returns
 /// If the textbox was shrunk to one character or not. True: was shrunk, False: was not
-fn keep_textbox_at_one_char(env: &mut Environment, focus: &Focus, codex: &Codex) -> bool {
+pub fn keep_textbox_at_one_char(env: &mut Environment, focus: &Focus, codex: &Codex) -> bool {
     let state = match focus {
         Focus::Creator(CreatorFocus::Priority) => &mut env.ui_state.creator.prio_entry_textbox,
         Focus::Menu(MenuFocus::Priority) => &mut env.ui_state.menu.sort_prio_textbox,

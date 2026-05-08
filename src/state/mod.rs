@@ -1,7 +1,10 @@
 use std::{collections::BTreeMap, path::PathBuf};
 
 use anansi::List;
-use talos::{codex::Codex, widgets::stateful::ListState};
+use talos::{
+    codex::Codex,
+    widgets::stateful::{ListState, TextBoxState},
+};
 
 use crate::state::{
     creator::{CreatorState, make_creator_state},
@@ -82,6 +85,20 @@ impl UiState {
             Focus::Menu(MenuFocus::Priority) => {
                 self.menu.sort_prio_textbox.active = true;
             }
+        }
+    }
+
+    pub fn active_textbox_mut(&mut self, focus: &Focus) -> Option<&mut TextBoxState> {
+        match focus {
+            Focus::None => None,
+            Focus::HeaderFileNewTextBox => Some(&mut self.header.file_menu_sub_new_textbox),
+            Focus::Creator(CreatorFocus::Task) => Some(&mut self.creator.task_entry_textbox),
+            Focus::Creator(CreatorFocus::Priority) => Some(&mut self.creator.prio_entry_textbox),
+            Focus::Creator(CreatorFocus::CreationDate) => {
+                Some(&mut self.creator.creation_date_entry_textbox)
+            }
+            Focus::Menu(MenuFocus::Text) => Some(&mut self.menu.search_textbox),
+            Focus::Menu(MenuFocus::Priority) => Some(&mut self.menu.sort_prio_textbox),
         }
     }
 

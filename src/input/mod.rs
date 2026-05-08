@@ -4,6 +4,7 @@ use talos::{
     codex::Codex,
     input::{Event, KeyCode, KeyEvent, MouseButton, MouseEvent, MouseEventKind},
     layout::Rect,
+    widgets::stateful::TextBoxState,
 };
 
 mod creator;
@@ -13,13 +14,46 @@ mod menu;
 use crate::{
     input::{
         creator::{handle_key_creator, mouse::handle_creator_mouse},
-        header::{handle_header_mouse, handle_key_textbox_newfile},
+        header::{handle_header_mouse, handle_header_newfile_input},
         menu::{handle_key_menu, handle_menu_mouse},
     },
-    state::Focus,
     startup::Environment,
+    state::Focus,
     utils::{add_load_n_forget_button_states, ensure_focus_on_active_textfield},
 };
+
+/// Handles the generic textbox input (backspace, char entry)
+///
+/// Returns true if the content changed
+pub fn handle_generic_textbox_input(
+    key_event: &KeyEvent,
+    state: &mut TextBoxState,
+    codex: &Codex,
+) -> bool {
+    let mut content = state.text.get_content().to_string();
+    let changed;
+
+    match key_event.code {
+        KeyCode::Backspace => {
+            content.pop();
+            changed = true;
+        }
+        KeyCode::Char(c) => {
+            content.push(c);
+            changed = true;
+        }
+        _ => {
+            changed = false;
+        }
+    }
+
+    if changed {
+        state.text.set_content(&content, codex);
+        state.cursor = Some(state.text.len());
+    }
+
+    changed
+}
 
 pub fn process_input(
     codex: &Codex,
@@ -42,9 +76,9 @@ pub fn process_input(
                             return None;
                         }
                         Focus::HeaderFileNewTextBox => {
-                            if let Some(_) =
-                                handle_key_textbox_newfile(key_event, env, codex, focus)
-                            {
+                            let state = env.ui_state.active_textbox_mut(focus)?;
+                            handle_generic_textbox_input(key_event, state, codex);
+                            if let Some(_) = handle_header_newfile_input(key_event, env, codex) {
                                 // Add the load/forget buttons
                                 add_load_n_forget_button_states(env);
                                 // Lastly close the menu
@@ -58,12 +92,12 @@ pub fn process_input(
                             // We do not save then, but we loose the focus
                             //
                             // The todo.txt format only allows for one line per task.
-                            if handle_key_creator(key_event, env, any, codex).is_some() {
+                            if handle_key_creator(key_event, env, &any, codex).is_some() {
                                 return Some(Focus::None);
                             }
                         }
                         Focus::Menu(any) => {
-                            if handle_key_menu(key_event, env, any, codex).is_some() {
+                            if handle_key_menu(key_event, env, &any, codex).is_some() {
                                 return Some(Focus::None);
                             }
                         }
