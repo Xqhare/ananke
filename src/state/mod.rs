@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, path::PathBuf};
 use anansi::List;
 use talos::{
     codex::Codex,
-    widgets::stateful::{ListState, TextBoxState},
+    widgets::stateful::{TableState, TextBoxState},
 };
 
 use crate::state::{
@@ -57,7 +57,7 @@ pub struct UiState {
     pub header: HeaderState,
     pub creator: CreatorState,
     pub menu: MenuState,
-    pub list: ListState,
+    pub task_table: TableState,
     pub dynamic_states: BTreeMap<usize, TaskState>,
 }
 
@@ -126,7 +126,7 @@ pub fn make_state(path_amount: usize, list: &List, codex: &Codex, home: &PathBuf
         header,
         creator,
         menu,
-        list,
+        task_table: list,
         dynamic_states,
     }
 }

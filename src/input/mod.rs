@@ -173,18 +173,19 @@ fn handle_scrolling(
     env: &mut Environment,
     current_focus: &Focus,
 ) -> Focus {
+    // Ignore the `x_offset` as there is only vertical scrolling
     if mouse_event.kind == MouseEventKind::ScrollUp {
-        let list_state = &mut env.ui_state.list;
-        let current_offset = list_state.scroll_offset;
+        let list_state = &mut env.ui_state.task_table;
+        let current_offset = list_state.y_offset;
         if current_offset > 0 {
-            list_state.scroll_offset = current_offset - 1;
+            list_state.y_offset = current_offset - 1;
         }
     } else if mouse_event.kind == MouseEventKind::ScrollDown {
         let list_max = env.list.task_amount();
-        let list_state = &mut env.ui_state.list;
-        let current_offset = list_state.scroll_offset;
+        let list_state = &mut env.ui_state.task_table;
+        let current_offset = list_state.y_offset;
         if current_offset < list_max - 1 {
-            list_state.scroll_offset = current_offset + 1;
+            list_state.y_offset = current_offset + 1;
         }
     }
     // Don't change the focus; Don't throw a user out of a text entry just because they scrolled - horrible UX otherwise imho

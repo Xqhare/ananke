@@ -5,7 +5,7 @@ use talos::{
     codex::Codex,
     widgets::{
         Text,
-        stateful::{ButtonState, ListState, TextBoxState},
+        stateful::{ButtonState, SequenceState, TableState, TextBoxState},
     },
 };
 
@@ -14,19 +14,25 @@ pub struct TaskState {
     pub delete_button: ButtonState,
     pub prio_textbox: TextBoxState,
     pub text_textbox: TextBoxState,
+    pub inception_textbox: TextBoxState,
+    pub completion_textbox: TextBoxState,
+    /// The state of all sequences, no special cases with no mutation
+    pub generic_sequence: SequenceState,
 }
 
 pub fn make_list_table_state(
     list: &List,
     codex: &Codex,
     out: &mut BTreeMap<usize, TaskState>,
-) -> ListState {
+) -> TableState {
     for task in &list.tasks() {
         make_single_task_state(task, codex, out);
     }
-    ListState {
-        selected: None,
-        scroll_offset: 0,
+    TableState {
+        x_offset: 0,
+        y_offset: 0,
+        max_rows: None,
+        max_columns: None,
     }
 }
 
@@ -51,6 +57,23 @@ pub fn make_single_task_state(task: &Task, codex: &Codex, out: &mut BTreeMap<usi
         cursor: None,
         text: Text::new(task_text, codex),
     };
+    let generic_sequence = SequenceState { scroll_offset: 0 };
+    let inception_text = task.inception_date();
+    let inception_textbox = TextBoxState {
+        active: false,
+        cursor: None,
+        text: Text::new(inception_text, codex)
+            .align_center()
+            .align_vertically(),
+    };
+    let completion_text = task.completion_date();
+    let completion_textbox = TextBoxState {
+        active: false,
+        cursor: None,
+        text: Text::new(completion_text, codex)
+            .align_center()
+            .align_vertically(),
+    };
 
     out.insert(
         id,
@@ -59,6 +82,9 @@ pub fn make_single_task_state(task: &Task, codex: &Codex, out: &mut BTreeMap<usi
             delete_button,
             prio_textbox,
             text_textbox,
+            generic_sequence,
+            inception_textbox,
+            completion_textbox,
         },
     );
 }

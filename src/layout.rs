@@ -10,7 +10,7 @@ use crate::keys::{
     CREATOR_PRIO_TEXT, CREATOR_RECT, CREATOR_SAVE_BUTTON, CREATOR_TASK_ENTRY_TEXTBOX,
     CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS, CREATOR_TEXT_SPECIAL_TAGS,
     HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON, HEADER_FILE_PATH, HEADER_FPS, HEADER_HELP_BUTTON,
-    HEADER_SAVE_BUTTON, MENU_RECT, MENU_SEARCH_PRIO_TEXT, MENU_SEARCH_PRIO_TEXTBOX,
+    HEADER_SAVE_BUTTON, LIST_RECT, MENU_RECT, MENU_SEARCH_PRIO_TEXT, MENU_SEARCH_PRIO_TEXTBOX,
     MENU_SEARCH_TEXTBOX, MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_TEXT, MENU_SORT_DROPDOWN,
     MENU_SORT_DROPDOWN_TEXT,
 };
@@ -40,7 +40,7 @@ pub fn make_frame_layout(screen_rect: &Rect, layout: &Layout) -> LayoutAtlas {
     out.store.extend(make_header_layout(&basic_layout[0]));
     out.store.extend(make_creator_layout(&basic_layout[1]));
     out.store.extend(make_menu_layout(&basic_layout[2]));
-    out.store.insert("task_list".to_string(), basic_layout[3]);
+    out.store.insert(LIST_RECT.to_string(), basic_layout[3]);
     out
 }
 

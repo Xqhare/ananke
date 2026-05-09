@@ -9,12 +9,15 @@ use talos::{
 };
 
 use crate::{
-    render::{creator::render_creator, header::render_header, menu::render_menu},
+    render::{
+        creator::render_creator, header::render_header, list::render_list, menu::render_menu,
+    },
     startup::Environment,
 };
 
 mod creator;
 mod header;
+mod list;
 mod menu;
 
 /// Renders the application
@@ -56,4 +59,5 @@ pub fn render_app(
         env,
     );
     render_menu(canvas, codex, layout_atlas, clickable_regions, env);
+    render_list(canvas, codex, layout_atlas, clickable_regions, env);
 }

@@ -46,6 +46,8 @@ pub const MENU_SEARCH_PRIO_TEXT: &str = "menu_sort_prio_button_text";
 pub const MENU_SEARCH_PRIO_TEXTBOX: &str = "menu_sort_prio_textbox";
 pub const MENU_SEARCH_TEXTBOX: &str = "menu_search_textbox";
 
+pub const LIST_RECT: &str = "list_rect";
+
 pub mod styles {
     pub const CURSOR: &str = "cursor";
     pub const DEFAULT_INVERTED: &str = "default_inverted";
