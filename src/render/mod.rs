@@ -38,10 +38,13 @@ pub fn render_app(
     clickable_regions.clear();
     let entire_canvas = canvas.size_rect();
     let default_style = env.styles.get_default();
-    // TODO: Remove `Area` below and see exactly where I need to draw the BG manually to save on draw calls
+    // While the Area below does double the rendering of the entire canvas, (drawing the bg twice) it does
+    // ensure no missed 'pixels' and simplifies the code.
+    // Hundreds of fps is fine for a to-do app.
     Area::new()
         .with_style(default_style)
         .render(canvas, entire_canvas, codex);
+
     render_creator(canvas, codex, layout_atlas, clickable_regions, env);
     // Render header after creator to ensure its buttons are on top
     render_header(
