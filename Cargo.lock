@@ -78,7 +78,7 @@ dependencies = [
 [[package]]
 name = "talos"
 version = "1.4.0"
-source = "git+https://github.com/Xqhare/talos#0b473ebf2216ea4cf1c2e9c4ae8c63583c16019d"
+source = "git+https://github.com/Xqhare/talos#35e6217c35f78f41a303cb6641874ac40ddb6f08"
 dependencies = [
  "libc",
 ]

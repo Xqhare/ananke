@@ -49,13 +49,17 @@ pub fn make_single_task_state(task: &Task, codex: &Codex, out: &mut BTreeMap<usi
     let prio_textbox = TextBoxState {
         active: false,
         cursor: None,
-        text: Text::new(task_priority, codex),
+        text: Text::new(task_priority, codex)
+            .align_vertically()
+            .align_center(),
     };
     let task_text = task.text();
     let text_textbox = TextBoxState {
         active: false,
         cursor: None,
-        text: Text::new(task_text, codex),
+        text: Text::new(task_text, codex)
+            .align_vertically()
+            .align_center(),
     };
     let generic_sequence = SequenceState { scroll_offset: 0 };
     let inception_text = task.inception_date();

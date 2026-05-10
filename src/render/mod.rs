@@ -49,7 +49,7 @@ pub fn render_app(
         .render(canvas, entire_canvas, codex);
 
     render_creator(canvas, codex, layout_atlas, clickable_regions, env);
-    // Render header after creator to ensure its buttons are on top
+    // Render header after creator to ensure its dropdown buttons are on top
     render_header(
         canvas,
         codex,
@@ -58,6 +58,7 @@ pub fn render_app(
         last_frame_dur,
         env,
     );
-    render_menu(canvas, codex, layout_atlas, clickable_regions, env);
     render_list(canvas, codex, layout_atlas, clickable_regions, env);
+    // Render menu after list to ensure its dropdown buttons are on top
+    render_menu(canvas, codex, layout_atlas, clickable_regions, env);
 }

@@ -7,7 +7,7 @@ use talos::{
     layout::{Constraint, Rect},
     render::Canvas,
     widgets::{
-        Block,
+        Block, Text,
         stateful::{BlockBox, Button, InnerBorder, Sequence, Table, TextBox},
         traits::Widget,
     },
@@ -54,9 +54,12 @@ pub fn render_list(
     let mut dates_completion_block_storage: Vec<Vec<Block>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
 
+    let mut prio_text_storage: Vec<Vec<Text>> = render_tasks.iter().map(|_| Vec::new()).collect();
     let mut prio_textbox_storage: Vec<Vec<TextBox>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
     let mut prio_block_storage: Vec<Vec<Block>> = render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut prio_blockbox_storage: Vec<Vec<BlockBox>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
     let mut prio_vec: Vec<Vec<BlockBox>> = render_tasks.iter().map(|_| Vec::new()).collect();
 
     let mut button_storage: Vec<Vec<Button>> = render_tasks.iter().map(|_| Vec::new()).collect();
@@ -64,7 +67,7 @@ pub fn render_list(
     let mut text_textbox: Vec<Vec<TextBox>> = render_tasks.iter().map(|_| Vec::new()).collect();
     let mut tags: Vec<Vec<BlockBox>> = render_tasks.iter().map(|_| Vec::new()).collect();
     let mut rows: Vec<Vec<Sequence>> = Vec::new();
-    let mut col2: Vec<Vec<Sequence>> = Vec::new();
+    let mut col2: Vec<Vec<Sequence>> = render_tasks.iter().map(|_| Vec::new()).collect();
 
     // --------------------- end of heap pointer alloc ---------------------
 
@@ -125,7 +128,12 @@ pub fn render_list(
             row.push(col0);
 
             prio_textbox_vec.push(TextBox::new(&mut state.prio_textbox).with_style(default_style));
-            prio_block_vec.push(Block::new().with_fat_border().with_style(default_style));
+            prio_block_vec.push(
+                Block::new()
+                    .with_fat_border()
+                    .with_style(default_style)
+                    .with_bg_fill(),
+            );
             prio_vec.push(BlockBox::new(
                 prio_block_vec.last_mut().unwrap(),
                 prio_textbox_vec.last_mut().unwrap(),
@@ -136,8 +144,12 @@ pub fn render_list(
 
             dates_inception_textbox_vec
                 .push(TextBox::new(&mut state.inception_textbox).with_style(default_style));
-            dates_inception_block_vec
-                .push(Block::new().with_fat_border().with_style(default_style));
+            dates_inception_block_vec.push(
+                Block::new()
+                    .with_fat_border()
+                    .with_style(default_style)
+                    .with_bg_fill(),
+            );
             dates_vec.push(BlockBox::new(
                 dates_inception_block_vec.last_mut().unwrap(),
                 dates_inception_textbox_vec.last_mut().unwrap(),
@@ -145,31 +157,37 @@ pub fn render_list(
 
             dates_completion_textbox_vec
                 .push(TextBox::new(&mut state.completion_textbox).with_style(default_style));
-            dates_completion_block_vec
-                .push(Block::new().with_fat_border().with_style(default_style));
+            dates_completion_block_vec.push(
+                Block::new()
+                    .with_fat_border()
+                    .with_style(default_style)
+                    .with_bg_fill(),
+            );
             dates_vec.push(BlockBox::new(
                 dates_completion_block_vec.last_mut().unwrap(),
                 dates_completion_textbox_vec.last_mut().unwrap(),
             ));
 
-            col2_vec.push(Sequence::new(state.generic_sequence, dates_vec.iter_mut()).horizontal());
+            col2_vec.push(Sequence::new(state.generic_sequence, dates_vec.iter_mut()).vertical());
 
             row.push(Sequence::new(state.generic_sequence, col2_vec.iter_mut()));
             rows.push(row);
         }
     }
 
-    // let layout = LayoutBuilder::new()
-    //     .add_constraint(Constraint::Length(10))
-    //     .add_constraint(Constraint::Length(10))
-    //     .add_constraint(Constraint::Min(1))
-    //     .build();
+    let layout = LayoutBuilder::new()
+        .add_constraint(Constraint::Length(10))
+        .add_constraint(Constraint::Length(5))
+        .add_constraint(Constraint::Max(25))
+        .add_constraint(Constraint::Min(1))
+        .build();
 
     Table::new(&mut ui_state.task_table)
         .with_rows(rows.iter_mut())
         .with_border_style(default_style)
         .with_style(default_style)
         .draw_inner_border(InnerBorder::Rows)
-        //.with_col_layout(layout)
+        .with_col_layout(layout)
+        .with_row_height(6)
         .render(canvas, area, codex);
 }

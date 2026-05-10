@@ -14,7 +14,8 @@ pub const CREATOR_HELP_PAGE_RIGHT: &str = "creator_help_page_right";
 
 // Names are prepended with "a0_" to ensure they are first in the clickable regions BTreeMap.
 // This is only relevant for the children of the file menu button, as they are drawn over parts of the
-// creator interactive regions (Task text textbox & Prio textbox)
+// creator interactive regions (Task text textbox & Prio textbox), as well as the dropdown menus in
+// the menu
 //
 // Names ending with a "_" are used as base names for needed children; they add their id or index to the end
 pub const HEADER_FILE_MENU_SUB_NEW_BUTTON: &str = "a0_header_file_menu_sub_new_button";
@@ -30,23 +31,23 @@ pub const HEADER_EXIT_BUTTON: &str = "header_exit_button";
 pub const HEADER_FPS: &str = "header_fps";
 pub const HEADER_FILE_PATH: &str = "header_file_path";
 
+pub const LIST_RECT: &str = "list_rect";
+
 pub const MENU_RECT: &str = "menu_rect";
 pub const MENU_SHOW_DROPDOWN_TEXT: &str = "menu_show_button_text";
 pub const MENU_SHOW_DROPDOWN: &str = "menu_show_button";
-pub const MENU_SHOW_DROPDOWN_ALL: &str = "menu_show_dropdown_all";
-pub const MENU_SHOW_DROPDOWN_DONE: &str = "menu_show_dropdown_done";
-pub const MENU_SHOW_DROPDOWN_OPEN: &str = "menu_show_dropdown_open";
+pub const MENU_SHOW_DROPDOWN_ALL: &str = "a0_menu_show_dropdown_all";
+pub const MENU_SHOW_DROPDOWN_DONE: &str = "a0_menu_show_dropdown_done";
+pub const MENU_SHOW_DROPDOWN_OPEN: &str = "a0_menu_show_dropdown_open";
 pub const MENU_SORT_DROPDOWN: &str = "menu_sort_button";
-pub const MENU_SORT_DROPDOWN_TEXT: &str = "menu_sort_button_text";
-pub const MENU_SORT_DROPDOWN_NONE: &str = "menu_sort_dropdown_none";
-pub const MENU_SORT_DROPDOWN_PRIO: &str = "menu_sort_dropdown_prio";
-pub const MENU_SORT_DROPDOWN_INCEPTION: &str = "menu_sort_dropdown_inception_date";
-pub const MENU_SORT_DROPDOWN_COMPLETION: &str = "menu_sort_dropdown_completion_date";
+pub const MENU_SORT_DROPDOWN_TEXT: &str = "a0_menu_sort_button_text";
+pub const MENU_SORT_DROPDOWN_NONE: &str = "a0_menu_sort_dropdown_none";
+pub const MENU_SORT_DROPDOWN_PRIO: &str = "a0_menu_sort_dropdown_prio";
+pub const MENU_SORT_DROPDOWN_INCEPTION: &str = "a0_menu_sort_dropdown_inception_date";
+pub const MENU_SORT_DROPDOWN_COMPLETION: &str = "a0_menu_sort_dropdown_completion_date";
 pub const MENU_SEARCH_PRIO_TEXT: &str = "menu_sort_prio_button_text";
 pub const MENU_SEARCH_PRIO_TEXTBOX: &str = "menu_sort_prio_textbox";
 pub const MENU_SEARCH_TEXTBOX: &str = "menu_search_textbox";
-
-pub const LIST_RECT: &str = "list_rect";
 
 pub mod styles {
     pub const CURSOR: &str = "cursor";
