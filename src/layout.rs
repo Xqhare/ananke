@@ -10,7 +10,7 @@ use crate::keys::{
     CREATOR_PRIO_TEXT, CREATOR_RECT, CREATOR_SAVE_BUTTON, CREATOR_TASK_ENTRY_TEXTBOX,
     CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS, CREATOR_TEXT_SPECIAL_TAGS,
     HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON, HEADER_FILE_PATH, HEADER_FPS, HEADER_HELP_BUTTON,
-    HEADER_SAVE_BUTTON, LIST_RECT, MENU_RECT, MENU_SEARCH_PRIO_TEXT, MENU_SEARCH_PRIO_TEXTBOX,
+    HEADER_SAVE_BUTTON, LIST_RECT, MENU_SEARCH_PRIO_TEXT, MENU_SEARCH_PRIO_TEXTBOX,
     MENU_SEARCH_TEXTBOX, MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_TEXT, MENU_SORT_DROPDOWN,
     MENU_SORT_DROPDOWN_TEXT,
 };
@@ -28,7 +28,7 @@ pub fn make_layout() -> Layout {
         .direction(Direction::Vertical)
         .add_constraint(Constraint::Length(3))
         .add_constraint(Constraint::Length(14))
-        .add_constraint(Constraint::Length(5))
+        .add_constraint(Constraint::Length(3))
         .add_constraint(Constraint::Min(1))
         .build()
 }
@@ -47,7 +47,6 @@ pub fn make_frame_layout(screen_rect: &Rect, layout: &Layout) -> LayoutAtlas {
 fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
     let mut layout = LayoutBuilder::new()
         .direction(Direction::Horizontal)
-        .margin(1)
         .add_constraint(Constraint::Percentage(50))
         .add_constraint(Constraint::Percentage(50))
         .build()
@@ -70,7 +69,7 @@ fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
         .build()
         .split(first_half[0]);
     debug_assert!(left_half.len() == 3);
-    let mut right_half = LayoutBuilder::new()
+    let right_half = LayoutBuilder::new()
         .direction(Direction::Horizontal)
         .add_constraint(Constraint::Min(1))
         .add_constraint(Constraint::Min(1))
@@ -78,9 +77,7 @@ fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
         .build()
         .split(first_half[1]);
     debug_assert!(right_half.len() == 3);
-    right_half[2].width += 1;
     vec![
-        (MENU_RECT.to_string(), *menu_rect),
         (MENU_SHOW_DROPDOWN_TEXT.to_string(), left_half[0]),
         (MENU_SHOW_DROPDOWN.to_string(), left_half[1]),
         (MENU_SORT_DROPDOWN_TEXT.to_string(), left_half[2]),

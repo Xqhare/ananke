@@ -32,8 +32,13 @@ pub const HEADER_FPS: &str = "header_fps";
 pub const HEADER_FILE_PATH: &str = "header_file_path";
 
 pub const LIST_RECT: &str = "list_rect";
+pub const LIST_ROW_DONE_BUTTON_BASE: &str = "list_row_buttons_";
+pub const LIST_ROW_DELETE_BUTTON_BASE: &str = "list_row_delete_buttons_";
+pub const LIST_ROW_PRIO_BASE: &str = "list_row_prio_";
+pub const LIST_ROW_INCEPTION_BASE: &str = "list_row_inception_";
+pub const LIST_ROW_COMPLETION_BASE: &str = "list_row_completion_";
+pub const LIST_ROW_TEXT_BASE: &str = "list_row_text_";
 
-pub const MENU_RECT: &str = "menu_rect";
 pub const MENU_SHOW_DROPDOWN_TEXT: &str = "menu_show_button_text";
 pub const MENU_SHOW_DROPDOWN: &str = "menu_show_button";
 pub const MENU_SHOW_DROPDOWN_ALL: &str = "a0_menu_show_dropdown_all";

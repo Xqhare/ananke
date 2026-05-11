@@ -14,11 +14,11 @@ use talos::{
 
 use crate::{
     keys::{
-        MENU_RECT, MENU_SEARCH_PRIO_TEXT, MENU_SEARCH_PRIO_TEXTBOX, MENU_SEARCH_TEXTBOX,
-        MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_ALL, MENU_SHOW_DROPDOWN_DONE,
-        MENU_SHOW_DROPDOWN_OPEN, MENU_SHOW_DROPDOWN_TEXT, MENU_SORT_DROPDOWN,
-        MENU_SORT_DROPDOWN_COMPLETION, MENU_SORT_DROPDOWN_INCEPTION, MENU_SORT_DROPDOWN_NONE,
-        MENU_SORT_DROPDOWN_PRIO, MENU_SORT_DROPDOWN_TEXT,
+        MENU_SEARCH_PRIO_TEXT, MENU_SEARCH_PRIO_TEXTBOX, MENU_SEARCH_TEXTBOX, MENU_SHOW_DROPDOWN,
+        MENU_SHOW_DROPDOWN_ALL, MENU_SHOW_DROPDOWN_DONE, MENU_SHOW_DROPDOWN_OPEN,
+        MENU_SHOW_DROPDOWN_TEXT, MENU_SORT_DROPDOWN, MENU_SORT_DROPDOWN_COMPLETION,
+        MENU_SORT_DROPDOWN_INCEPTION, MENU_SORT_DROPDOWN_NONE, MENU_SORT_DROPDOWN_PRIO,
+        MENU_SORT_DROPDOWN_TEXT,
         styles::{CURSOR, DEFAULT_INVERTED},
     },
     startup::Environment,
@@ -31,10 +31,6 @@ pub fn render_menu(
     clickable_regions: &mut BTreeMap<String, Rect>,
     env: &mut Environment,
 ) {
-    let area = layout_atlas.get_known_rect(MENU_RECT);
-    let style = env.styles.get_default();
-    let mut block = Block::new().with_style(style);
-    block.render(canvas, area, codex);
     render_show_dropdown(canvas, codex, layout_atlas, clickable_regions, env);
     render_sort_dropdown(canvas, codex, layout_atlas, clickable_regions, env);
     render_prio_search(canvas, codex, layout_atlas, clickable_regions, env);

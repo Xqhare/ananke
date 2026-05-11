@@ -1,10 +1,11 @@
 use std::collections::BTreeMap;
 
+use anansi::Task;
 use talos::{
     LayoutBuilder,
     atlases::LayoutAtlas,
     codex::Codex,
-    layout::{Constraint, Rect},
+    layout::{Constraint, Direction, Rect},
     render::Canvas,
     widgets::{
         Block, Text,
@@ -13,7 +14,7 @@ use talos::{
     },
 };
 
-use crate::{keys::LIST_RECT, startup::Environment, state::list::TaskState};
+use crate::{keys::{LIST_RECT, LIST_ROW_COMPLETION_BASE, LIST_ROW_DELETE_BUTTON_BASE, LIST_ROW_DONE_BUTTON_BASE, LIST_ROW_INCEPTION_BASE, LIST_ROW_PRIO_BASE, LIST_ROW_TEXT_BASE}, startup::Environment, state::list::TaskState};
 
 pub fn render_list(
     canvas: &mut Canvas,
@@ -303,12 +304,59 @@ pub fn render_list(
         .add_constraint(Constraint::Min(1))
         .build();
 
-    Table::new(&mut ui_state.task_table)
+    let mut table = Table::new(&mut ui_state.task_table)
         .with_rows(rows.iter_mut())
         .with_border_style(default_style)
         .with_style(default_style)
         .draw_inner_border(InnerBorder::Rows)
         .with_col_layout(layout)
-        .with_row_height(6)
-        .render(canvas, area, codex);
+        .with_row_height(6);
+    table.render(canvas, area, codex);
+
+    manage_clickable_regions(
+        table.inner(area),
+        ui_state.task_table.y_offset,
+        clickable_regions,
+        render_tasks,
+    );
+}
+
+fn manage_clickable_regions(
+    rects: Vec<Vec<Rect>>,
+    offset: usize,
+    clickable_regions: &mut BTreeMap<String, Rect>,
+    render_tasks: &Vec<Task>,
+) {
+    let button_dates_text_layout = LayoutBuilder::new().add_constraint(Constraint::Percentage(50)).add_constraint(Constraint::Percentage(50)).direction(Direction::Vertical).build();
+    for (idx, rect) in rects.iter().enumerate() {
+        debug_assert!(rect.len() == 4);
+        let buttons = button_dates_text_layout.split(rect[0]);
+        clickable_regions.insert(
+            format!("{}{}", LIST_ROW_DONE_BUTTON_BASE, render_tasks[idx + offset].id().to_string()),
+            buttons[0],
+        );
+        clickable_regions.insert(
+            format!("{}{}", LIST_ROW_DELETE_BUTTON_BASE, render_tasks[idx + offset].id().to_string()),
+            buttons[1],
+        );
+        let prio = rect[1];
+        clickable_regions.insert(
+            format!("{}{}", LIST_ROW_PRIO_BASE, render_tasks[idx + offset].id().to_string()),
+            prio,
+        );
+        let dates = button_dates_text_layout.split(rect[2]);
+        clickable_regions.insert(
+            format!("{}{}", LIST_ROW_INCEPTION_BASE, render_tasks[idx + offset].id().to_string()),
+            dates[0],
+        );
+        clickable_regions.insert(
+            format!("{}{}", LIST_ROW_COMPLETION_BASE, render_tasks[idx + offset].id().to_string()),
+            dates[1],
+        );
+        let text = button_dates_text_layout.split(rect[3]).first().unwrap().clone();
+        clickable_regions.insert(
+            format!("{}{}", LIST_ROW_TEXT_BASE, render_tasks[idx + offset].id().to_string()),
+            text,
+        );
+    }
 }
