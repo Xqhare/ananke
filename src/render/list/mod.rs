@@ -19,7 +19,7 @@ pub fn render_list(
     canvas: &mut Canvas,
     codex: &Codex,
     layout_atlas: &LayoutAtlas,
-    _clickable_regions: &mut BTreeMap<String, Rect>,
+    clickable_regions: &mut BTreeMap<String, Rect>,
     env: &mut Environment,
 ) {
     let area = layout_atlas.get_known_rect(LIST_RECT);
@@ -71,27 +71,48 @@ pub fn render_list(
         render_tasks.iter().map(|_| Vec::new()).collect();
     let mut project_tags_block_storage: Vec<Vec<Block>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
-    let mut project_tags: Vec<Vec<BlockBox>> =
-        render_tasks.iter().map(|_| Vec::new()).collect();
     let mut context_tags_text_storage: Vec<Vec<Text>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
     let mut context_tags_block_storage: Vec<Vec<Block>> =
-        render_tasks.iter().map(|_| Vec::new()).collect();
-    let mut context_tags: Vec<Vec<BlockBox>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
     let mut special_tags_text_storage: Vec<Vec<Text>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
     let mut special_tags_block_storage: Vec<Vec<Block>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
-    let mut special_tags: Vec<Vec<BlockBox>> =
+    let mut tags: Vec<Vec<BlockBox>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
     let mut rows: Vec<Vec<Sequence>> = Vec::new();
     let mut col2: Vec<Vec<Sequence>> = render_tasks.iter().map(|_| Vec::new()).collect();
 
     // --------------------- end of heap pointer alloc ---------------------
 
-    for (
-        (
+    let iter = render_tasks
+        .iter()
+        .zip(button_storage.iter_mut())
+        .zip(prio_textbox_storage.iter_mut())
+        .zip(prio_block_storage.iter_mut())
+        .zip(prio_vec.iter_mut())
+        .zip(dates_inception_textbox_storage.iter_mut())
+        .zip(dates_inception_block_storage.iter_mut())
+        .zip(dates_completion_textbox_storage.iter_mut())
+        .zip(dates_completion_block_storage.iter_mut())
+        .zip(dates_storage.iter_mut())
+        .zip(text_textbox_storage.iter_mut())
+        .zip(text_block_storage.iter_mut())
+        .zip(text_vec.iter_mut())
+        .zip(col3_sub.iter_mut())
+        .zip(col3.iter_mut())
+        .zip(project_tags_text_storage.iter_mut())
+        .zip(project_tags_block_storage.iter_mut())
+        .zip(context_tags_text_storage.iter_mut())
+        .zip(context_tags_block_storage.iter_mut())
+        .zip(special_tags_text_storage.iter_mut())
+        .zip(special_tags_block_storage.iter_mut())
+        .zip(tags.iter_mut())
+        .zip(col2.iter_mut());
+
+    for item in iter {
+        let (
             (
                 (
                     (
@@ -113,85 +134,52 @@ pub fn render_list(
                                                                                     (
                                                                                         (
                                                                                             (
-                                                                                                (
-                                                                                                    (
-                                                                                                        task,
-                                                                                                        buttons_vec,
-                                                                                                    ),
-                                                                                                    prio_textbox_vec,
-                                                                                                ),
-                                                                                                prio_block_vec,
+                                                                                                task,
+                                                                                                buttons_vec,
                                                                                             ),
-                                                                                            prio_vec,
+                                                                                            prio_textbox_vec,
                                                                                         ),
-                                                                                        dates_inception_textbox_vec,
+                                                                                        prio_block_vec,
                                                                                     ),
-                                                                                    dates_inception_block_vec,
+                                                                                    prio_vec,
                                                                                 ),
-                                                                                dates_completion_textbox_vec,
+                                                                                dates_inception_textbox_vec,
                                                                             ),
-                                                                            dates_completion_block_vec,
+                                                                            dates_inception_block_vec,
                                                                         ),
-                                                                        dates_vec,
+                                                                        dates_completion_textbox_vec,
                                                                     ),
-                                                                    text_textbox_vec,
+                                                                    dates_completion_block_vec,
                                                                 ),
-                                                                text_block_vec,
+                                                                dates_vec,
                                                             ),
-                                                            text_vec,
+                                                            text_textbox_vec,
                                                         ),
-                                                        col3_sub_vec,
+                                                        text_block_vec,
                                                     ),
-                                                    col3_vec,
+                                                    text_vec,
                                                 ),
-                                                tags_vec,
-                                            ), 
-                                            project_tags_text_vec, 
+                                                col3_sub_vec,
+                                            ),
+                                            col3_vec,
                                         ),
-                                        project_tags_block_vec
+                                        project_tags_text_vec,
                                     ),
-                                    project_tags_vec,
+                                    project_tags_block_vec,
                                 ),
                                 context_tags_text_vec,
                             ),
                             context_tags_block_vec,
                         ),
-                        context_tags_vec,
+                        special_tags_text_vec,
                     ),
-                    special_tags_text_vec,
+                    special_tags_block_vec,
                 ),
-                special_tags_block_vec,
+                tags_vec,
             ),
-            special_tags_vec,
-        ),
-        col2_vec,
-    ) in render_tasks
-        .iter()
-        .zip(button_storage.iter_mut())
-        .zip(prio_textbox_storage.iter_mut())
-        .zip(prio_block_storage.iter_mut())
-        .zip(prio_vec.iter_mut())
-        .zip(dates_inception_textbox_storage.iter_mut())
-        .zip(dates_inception_block_storage.iter_mut())
-        .zip(dates_completion_textbox_storage.iter_mut())
-        .zip(dates_completion_block_storage.iter_mut())
-        .zip(dates_storage.iter_mut())
-        .zip(text_textbox_storage.iter_mut())
-        .zip(text_block_storage.iter_mut())
-        .zip(text_vec.iter_mut())
-        .zip(col3_sub.iter_mut())
-        .zip(col3.iter_mut())
-        .zip(project_tags_text_storage.iter_mut())
-        .zip(project_tags_block_storage.iter_mut())
-        .zip(project_tags.iter_mut())
-        .zip(context_tags_text_storage.iter_mut())
-        .zip(context_tags_block_storage.iter_mut())
-        .zip(context_tags.iter_mut())
-        .zip(special_tags_text_storage.iter_mut())
-        .zip(special_tags_block_storage.iter_mut())
-        .zip(special_tags.iter_mut())
-        .zip(col2.iter_mut())
-    {
+            col2_vec,
+        ) = item;
+
         if let Some(state) = states_map.remove(&task.id()) {
             let mut row = vec![];
 
@@ -263,6 +251,46 @@ pub fn render_list(
             ));
             col3_sub_vec
                 .push(Sequence::new(state.generic_sequence, text_vec.iter_mut()).vertical());
+
+            project_tags_text_vec
+                .push(Text::new(task.projects().join(", "), codex).with_style(default_style));
+            project_tags_block_vec.push(
+                Block::new()
+                    .with_style(default_style)
+                    .with_bg_fill(),
+            );
+            tags_vec.push(BlockBox::new(
+                project_tags_block_vec.last_mut().unwrap(),
+                project_tags_text_vec.last_mut().unwrap(),
+            ));
+
+            context_tags_text_vec
+                .push(Text::new(task.contexts().join(", "), codex).with_style(default_style));
+            context_tags_block_vec.push(
+                Block::new()
+                    .with_style(default_style)
+                    .with_bg_fill(),
+            );
+            tags_vec.push(BlockBox::new(
+                context_tags_block_vec.last_mut().unwrap(),
+                context_tags_text_vec.last_mut().unwrap(),
+            ));
+
+            special_tags_text_vec
+                .push(Text::new(task.specials().iter().map(|(k, v)| format!("{}: {}", k, v)).collect::<Vec<String>>().join(", "), codex).with_style(default_style));
+            special_tags_block_vec.push(
+                Block::new()
+                    .with_style(default_style)
+                    .with_bg_fill(),
+            );
+            tags_vec.push(BlockBox::new(
+                special_tags_block_vec.last_mut().unwrap(),
+                special_tags_text_vec.last_mut().unwrap(),
+            ));
+
+            col3_sub_vec.push(Sequence::new(state.generic_sequence, tags_vec.iter_mut()).horizontal());
+            col3_vec.push(Sequence::new(state.generic_sequence, col3_sub_vec.iter_mut()).vertical());
+            row.push(Sequence::new(state.generic_sequence, col3_vec.iter_mut()));
 
             rows.push(row);
         }
