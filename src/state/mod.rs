@@ -62,6 +62,9 @@ pub struct UiState {
 }
 
 impl UiState {
+    pub fn reset_menu(&mut self, codex: &Codex) {
+        self.menu = make_menu_state(codex);
+    }
     pub fn set_focus(&mut self, focus: Focus) {
         self.deactivate_all_textboxes();
 

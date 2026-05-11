@@ -51,6 +51,12 @@ pub fn handle_header_newfile_input(
             .text
             .set_content(env.disk_env.home_path.to_string_lossy(), codex);
 
+        // Update the tasks to display
+        env.render_tasks = env.list.tasks();
+
+        // Reset the menu
+        env.ui_state.reset_menu(codex);
+
         return Some(());
     }
     None
@@ -91,7 +97,7 @@ pub fn keep_textbox_at_one_char(env: &mut Environment, focus: &Focus, codex: &Co
 }
 
 /// Handles the mouse events for the header
-pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
+pub fn handle_header_mouse(env: &mut Environment, name: &str, codex: &Codex) -> Focus {
     match name {
         HEADER_FILE_MENU_BUTTON => {
             env.ui_state.header.file_menu_button.clicked =
@@ -145,11 +151,11 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
             if name.contains(HEADER_FILE_MENU_SUB_FORGET_BUTTON_BASE) {
                 let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
                 let obj = path.as_object_mut().unwrap();
-                handle_mouse_forget_button(name, env, obj);
+                handle_mouse_forget_button(name, env, obj, codex);
             } else if name.contains(HEADER_FILE_MENU_SUB_LOAD_BUTTON_BASE) {
                 let mut path = env.disk_env.brigid.get_file("config.xff").unwrap();
                 let obj = path.as_object_mut().unwrap();
-                handle_mouse_load_button(name, env, obj);
+                handle_mouse_load_button(name, env, obj, codex);
             }
             Focus::None
         }
@@ -157,7 +163,7 @@ pub fn handle_header_mouse(env: &mut Environment, name: &str) -> Focus {
 }
 
 /// Handles the mouse events for the forget button
-fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Object) {
+fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Object, codex: &Codex) {
     // Close the forget menu
     env.ui_state.header.file_menu_sub_forget_button.clicked = false;
 
@@ -193,11 +199,13 @@ fn handle_mouse_forget_button(name: &str, env: &mut Environment, obj: &mut Objec
             .disk_env
             .brigid
             .update_file("config.xff", Content::XFF(xff!(obj.clone())));
+        env.render_tasks = env.list.tasks();
+        env.ui_state.reset_menu(codex);
     }
 }
 
 /// Handles the mouse events for the load button
-fn handle_mouse_load_button(name: &str, env: &mut Environment, obj: &mut Object) {
+fn handle_mouse_load_button(name: &str, env: &mut Environment, obj: &mut Object, codex: &Codex) {
     // Close the load menu
     env.ui_state.header.file_menu_sub_load_button.clicked = false;
 
@@ -218,4 +226,6 @@ fn handle_mouse_load_button(name: &str, env: &mut Environment, obj: &mut Object)
         .disk_env
         .brigid
         .update_file("config.xff", Content::XFF(xff!(obj.clone())));
+    env.render_tasks = env.list.tasks();
+    env.ui_state.reset_menu(codex);
 }

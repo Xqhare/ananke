@@ -154,7 +154,7 @@ fn handle_mouse(
             match mouse_event.kind {
                 MouseEventKind::Up(MouseButton::Left) => {
                     if name.contains("header") {
-                        return handle_header_mouse(env, name);
+                        return handle_header_mouse(env, name, codex);
                     } else if name.contains("creator") {
                         return handle_creator_mouse(env, name, codex);
                     } else if name.contains("menu") {
