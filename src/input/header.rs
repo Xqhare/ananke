@@ -50,7 +50,7 @@ pub fn handle_header_newfile_input(
         state
             .text
             .set_content(env.disk_env.home_path.to_string_lossy(), codex);
-        
+
         return Some(());
     }
     None

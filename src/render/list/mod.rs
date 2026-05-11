@@ -30,7 +30,7 @@ pub fn render_list(
     // Let me be honest here. I don't really like the below code, but it is the only way I found to
     // make it work. (Without reworking `Talos` a fair bit)
     //
-    // To keep it short: A lot of code is needed for heap pointer management.
+    // To keep it short: A lot of heap pointer management.
 
     // --------------------- said heap pointers ---------------------
     let Environment {
@@ -54,18 +54,37 @@ pub fn render_list(
     let mut dates_completion_block_storage: Vec<Vec<Block>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
 
-    let mut prio_text_storage: Vec<Vec<Text>> = render_tasks.iter().map(|_| Vec::new()).collect();
     let mut prio_textbox_storage: Vec<Vec<TextBox>> =
         render_tasks.iter().map(|_| Vec::new()).collect();
     let mut prio_block_storage: Vec<Vec<Block>> = render_tasks.iter().map(|_| Vec::new()).collect();
-    let mut prio_blockbox_storage: Vec<Vec<BlockBox>> =
-        render_tasks.iter().map(|_| Vec::new()).collect();
     let mut prio_vec: Vec<Vec<BlockBox>> = render_tasks.iter().map(|_| Vec::new()).collect();
 
     let mut button_storage: Vec<Vec<Button>> = render_tasks.iter().map(|_| Vec::new()).collect();
     let mut dates_storage: Vec<Vec<BlockBox>> = render_tasks.iter().map(|_| Vec::new()).collect();
-    let mut text_textbox: Vec<Vec<TextBox>> = render_tasks.iter().map(|_| Vec::new()).collect();
-    let mut tags: Vec<Vec<BlockBox>> = render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut text_textbox_storage: Vec<Vec<TextBox>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut text_block_storage: Vec<Vec<Block>> = render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut text_vec: Vec<Vec<BlockBox>> = render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut col3_sub: Vec<Vec<Sequence>> = render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut col3: Vec<Vec<Sequence>> = render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut project_tags_text_storage: Vec<Vec<Text>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut project_tags_block_storage: Vec<Vec<Block>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut project_tags: Vec<Vec<BlockBox>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut context_tags_text_storage: Vec<Vec<Text>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut context_tags_block_storage: Vec<Vec<Block>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut context_tags: Vec<Vec<BlockBox>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut special_tags_text_storage: Vec<Vec<Text>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut special_tags_block_storage: Vec<Vec<Block>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
+    let mut special_tags: Vec<Vec<BlockBox>> =
+        render_tasks.iter().map(|_| Vec::new()).collect();
     let mut rows: Vec<Vec<Sequence>> = Vec::new();
     let mut col2: Vec<Vec<Sequence>> = render_tasks.iter().map(|_| Vec::new()).collect();
 
@@ -80,22 +99,70 @@ pub fn render_list(
                             (
                                 (
                                     (
-                                        (((task, buttons_vec), prio_textbox_vec), prio_block_vec),
-                                        prio_vec,
+                                        (
+                                            (
+                                                (
+                                                    (
+                                                        (
+                                                            (
+                                                                (
+                                                                    (
+                                                                        (
+                                                                            (
+                                                                                (
+                                                                                    (
+                                                                                        (
+                                                                                            (
+                                                                                                (
+                                                                                                    (
+                                                                                                        task,
+                                                                                                        buttons_vec,
+                                                                                                    ),
+                                                                                                    prio_textbox_vec,
+                                                                                                ),
+                                                                                                prio_block_vec,
+                                                                                            ),
+                                                                                            prio_vec,
+                                                                                        ),
+                                                                                        dates_inception_textbox_vec,
+                                                                                    ),
+                                                                                    dates_inception_block_vec,
+                                                                                ),
+                                                                                dates_completion_textbox_vec,
+                                                                            ),
+                                                                            dates_completion_block_vec,
+                                                                        ),
+                                                                        dates_vec,
+                                                                    ),
+                                                                    text_textbox_vec,
+                                                                ),
+                                                                text_block_vec,
+                                                            ),
+                                                            text_vec,
+                                                        ),
+                                                        col3_sub_vec,
+                                                    ),
+                                                    col3_vec,
+                                                ),
+                                                tags_vec,
+                                            ), 
+                                            project_tags_text_vec, 
+                                        ),
+                                        project_tags_block_vec
                                     ),
-                                    dates_inception_textbox_vec,
+                                    project_tags_vec,
                                 ),
-                                dates_inception_block_vec,
+                                context_tags_text_vec,
                             ),
-                            dates_completion_textbox_vec,
+                            context_tags_block_vec,
                         ),
-                        dates_completion_block_vec,
+                        context_tags_vec,
                     ),
-                    dates_vec,
+                    special_tags_text_vec,
                 ),
-                text_textbox_vec,
+                special_tags_block_vec,
             ),
-            tags_vec,
+            special_tags_vec,
         ),
         col2_vec,
     ) in render_tasks
@@ -109,8 +176,20 @@ pub fn render_list(
         .zip(dates_completion_textbox_storage.iter_mut())
         .zip(dates_completion_block_storage.iter_mut())
         .zip(dates_storage.iter_mut())
-        .zip(text_textbox.iter_mut())
-        .zip(tags.iter_mut())
+        .zip(text_textbox_storage.iter_mut())
+        .zip(text_block_storage.iter_mut())
+        .zip(text_vec.iter_mut())
+        .zip(col3_sub.iter_mut())
+        .zip(col3.iter_mut())
+        .zip(project_tags_text_storage.iter_mut())
+        .zip(project_tags_block_storage.iter_mut())
+        .zip(project_tags.iter_mut())
+        .zip(context_tags_text_storage.iter_mut())
+        .zip(context_tags_block_storage.iter_mut())
+        .zip(context_tags.iter_mut())
+        .zip(special_tags_text_storage.iter_mut())
+        .zip(special_tags_block_storage.iter_mut())
+        .zip(special_tags.iter_mut())
         .zip(col2.iter_mut())
     {
         if let Some(state) = states_map.remove(&task.id()) {
@@ -169,8 +248,22 @@ pub fn render_list(
             ));
 
             col2_vec.push(Sequence::new(state.generic_sequence, dates_vec.iter_mut()).vertical());
-
             row.push(Sequence::new(state.generic_sequence, col2_vec.iter_mut()));
+
+            text_textbox_vec.push(TextBox::new(&mut state.text_textbox).with_style(default_style));
+            text_block_vec.push(
+                Block::new()
+                    .with_fat_border()
+                    .with_style(default_style)
+                    .with_bg_fill(),
+            );
+            text_vec.push(BlockBox::new(
+                text_block_vec.last_mut().unwrap(),
+                text_textbox_vec.last_mut().unwrap(),
+            ));
+            col3_sub_vec
+                .push(Sequence::new(state.generic_sequence, text_vec.iter_mut()).vertical());
+
             rows.push(row);
         }
     }

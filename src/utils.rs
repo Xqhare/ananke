@@ -5,10 +5,7 @@ use std::{
 
 use talos::widgets::stateful::ButtonState;
 
-use crate::{
-    state::Focus,
-    startup::Environment,
-};
+use crate::{startup::Environment, state::Focus};
 
 pub fn fps_sleeper(last_frame: Instant) -> (Instant, u128) {
     let fps_goal = 2_000;
