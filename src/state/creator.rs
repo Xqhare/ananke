@@ -58,8 +58,6 @@ pub fn make_creator_state(codex: &Codex) -> CreatorState {
     state
 }
 
-// TODO: Need for process management later, when save button is hit, recreate the default state for
-// the creator
 /// Creates the state for the task creation date entry
 ///
 /// Polls the current date every time the function is called

@@ -45,7 +45,6 @@ pub fn make_list_table_state(
     }
 }
 
-// TODO: Will need to call that when updating a task.
 /// Creates the state for a single task
 pub fn make_single_task_state(task: &Task, codex: &Codex, out: &mut BTreeMap<usize, TaskState>) {
     let id = task.id();
