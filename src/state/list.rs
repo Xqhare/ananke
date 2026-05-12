@@ -20,6 +20,15 @@ pub struct TaskState {
     pub generic_sequence: SequenceState,
 }
 
+impl TaskState {
+    pub fn deactivate_all_textboxes(&mut self) {
+        self.prio_textbox.active = false;
+        self.text_textbox.active = false;
+        self.inception_textbox.active = false;
+        self.completion_textbox.active = false;
+    }
+}
+
 pub fn make_list_table_state(
     list: &List,
     codex: &Codex,
@@ -48,7 +57,7 @@ pub fn make_single_task_state(task: &Task, codex: &Codex, out: &mut BTreeMap<usi
     let task_priority = task.prio().map(|c| c.to_string()).unwrap_or_default();
     let prio_textbox = TextBoxState {
         active: false,
-        cursor: None,
+        cursor: Some(task_priority.chars().count()),
         text: Text::new(task_priority, codex)
             .align_vertically()
             .align_center(),
@@ -56,7 +65,7 @@ pub fn make_single_task_state(task: &Task, codex: &Codex, out: &mut BTreeMap<usi
     let task_text = task.text();
     let text_textbox = TextBoxState {
         active: false,
-        cursor: None,
+        cursor: Some(task_text.chars().count()),
         text: Text::new(task_text, codex)
             .align_vertically()
             .align_center(),
@@ -65,7 +74,7 @@ pub fn make_single_task_state(task: &Task, codex: &Codex, out: &mut BTreeMap<usi
     let inception_text = task.inception_date();
     let inception_textbox = TextBoxState {
         active: false,
-        cursor: None,
+        cursor: Some(inception_text.chars().count()),
         text: Text::new(inception_text, codex)
             .align_center()
             .align_vertically(),
@@ -73,7 +82,7 @@ pub fn make_single_task_state(task: &Task, codex: &Codex, out: &mut BTreeMap<usi
     let completion_text = task.completion_date();
     let completion_textbox = TextBoxState {
         active: false,
-        cursor: None,
+        cursor: Some(completion_text.chars().count()),
         text: Text::new(completion_text, codex)
             .align_center()
             .align_vertically(),

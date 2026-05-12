@@ -49,38 +49,36 @@ pub fn handle_list_mouse(env: &mut Environment, name: &str) -> Focus {
 
         Focus::None
     } else if name.starts_with(LIST_ROW_DELETE_BUTTON_BASE) {
+        let _ = env.list.remove(id);
+        update_render_list(env);
         Focus::None
     } else if name.starts_with(LIST_ROW_PRIO_BASE) {
-        env.ui_state
-            .dynamic_states
-            .get_mut(&id)
-            .unwrap()
-            .prio_textbox
-            .active = true;
+        let state = env.ui_state.dynamic_states.get_mut(&id).unwrap();
+        state.prio_textbox.active = true;
+        if state.prio_textbox.cursor.is_none() {
+            state.prio_textbox.cursor = Some(state.prio_textbox.text.len());
+        }
         Focus::List(ListFocus::Priority(id))
     } else if name.starts_with(LIST_ROW_INCEPTION_BASE) {
-        env.ui_state
-            .dynamic_states
-            .get_mut(&id)
-            .unwrap()
-            .inception_textbox
-            .active = true;
+        let state = env.ui_state.dynamic_states.get_mut(&id).unwrap();
+        state.inception_textbox.active = true;
+        if state.inception_textbox.cursor.is_none() {
+            state.inception_textbox.cursor = Some(state.inception_textbox.text.len());
+        }
         Focus::List(ListFocus::Inception(id))
     } else if name.starts_with(LIST_ROW_COMPLETION_BASE) {
-        env.ui_state
-            .dynamic_states
-            .get_mut(&id)
-            .unwrap()
-            .completion_textbox
-            .active = true;
+        let state = env.ui_state.dynamic_states.get_mut(&id).unwrap();
+        state.completion_textbox.active = true;
+        if state.completion_textbox.cursor.is_none() {
+            state.completion_textbox.cursor = Some(state.completion_textbox.text.len());
+        }
         Focus::List(ListFocus::Completion(id))
     } else if name.starts_with(LIST_ROW_TEXT_BASE) {
-        env.ui_state
-            .dynamic_states
-            .get_mut(&id)
-            .unwrap()
-            .text_textbox
-            .active = true;
+        let state = env.ui_state.dynamic_states.get_mut(&id).unwrap();
+        state.text_textbox.active = true;
+        if state.text_textbox.cursor.is_none() {
+            state.text_textbox.cursor = Some(state.text_textbox.text.len());
+        }
         Focus::List(ListFocus::Task(id))
     } else {
         Focus::None

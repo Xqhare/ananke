@@ -176,6 +176,9 @@ impl UiState {
         for tb in self.menu.get_textboxes_mut() {
             tb.active = false;
         }
+        for state in self.dynamic_states.values_mut() {
+            state.deactivate_all_textboxes();
+        }
     }
 }
 

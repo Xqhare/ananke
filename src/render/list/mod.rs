@@ -113,6 +113,8 @@ pub fn render_list(
         .zip(tags.iter_mut())
         .zip(col2.iter_mut());
 
+    let cursor_style = env.styles.get_known_style(crate::keys::styles::CURSOR);
+
     for item in iter {
         let (
             (
@@ -196,7 +198,11 @@ pub fn render_list(
             let col0 = Sequence::new(state.generic_sequence, buttons_vec.iter_mut()).vertical();
             row.push(col0);
 
-            prio_textbox_vec.push(TextBox::new(&mut state.prio_textbox).with_style(default_style));
+            prio_textbox_vec.push(
+                TextBox::new(&mut state.prio_textbox)
+                    .with_style(default_style)
+                    .with_highlight_style(cursor_style),
+            );
             prio_block_vec.push(
                 Block::new()
                     .with_fat_border()
@@ -211,8 +217,11 @@ pub fn render_list(
             let col1 = Sequence::new(state.generic_sequence, prio_vec.iter_mut()).vertical();
             row.push(col1);
 
-            dates_inception_textbox_vec
-                .push(TextBox::new(&mut state.inception_textbox).with_style(default_style));
+            dates_inception_textbox_vec.push(
+                TextBox::new(&mut state.inception_textbox)
+                    .with_style(default_style)
+                    .with_highlight_style(cursor_style),
+            );
             dates_inception_block_vec.push(
                 Block::new()
                     .with_fat_border()
@@ -224,8 +233,11 @@ pub fn render_list(
                 dates_inception_textbox_vec.last_mut().unwrap(),
             ));
 
-            dates_completion_textbox_vec
-                .push(TextBox::new(&mut state.completion_textbox).with_style(default_style));
+            dates_completion_textbox_vec.push(
+                TextBox::new(&mut state.completion_textbox)
+                    .with_style(default_style)
+                    .with_highlight_style(cursor_style),
+            );
             dates_completion_block_vec.push(
                 Block::new()
                     .with_fat_border()
@@ -240,7 +252,11 @@ pub fn render_list(
             col2_vec.push(Sequence::new(state.generic_sequence, dates_vec.iter_mut()).vertical());
             row.push(Sequence::new(state.generic_sequence, col2_vec.iter_mut()));
 
-            text_textbox_vec.push(TextBox::new(&mut state.text_textbox).with_style(default_style));
+            text_textbox_vec.push(
+                TextBox::new(&mut state.text_textbox)
+                    .with_style(default_style)
+                    .with_highlight_style(cursor_style),
+            );
             text_block_vec.push(
                 Block::new()
                     .with_fat_border()
