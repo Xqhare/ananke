@@ -84,8 +84,7 @@ pub fn keep_textbox_at_one_char(env: &mut Environment, focus: &Focus, codex: &Co
                 .text
                 .get_content()
                 .chars()
-                .take(1)
-                .next()
+                .last()
                 .unwrap()
                 .to_uppercase()
                 .take(1)

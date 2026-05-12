@@ -45,7 +45,7 @@ pub fn make_single_task_state(task: &Task, codex: &Codex, out: &mut BTreeMap<usi
         clicked: task_status,
     };
     let delete_button = ButtonState { clicked: false };
-    let task_priority = task.prio().unwrap_or(' ');
+    let task_priority = task.prio().map(|c| c.to_string()).unwrap_or_default();
     let prio_textbox = TextBoxState {
         active: false,
         cursor: None,
