@@ -93,15 +93,15 @@ pub fn update_render_list(env: &mut Environment) {
         _ => unreachable!(),
     }
 
-    env.render_tasks = search_vec_task_prio(
-        &env.render_tasks,
-        env.ui_state.menu.sort_prio_textbox.text.get_content(),
-    );
+    let search_prio = env.ui_state.menu.sort_prio_textbox.text.get_content();
+    if !search_prio.is_empty() {
+        env.render_tasks = search_vec_task_prio(&env.render_tasks, search_prio);
+    }
 
-    env.render_tasks = search_vec_task_text(
-        &env.render_tasks,
-        env.ui_state.menu.search_textbox.text.get_content(),
-    );
+    let search_text = env.ui_state.menu.search_textbox.text.get_content();
+    if !search_text.is_empty() {
+        env.render_tasks = search_vec_task_text(&env.render_tasks, search_text);
+    }
 }
 
 pub fn update_new_task_after_key_press(env: &mut Environment, codex: &Codex) {
