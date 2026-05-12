@@ -14,7 +14,7 @@ use crate::{
         HEADER_FILE_MENU_SUB_NEW_TEXTBOX, HEADER_HELP_BUTTON, HEADER_SAVE_BUTTON,
     },
     startup::Environment,
-    state::{CreatorFocus, Focus, MenuFocus},
+    state::{CreatorFocus, Focus, ListFocus, MenuFocus},
     utils::goto_exit,
 };
 
@@ -68,6 +68,14 @@ pub fn keep_textbox_at_one_char(env: &mut Environment, focus: &Focus, codex: &Co
     let state = match focus {
         Focus::Creator(CreatorFocus::Priority) => &mut env.ui_state.creator.prio_entry_textbox,
         Focus::Menu(MenuFocus::Priority) => &mut env.ui_state.menu.sort_prio_textbox,
+        Focus::List(ListFocus::Priority(id)) => {
+            &mut env
+                .ui_state
+                .dynamic_states
+                .get_mut(id)
+                .unwrap()
+                .prio_textbox
+        }
         _ => unreachable!(),
     };
     if state.text.len() > 1 {

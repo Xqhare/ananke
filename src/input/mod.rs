@@ -167,7 +167,7 @@ fn handle_mouse(
                     } else if name.contains("menu") {
                         return handle_menu_mouse(env, name, codex);
                     } else if name.contains("list") {
-                        return handle_list_mouse(env, name, codex);
+                        return handle_list_mouse(env, name);
                     }
                 }
                 _ => {}
