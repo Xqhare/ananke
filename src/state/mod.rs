@@ -1,3 +1,13 @@
+//! # State Management & Focus Control
+//!
+//! This module defines the application's state architecture, demonstrating how **Talos**
+//! separates persistent data (the Todo list) from transient UI state (cursor positions,
+//! active textboxes, and focus).
+//!
+//! Talos uses **Stateful Widgets**. A widget's visual representation is separate from its
+//! internal state, allowing the state to persist across frames while the layout and
+//! canvas are rebuilt.
+
 use std::{collections::BTreeMap, path::PathBuf};
 
 use anansi::List;
@@ -18,20 +28,21 @@ pub mod header;
 pub mod list;
 pub mod menu;
 
-/// The focus of the program
+/// Represents the global 'Focus' of the application.
 ///
-/// Used for keyboard input capture and ensuring that the focus is on the active textfield
+/// Because terminal input is a single stream of events, focus is used to route 
+/// keyboard events to the correct stateful widget (e.g., which TextBox is receiving text).
 #[derive(Clone, Copy, Debug)]
 pub enum Focus {
-    /// No focus
+    /// No interactive element is active.
     None,
-    /// Focus on the header new-file textbox
+    /// The 'New File' textbox in the header has focus.
     HeaderFileNewTextBox,
-    /// Focus on some part of the creator
+    /// A specific field in the task creator has focus.
     Creator(CreatorFocus),
-    /// Focus on some part of the menu
+    /// A search or filter field in the menu has focus.
     Menu(MenuFocus),
-    /// Focus on some part of the list
+    /// A specific cell in the task list table has focus.
     List(ListFocus),
 }
 
@@ -70,11 +81,18 @@ pub enum MenuFocus {
     Text,
 }
 
+/// The aggregated UI state of Ananke.
 pub struct UiState {
+    /// State for the header (file menus, buttons).
     pub header: HeaderState,
+    /// State for the task creator (entry fields).
     pub creator: CreatorState,
+    /// State for the menu (dropdowns, search).
     pub menu: MenuState,
+    /// Global state for the task table (scrolling, selection).
     pub task_table: TableState,
+    /// Per-row dynamic states for tasks in the list.
+    /// This demonstrates how to manage state for a dynamic number of widgets.
     pub dynamic_states: BTreeMap<usize, TaskState>,
 }
 
@@ -82,6 +100,10 @@ impl UiState {
     pub fn reset_menu(&mut self, codex: &Codex) {
         self.menu = make_menu_state(codex);
     }
+
+    /// Updates which widget has active focus.
+    /// This method ensures that only one TextBox is 'active' at a time, which
+    /// typically triggers a different visual style (e.g., a blinking cursor).
     pub fn set_focus(&mut self, focus: Focus) {
         self.deactivate_all_textboxes();
 
@@ -138,6 +160,7 @@ impl UiState {
         }
     }
 
+    /// Retrieves a mutable reference to the currently focused TextBoxState, if any.
     pub fn active_textbox_mut(&mut self, focus: &Focus) -> Option<&mut TextBoxState> {
         match focus {
             Focus::None => None,

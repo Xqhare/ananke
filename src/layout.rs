@@ -1,3 +1,11 @@
+//! # Responsive Layout Architecture
+//!
+//! This module defines how the terminal screen is partitioned into functional zones
+//! using the **Talos** `LayoutBuilder`. 
+//!
+//! Talos layouts are hierarchical and constraint-based, similar to Flexbox or Flutter's
+//! layout system, allowing the UI to remain responsive across different terminal sizes.
+
 use talos::{
     LayoutBuilder,
     atlases::LayoutAtlas,
@@ -15,17 +23,17 @@ use crate::keys::{
     MENU_SORT_DROPDOWN_TEXT,
 };
 
-/// Builds the basic layout of Ananke.
+/// Builds the master layout for the application.
 ///
-/// It splits the screen into the 4 needed sectors vertically.
-///
-/// 1. Header - Buttons, set size of 3
-/// 2. Creator - Task creation, set size of 14
-/// 3. Menu - Sorting etc, set size of 5
-/// 4. Task list - Task to be rendered, rest of the screen
+/// It splits the available vertical space into four primary sectors:
+/// 1. **Header**: Fixed height of 3 (Buttons and Path).
+/// 2. **Creator**: Fixed height of 14 (Task entry and tags).
+/// 3. **Menu**: Fixed height of 3 (Sorting and Filtering).
+/// 4. **List**: Takes the remaining space (Min 1).
 pub fn make_layout() -> Layout {
     LayoutBuilder::new()
         .direction(Direction::Vertical)
+        // Constraints can be fixed (Length), relative (Percentage), or elastic (Min/Max).
         .add_constraint(Constraint::Length(3))
         .add_constraint(Constraint::Length(14))
         .add_constraint(Constraint::Length(3))
@@ -33,10 +41,16 @@ pub fn make_layout() -> Layout {
         .build()
 }
 
+/// Computes the final rectangles for every UI element based on the current screen size.
+///
+/// Returns a `LayoutAtlas`, which is a map of unique keys to their calculated `Rect`.
+/// This atlas is passed to the rendering modules to ensure alignment.
 pub fn make_frame_layout(screen_rect: &Rect, layout: &Layout) -> LayoutAtlas {
     let basic_layout = layout.split(*screen_rect);
     debug_assert!(basic_layout.len() == 4);
+    
     let mut out = LayoutAtlas::new();
+    // Sub-layouts are calculated recursively by splitting the parent rectangles.
     out.store.extend(make_header_layout(&basic_layout[0]));
     out.store.extend(make_creator_layout(&basic_layout[1]));
     out.store.extend(make_menu_layout(&basic_layout[2]));
@@ -44,6 +58,8 @@ pub fn make_frame_layout(screen_rect: &Rect, layout: &Layout) -> LayoutAtlas {
     out
 }
 
+/// Splits the menu sector horizontally.
+/// Demonstrates nested layouts and the use of Percentage vs Max/Min constraints.
 fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
     let mut layout = LayoutBuilder::new()
         .direction(Direction::Horizontal)
@@ -52,8 +68,10 @@ fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
         .build()
         .split(*menu_rect);
     debug_assert!(layout.len() == 2);
+    
+    // Manual adjustments (like padding) can be applied to the calculated Rects.
     layout[0].width -= 2;
-    // You can think of this as a true flex box. The available space is split into 6 equal parts (or as close as possible)
+    
     let first_half = LayoutBuilder::new()
         .direction(Direction::Horizontal)
         .add_constraint(Constraint::Percentage(50))

@@ -1,3 +1,11 @@
+//! # Event Processing & State Mutation
+//!
+//! This module acts as the application's "Controller". It processes raw terminal
+//! events (Keyboard, Mouse, Resize) and translates them into meaningful state mutations.
+//!
+//! In the **Talos** architecture, state mutations are centralized here to ensure
+//! that the rendering phase always sees a consistent snapshot of the data.
+
 use std::collections::BTreeMap;
 
 use talos::{
@@ -7,10 +15,10 @@ use talos::{
     widgets::stateful::TextBoxState,
 };
 
-mod creator;
-mod header;
-mod list;
-mod menu;
+pub mod creator;
+pub mod header;
+pub mod list;
+pub mod menu;
 
 use crate::{
     input::{
@@ -57,6 +65,12 @@ pub fn handle_generic_textbox_input(
     changed
 }
 
+/// Orchestrates the processing of all pending events.
+///
+/// This function demonstrates the **Event Routing** pattern:
+/// 1. **Keyboard Events**: Routed based on the current `Focus`.
+/// 2. **Mouse Events**: Routed based on `clickable_regions` (Hit Testing).
+/// 3. **Special Keys**: Global overrides (like `Esc` to unfocus).
 pub fn process_input(
     codex: &Codex,
     events: Option<&[Event]>,
@@ -68,32 +82,30 @@ pub fn process_input(
         for event in events.iter() {
             match event {
                 Event::KeyEvent(key_event) => {
-                    // In any case, if the escape key is pressed, exit all special modes
+                    // Global 'Esc' handler: provides a consistent way to "back out" of any mode.
                     if key_event.code == KeyCode::Esc {
                         return Some(Focus::None);
                     }
+                    
+                    // Focus-based routing for keyboard input.
                     match focus {
                         Focus::None => {
                             handle_key_normal(key_event, env);
                             return None;
                         }
                         Focus::HeaderFileNewTextBox => {
+                            // Example of direct state mutation for a focused TextBox.
                             let state = env.ui_state.active_textbox_mut(focus)?;
                             handle_generic_textbox_input(key_event, state, codex);
                             if let Some(_) = handle_header_newfile_input(key_event, env, codex) {
-                                // Add the load/forget buttons
+                                // Side-effects: when a file is loaded, we must update other button states.
                                 add_load_n_forget_button_states(env);
-                                // Lastly close the menu
                                 let state = &mut env.ui_state.header.file_menu_sub_new_button;
                                 state.clicked = false;
                             };
                             return None;
                         }
                         Focus::Creator(any) => {
-                            // Handle the creator. Returns `Some(())` if enter was hit.
-                            // We do not save then, but we loose the focus
-                            //
-                            // The todo.txt format only allows for one line per task.
                             if handle_key_creator(key_event, env, &any, codex).is_some() {
                                 return Some(Focus::None);
                             }
@@ -111,6 +123,8 @@ pub fn process_input(
                     }
                 }
                 Event::MouseEvent(mouse_event) => {
+                    // Mouse events are handled via Hit Testing against the regions registered 
+                    // during the previous Render phase.
                     return Some(handle_mouse(
                         mouse_event,
                         env,

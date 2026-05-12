@@ -1,3 +1,10 @@
+//! # UI Composition & Rendering
+//!
+//! This module orchestrates the rendering phase of the application. 
+//!
+//! In **Talos**, rendering is "atomic": the entire UI is redrawn every frame based 
+//! on the current `UiState` and `LayoutAtlas`. 
+
 use std::collections::BTreeMap;
 
 use talos::{
@@ -15,21 +22,19 @@ use crate::{
     startup::Environment,
 };
 
-mod creator;
-mod header;
-mod list;
-mod menu;
+pub mod creator;
+pub mod header;
+pub mod list;
+pub mod menu;
 
-/// Renders the application
+/// The root rendering function.
 ///
-/// # Arguments
-/// * `canvas` - The canvas to render to
-/// * `layout_atlas` - The layout atlas for the current frame
-/// * `clickable_regions` - The clickable regions for the current frame
-/// * `last_frame_dur` - The duration of the last frame
-/// * `env` - The environment
+/// It performs the following steps:
+/// 1. Clears the `clickable_regions` map for the new frame.
+/// 2. Draws the background `Area`.
+/// 3. Sequentially calls sub-renderers for each component.
 ///
-/// The clickable regions are updated with the new clickable regions of the current rendered frame
+/// Note: The order of calls matters for Z-indexing (elements rendered later appear on top).
 pub fn render_app(
     canvas: &mut Canvas,
     codex: &Codex,
@@ -38,18 +43,21 @@ pub fn render_app(
     last_frame_dur: u128,
     env: &mut Environment,
 ) {
+    // Reset click tracking. As we render widgets, they will register their Rects here.
     clickable_regions.clear();
+    
     let entire_canvas = canvas.size_rect();
     let default_style = env.styles.get_default();
-    // While the Area below does double the rendering of the entire canvas, (drawing the bg twice) it does
-    // ensure no missed 'pixels' and simplifies the code.
-    // Hundreds of fps is fine for a to-do app.
+
+    // Fill the background.
     Area::new()
         .with_style(default_style)
         .render(canvas, entire_canvas, codex);
 
+    // Component Rendering
     render_creator(canvas, codex, layout_atlas, clickable_regions, env);
-    // Render header after creator to ensure its dropdown buttons are on top
+    
+    // The header is rendered after the creator to ensure dropdown menus overlap the creator.
     render_header(
         canvas,
         codex,
@@ -58,7 +66,9 @@ pub fn render_app(
         last_frame_dur,
         env,
     );
+    
     render_list(canvas, codex, layout_atlas, clickable_regions, env);
-    // Render menu after list to ensure its dropdown buttons are on top
+    
+    // The menu is rendered last for similar overlap reasons.
     render_menu(canvas, codex, layout_atlas, clickable_regions, env);
 }
