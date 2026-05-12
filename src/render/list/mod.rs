@@ -27,6 +27,7 @@ pub fn render_list(
     let default_style = env.styles.get_default();
     let ok_style = env.styles.get_ok();
     let error_style = env.styles.get_error();
+    let warning_style = env.styles.get_warning();
 
     // Let me be honest here. I don't really like the below code, but it is the only way I found to
     // make it work. (Without reworking `Talos` a fair bit)
@@ -186,7 +187,7 @@ pub fn render_list(
 
             let done_button_text = if task.is_done() { "Done" } else { "To Do" };
             buttons_vec.push(
-                Button::new(done_button_text, &mut state.done_button, codex).with_style(ok_style),
+                Button::new(done_button_text, &mut state.done_button, codex).with_style(ok_style).with_clicked_style(warning_style),
             );
             buttons_vec.push(
                 Button::new("Delete", &mut state.delete_button, codex).with_style(error_style),

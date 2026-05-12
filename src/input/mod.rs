@@ -9,12 +9,14 @@ use talos::{
 
 mod creator;
 mod header;
+mod list;
 mod menu;
 
 use crate::{
     input::{
         creator::{handle_key_creator, mouse::handle_creator_mouse},
         header::{handle_header_mouse, handle_header_newfile_input},
+        list::{handle_key_list, handle_list_mouse},
         menu::{handle_key_menu, handle_menu_mouse},
     },
     startup::Environment,
@@ -101,6 +103,11 @@ pub fn process_input(
                                 return Some(Focus::None);
                             }
                         }
+                        Focus::List(any) => {
+                            if handle_key_list(key_event, env, &any, codex).is_some() {
+                                return Some(Focus::None);
+                            }
+                        }
                     }
                 }
                 Event::MouseEvent(mouse_event) => {
@@ -159,6 +166,8 @@ fn handle_mouse(
                         return handle_creator_mouse(env, name, codex);
                     } else if name.contains("menu") {
                         return handle_menu_mouse(env, name, codex);
+                    } else if name.contains("list") {
+                        return handle_list_mouse(env, name, codex);
                     }
                 }
                 _ => {}
