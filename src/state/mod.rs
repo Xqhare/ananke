@@ -31,6 +31,23 @@ pub enum Focus {
     Creator(CreatorFocus),
     /// Focus on some part of the menu
     Menu(MenuFocus),
+    /// Focus on some part of the list
+    List(ListFocus),
+}
+
+/// The focus of the list
+///
+/// All members wrap the id of the task
+#[derive(Clone, Copy, Debug)]
+pub enum ListFocus {
+    /// Focus on the task table priority textbox
+    Priority(usize),
+    /// Focus on the task table inception date textbox
+    Inception(usize),
+    /// Focus on the task table completion date textbox
+    Completion(usize),
+    /// Focus on the task table text textbox
+    Task(usize),
 }
 
 /// The focus of the creator
@@ -88,6 +105,36 @@ impl UiState {
             Focus::Menu(MenuFocus::Priority) => {
                 self.menu.sort_prio_textbox.active = true;
             }
+            Focus::List(list) => match list {
+                ListFocus::Priority(id) => {
+                    self.dynamic_states
+                        .get_mut(&id)
+                        .unwrap()
+                        .prio_textbox
+                        .active = true;
+                }
+                ListFocus::Inception(id) => {
+                    self.dynamic_states
+                        .get_mut(&id)
+                        .unwrap()
+                        .inception_textbox
+                        .active = true;
+                }
+                ListFocus::Completion(id) => {
+                    self.dynamic_states
+                        .get_mut(&id)
+                        .unwrap()
+                        .completion_textbox
+                        .active = true;
+                }
+                ListFocus::Task(id) => {
+                    self.dynamic_states
+                        .get_mut(&id)
+                        .unwrap()
+                        .text_textbox
+                        .active = true;
+                }
+            },
         }
     }
 
@@ -102,6 +149,20 @@ impl UiState {
             }
             Focus::Menu(MenuFocus::Text) => Some(&mut self.menu.search_textbox),
             Focus::Menu(MenuFocus::Priority) => Some(&mut self.menu.sort_prio_textbox),
+            Focus::List(list) => match list {
+                ListFocus::Priority(id) => {
+                    Some(&mut self.dynamic_states.get_mut(&id).unwrap().prio_textbox)
+                }
+                ListFocus::Inception(id) => {
+                    Some(&mut self.dynamic_states.get_mut(&id).unwrap().inception_textbox)
+                }
+                ListFocus::Completion(id) => {
+                    Some(&mut self.dynamic_states.get_mut(&id).unwrap().completion_textbox)
+                }
+                ListFocus::Task(id) => {
+                    Some(&mut self.dynamic_states.get_mut(&id).unwrap().text_textbox)
+                }
+            },
         }
     }
 
