@@ -10,7 +10,8 @@ Ananke is a fully featured to-do app written in Rust for all PC platforms.
 ## Known issues
 
 - Crashes if height is less than 20 lines
-- Tasks are not rendered if starting outside the viewport and scrolled to. This only happens with some terminal heights. To fix, resize the terminal to a higher height and restart.
+- Tasks may not render correctly if starting outside the viewport and scrolled to. This only happens with some terminal heights, especially during resizing.
+  - To fix, resize the terminal to a higher height and restart.
 
 ## Name
 Ananke is named after the Greek goddess embodying destiny and the natural order of things. She is also associated with fulfilling ones obligations.
