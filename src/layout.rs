@@ -1,0 +1,249 @@
+//! # Responsive Layout Architecture
+//!
+//! This module defines how the terminal screen is partitioned into functional zones
+//! using the **Talos** `LayoutBuilder`. 
+//!
+//! Talos layouts are hierarchical and constraint-based, similar to Flexbox or Flutter's
+//! layout system, allowing the UI to remain responsive across different terminal sizes.
+
+use talos::{
+    LayoutBuilder,
+    atlases::LayoutAtlas,
+    layout::{Constraint, Direction, Layout, Rect},
+};
+
+use crate::keys::{
+    CREATOR_CLEAR_BUTTON, CREATOR_HELP_PAGE_LEFT, CREATOR_HELP_PAGE_RIGHT,
+    CREATOR_INCEPTION_ENTRY_TEXTBOX, CREATOR_INCEPTION_TEXT, CREATOR_PRIO_ENTRY_TEXTBOX,
+    CREATOR_PRIO_TEXT, CREATOR_RECT, CREATOR_SAVE_BUTTON, CREATOR_TASK_ENTRY_TEXTBOX,
+    CREATOR_TEXT_CONTEXT_TAGS, CREATOR_TEXT_PROJECT_TAGS, CREATOR_TEXT_SPECIAL_TAGS,
+    HEADER_EXIT_BUTTON, HEADER_FILE_MENU_BUTTON, HEADER_FILE_PATH, HEADER_FPS, HEADER_HELP_BUTTON,
+    HEADER_SAVE_BUTTON, LIST_RECT, MENU_SEARCH_PRIO_TEXT, MENU_SEARCH_PRIO_TEXTBOX,
+    MENU_SEARCH_TEXTBOX, MENU_SHOW_DROPDOWN, MENU_SHOW_DROPDOWN_TEXT, MENU_SORT_DROPDOWN,
+    MENU_SORT_DROPDOWN_TEXT,
+};
+
+/// Builds the master layout for the application.
+///
+/// It splits the available vertical space into four primary sectors:
+/// 1. **Header**: Fixed height of 3 (Buttons and Path).
+/// 2. **Creator**: Fixed height of 14 (Task entry and tags).
+/// 3. **Menu**: Fixed height of 3 (Sorting and Filtering).
+/// 4. **List**: Takes the remaining space (Min 1).
+pub fn make_layout() -> Layout {
+    LayoutBuilder::new()
+        .direction(Direction::Vertical)
+        // Constraints can be fixed (Length), relative (Percentage), or elastic (Min/Max).
+        .add_constraint(Constraint::Length(3))
+        .add_constraint(Constraint::Length(14))
+        .add_constraint(Constraint::Length(3))
+        .add_constraint(Constraint::Min(1))
+        .build()
+}
+
+/// Computes the final rectangles for every UI element based on the current screen size.
+///
+/// Returns a `LayoutAtlas`, which is a map of unique keys to their calculated `Rect`.
+/// This atlas is passed to the rendering modules to ensure alignment.
+pub fn make_frame_layout(screen_rect: &Rect, layout: &Layout) -> LayoutAtlas {
+    let basic_layout = layout.split(*screen_rect);
+    debug_assert!(basic_layout.len() == 4);
+    
+    let mut out = LayoutAtlas::new();
+    // Sub-layouts are calculated recursively by splitting the parent rectangles.
+    out.store.extend(make_header_layout(&basic_layout[0]));
+    out.store.extend(make_creator_layout(&basic_layout[1]));
+    out.store.extend(make_menu_layout(&basic_layout[2]));
+    out.store.insert(LIST_RECT.to_string(), basic_layout[3]);
+    out
+}
+
+/// Splits the menu sector horizontally.
+/// Demonstrates nested layouts and the use of Percentage vs Max/Min constraints.
+fn make_menu_layout(menu_rect: &Rect) -> Vec<(String, Rect)> {
+    let mut layout = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(50))
+        .build()
+        .split(*menu_rect);
+    debug_assert!(layout.len() == 2);
+    
+    // Manual adjustments (like padding) can be applied to the calculated Rects.
+    layout[0].width -= 2;
+    
+    let first_half = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(50))
+        .build()
+        .split(layout[0]);
+    debug_assert!(first_half.len() == 2);
+    let left_half = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Max(9))
+        .add_constraint(Constraint::Max(19))
+        .add_constraint(Constraint::Min(1))
+        .build()
+        .split(first_half[0]);
+    debug_assert!(left_half.len() == 3);
+    let right_half = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Min(1))
+        .add_constraint(Constraint::Min(1))
+        .add_constraint(Constraint::Min(1))
+        .build()
+        .split(first_half[1]);
+    debug_assert!(right_half.len() == 3);
+    vec![
+        (MENU_SHOW_DROPDOWN_TEXT.to_string(), left_half[0]),
+        (MENU_SHOW_DROPDOWN.to_string(), left_half[1]),
+        (MENU_SORT_DROPDOWN_TEXT.to_string(), left_half[2]),
+        (MENU_SORT_DROPDOWN.to_string(), right_half[0]),
+        (MENU_SEARCH_PRIO_TEXT.to_string(), right_half[1]),
+        (MENU_SEARCH_PRIO_TEXTBOX.to_string(), right_half[2]),
+        (MENU_SEARCH_TEXTBOX.to_string(), layout[1]),
+    ]
+}
+
+fn make_creator_layout(creator_rect: &Rect) -> Vec<(String, Rect)> {
+    let layout = LayoutBuilder::new()
+        .direction(Direction::Vertical)
+        .margin(1)
+        .add_constraint(Constraint::Length(3))
+        .add_constraint(Constraint::Length(3))
+        .add_constraint(Constraint::Length(3))
+        .add_constraint(Constraint::Length(3))
+        .build()
+        .split(*creator_rect);
+    debug_assert!(layout.len() == 4);
+
+    let row1 = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(50))
+        .build()
+        .split(layout[1]);
+    debug_assert!(row1.len() == 2);
+
+    let mut row1_sub = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(25))
+        .add_constraint(Constraint::Percentage(75))
+        .build()
+        .split(row1[0]);
+    debug_assert!(row1_sub.len() == 2);
+    row1_sub[0].width -= 1;
+    row1_sub[1].x -= 1;
+    row1_sub[1].width += 1;
+
+    let mut row_1_prio = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(35))
+        .add_constraint(Constraint::Percentage(65))
+        .build()
+        .split(row1_sub[0]);
+    debug_assert!(row_1_prio.len() == 2);
+    row_1_prio[1].width += 1;
+
+    let mut row_1_inception = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(30))
+        .add_constraint(Constraint::Percentage(70))
+        .build()
+        .split(row1_sub[1]);
+    debug_assert!(row_1_inception.len() == 2);
+    row_1_inception[1].x += 3;
+    row_1_inception[1].width -= 3;
+
+    let mut row2 = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(50))
+        .build()
+        .split(layout[2]);
+    debug_assert!(row2.len() == 2);
+    row2[0].width -= 2;
+
+    let row3 = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(25))
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(25))
+        .build()
+        .split(layout[3]);
+    debug_assert!(row3.len() == 3);
+
+    let mut row3_middle_buttons = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(50))
+        .build()
+        .split(row3[1]);
+    debug_assert!(row3_middle_buttons.len() == 2);
+    row3_middle_buttons[0].x -= 1;
+    row3_middle_buttons[1].x += 1;
+
+    let help_page = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .margin(1)
+        .add_constraint(Constraint::Percentage(70))
+        .add_constraint(Constraint::Percentage(30))
+        .build()
+        .split(*creator_rect);
+    debug_assert!(help_page.len() == 2);
+
+    vec![
+        (CREATOR_RECT.to_string(), *creator_rect),
+        (CREATOR_TASK_ENTRY_TEXTBOX.to_string(), layout[0]),
+        (CREATOR_PRIO_TEXT.to_string(), row_1_prio[0]),
+        (CREATOR_PRIO_ENTRY_TEXTBOX.to_string(), row_1_prio[1]),
+        (CREATOR_INCEPTION_TEXT.to_string(), row_1_inception[0]),
+        (
+            CREATOR_INCEPTION_ENTRY_TEXTBOX.to_string(),
+            row_1_inception[1],
+        ),
+        (CREATOR_TEXT_CONTEXT_TAGS.to_string(), row1[1]),
+        (CREATOR_TEXT_PROJECT_TAGS.to_string(), row2[0]),
+        (CREATOR_TEXT_SPECIAL_TAGS.to_string(), row2[1]),
+        (CREATOR_CLEAR_BUTTON.to_string(), row3_middle_buttons[0]),
+        (CREATOR_SAVE_BUTTON.to_string(), row3_middle_buttons[1]),
+        (CREATOR_HELP_PAGE_LEFT.to_string(), help_page[0]),
+        (CREATOR_HELP_PAGE_RIGHT.to_string(), help_page[1]),
+    ]
+}
+
+fn make_header_layout(header_rect: &Rect) -> Vec<(String, Rect)> {
+    let layout = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(50))
+        .add_constraint(Constraint::Percentage(50))
+        .build()
+        .split(*header_rect);
+    debug_assert!(layout.len() == 2);
+    let buttons = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(25))
+        .add_constraint(Constraint::Percentage(25))
+        .add_constraint(Constraint::Percentage(25))
+        .add_constraint(Constraint::Percentage(25))
+        .build()
+        .split(layout[0]);
+    debug_assert!(buttons.len() == 4);
+    let stats = LayoutBuilder::new()
+        .direction(Direction::Horizontal)
+        .add_constraint(Constraint::Percentage(10))
+        .add_constraint(Constraint::Percentage(20))
+        .add_constraint(Constraint::Percentage(70))
+        .build()
+        .split(layout[1]);
+    debug_assert!(stats.len() == 3);
+    vec![
+        (HEADER_FILE_MENU_BUTTON.to_string(), buttons[0]),
+        (HEADER_SAVE_BUTTON.to_string(), buttons[1]),
+        (HEADER_HELP_BUTTON.to_string(), buttons[2]),
+        (HEADER_EXIT_BUTTON.to_string(), buttons[3]),
+        (HEADER_FPS.to_string(), stats[1]),
+        (HEADER_FILE_PATH.to_string(), stats[2]),
+    ]
+}

@@ -1,109 +1,107 @@
-#![feature(const_trait_impl)]
-//! `ananke`: a todo.txt editor in pure Rust!
-//! The name Ananke is derived from the Greek goddess of necessity and inevitability.
+//! # Ananke: The Entry Point
 //!
-//! Source code can be found on [`github`].
+//! This module orchestrates the main application lifecycle, demonstrating the core pattern of the **Talos**
+//! rendering engine: a reactive, frame-based loop.
 //!
-//! [`github`]: https://github.com/Xqhare/ananke
+//! The application flow follows a strict **Startup -> Render -> Input -> Present** cycle, ensuring
+//! predictable state mutations and high-performance terminal rendering.
 
-use std::{path::{Path, PathBuf}, fs::File, ffi::OsString, io::Write, os::unix::prelude::OsStrExt, collections::HashMap, io::{BufReader, BufRead}, io, };
+use std::{collections::BTreeMap, time::Instant};
 
-/// Contains the Appstate, rendering, styling and saving.
-mod gui;
-/// Used to decode or encode a line of todo.txt formatted text.
-mod task;
+use talos::layout::Rect;
 
-/// The main function only calles the `gui::main()` function.
-fn main() {
-    // println!("Welcome to {NAME} by {AUTHOR}, v. {VERSION}");
-    gui::main();
-}
-// This short description of the todo.txt format needed someplace for quick reference, but task.rs
-// really wasn't the right place:
-    // To deconstruct a todo.txt task:
-    // Each task is on one line
-    // whitespace splits the elements
-    // if line starts with x+whitespace == completed
-        // put at bottom/do not show
-    // Priority is in the format: (A-Z)
-        // It should be discarded after task completion - for better automatic sorting of the tasks by completion, then date; Some clients transform it into a special tag e.g.
-            // pri:A
-    // Dates in format YYYY-MM-DD
-        // If completion date is specified, creation time has to be specified too.
-        // for simplicity I could just always add the creation date; - as a special tag!
-    // Normal text has no special char at the beginning, but can have any char inside it.
-        // e.g. normal text means one can also use numb3rs 456 and things: like-this
-        // IMPLEMENTAION OPTIONAL
-            // calculations are possible with the = prefix e.g.
-            // =50*32 or more complex.
-    // Project tags start with a +
-    // Context tags with @
-    // and special tags follow -> key:value
-        // here don't forget to check if it's 'word: more text' vs 'word:text'
-        // first would be text, second a special tag
-    // interesting special tags to add:
-    // - due:YYYY-MM-DD
-    // - pri:A
-    // - created:YYYY-MM-DD
+use crate::{
+    error::{AnankeError, AnankeResult},
+    input::process_input,
+    layout::make_frame_layout,
+    render::render_app,
+    startup::startup,
+    state::Focus,
+    utils::fps_sleeper,
+};
 
-/// This function checks if an appstate exists and returns a touple containing true if it does,
-/// false if not. It also returns the appstate directory, the appstate file name, and both put
-/// together, in that order, as `PathBuf`.
-pub fn check_for_persistant_appstate() -> (bool, PathBuf) {
-    let mut appstate_dir_os_string: OsString = OsString::new();
-    let appstate_file_name: OsString = OsString::from(".anankeconfig");
-    appstate_dir_os_string.push(appstate_file_name);
-    let appstate_dir_pathbuf = PathBuf::from(appstate_dir_os_string);
-    match appstate_dir_pathbuf.try_exists() {
-        Ok(result) => {
-            if result {
-                // appstate exists
-                return (true, appstate_dir_pathbuf);
-            } else {
-                // no appstate
-                return (false, appstate_dir_pathbuf);
-            }
-        },
-        _ => return (false, appstate_dir_pathbuf),
-    };
-}
-/// Creates a file, and writes the data needed for the persistant appstate, in this case only the
-/// path to the todo.txt file of the user. Takes in the path (filename) and thing to be written,
-/// the todo file path.
-pub fn create_persistant_appstate(full_appstate_path_name: PathBuf, todo_file_paths: Vec<PathBuf>) {
-    let mut new_appstate = File::create(full_appstate_path_name).expect("Something went terribly wrong, main.rs create_persistant_appstate");
-    for path in todo_file_paths {
-        let out = path.into_os_string();
-        let _ignore_error0 = new_appstate.write_all(out.as_bytes());
-        // for the newline
-        let _ignore_error1 = new_appstate.write_all(b"\n");
+mod error;
+mod input;
+mod keys;
+mod layout;
+mod render;
+mod startup;
+mod state;
+mod utils;
+
+fn main() -> AnankeResult<()> {
+    // --- 1. Startup Phase ---
+    // Initialize the environment (using Brigid for filesystem & Anansi for todo logic)
+    // and the Talos rendering engine. This phase is handled by `startup.rs`.
+    let (mut env, mut talos) = startup()?;
+
+    // Tracks regions of the terminal that are interactive (clickable). 
+    // This map is reconstructed every frame during the render phase.
+    let mut clickable_regions: BTreeMap<String, Rect> = BTreeMap::new();
+
+    // Timing metadata for frame-rate capping and delta-time calculations.
+    let mut last_frame = Instant::now();
+    let mut last_frame_dur = 0;
+
+    // The Codex holds the font and glyph information. 
+    // Cloning it here (it's an Arc/Reference internally) avoids borrow-checker issues during the loop.
+    let codex = &talos.codex().clone();
+
+    // Persistent focus tracking for text entry fields.
+    let mut focus = Focus::None;
+
+    // --- 2. Main Render Loop ---
+    // The application continues running as long as `env.run` is true.
+    while env.run {
+        // Signals the start of a new frame to the Talos engine.
+        talos.begin_frame();
+
+        // Dynamically construct the layout based on the current terminal size.
+        // Talos uses a constraint-based layout system.
+        let (canvas, _) = talos.render_ctx();
+        let frame_layout = make_frame_layout(&canvas.size_rect(), &env.gen_layout);
+
+        // --- 3. Render Phase ---
+        // Draws all UI components to the internal canvas.
+        // This also populates the `clickable_regions` map.
+        render_app(
+            canvas,
+            codex,
+            &frame_layout,
+            &mut clickable_regions,
+            last_frame_dur,
+            &mut env,
+        );
+
+        // --- 4. Input Processing Phase ---
+        // Polls the terminal for keyboard and mouse events.
+        // State mutations (like adding a task) happen strictly within this block.
+        if let Some(foci) = process_input(
+            codex,
+            talos
+                .poll_input()
+                .map_err(|err| Into::<AnankeError>::into(err))?,
+            &mut env,
+            &clickable_regions,
+            &focus,
+        ) {
+            focus = foci;
+        }
+
+        // --- 5. Presentation Phase ---
+        // Flushes the internal canvas to the actual terminal output.
+        talos
+            .present()
+            .map_err(|err| Into::<AnankeError>::into(err))?;
+
+        // --- 6. Frame Rate Control ---
+        // Caps the application to a target FPS (defined in utils) to prevent CPU saturation.
+        (last_frame, last_frame_dur) = fps_sleeper(last_frame);
     }
-    
-}
-/// Takes in a `String` and returns a Vector containing all words and the amount of times they were
-/// used ordered by that amount.
-///
-/// ## Info
-/// This is the first time I used an `HashMap`, so this explanation could be wrong:
-/// 
-/// ### Explanation
-/// The input is split by whitespace, and then put as a key into the `HashMap`. The `or_insert` part counts
-/// up if a key inside this map already exists and the count is put inside the `HashMap` aswell.
-/// The `HashMap` is then collected into a `Vec` filled with the `touples` of the `String` with its
-/// amount. 
-/// That `Vec` is then sorted by the amount.
-pub fn word_counts(input: String) -> Vec<(String, usize)> {
-    let mut word_counts: HashMap<String, usize> = HashMap::new();
-    for word in input.split_whitespace() {
-        *word_counts.entry(word.to_string()).or_insert(0) += 1;
-    }
-    let mut word_count_vec: Vec<(String, usize)> = word_counts.into_iter().collect();
-    word_count_vec.sort_by(|a, b| b.1.cmp(&a.1));
-    return word_count_vec;
-}
-/// This helper function reads a file by line from a supplied path (could be an &str of the absolute or relative path for examle).
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
-    let file = File::open(filename)?;
-    Ok(BufReader::new(file).lines())
-}
 
+    // --- 7. Cleanup & Persistance ---
+    // Ensure the todo list is saved back to disk before exiting.
+    // Brigid and Talos cleanup is handled automatically via Drop traits.
+    let _ = env.list.save();
+    Ok(())
+}
