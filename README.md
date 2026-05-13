@@ -1,5 +1,10 @@
 # Ananke
+
 Ananke is a fully featured to-do app written in Rust for all UNIX platforms.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/Xqhare/Adytum/main/Programming/rust/ananke/preview.png" alt="preview">
+</p>
 
 It follows my "All code written by me or part of rust's standard library and libc" philosophy.
 You can learn more about that [here](https://blog.xqhare.net/posts/why_solve_problems/).
