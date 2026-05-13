@@ -1,11 +1,20 @@
 # Ananke
-Ananke is a fully featured to-do app written in Rust for all PC platforms.
+Ananke is a fully featured to-do app written in Rust for all UNIX platforms.
+
+It follows my "All code written by me or part of rust's standard library and libc" philosophy.
+You can learn more about that [here](https://blog.xqhare.net/posts/why_solve_problems/).
+
+Ananke also serves as a demo for my code stack, pulling in 6 projects of mine directly.
 
 ## Features
-- Cross-platform
-- Minimal dependencies
-
-## TODO
+- _**No dependencies**_: All code is written by me or part of std.
+- Cross-platform: Linux & macOS
+- Standalone executable
+- Simple, no frills UI
+- Implements the [todo.txt](https://github.com/todotxt/todo.txt) specification
+- Supports multiple todo files
+- Supports sorting by date, priority, or inception and completion date
+- Supports search by date, priority, or text and tags
 
 ## Known issues
 
@@ -14,7 +23,11 @@ Ananke is a fully featured to-do app written in Rust for all PC platforms.
   - To fix, resize the terminal to a higher height and restart.
 
 ## Name
-Ananke is named after the Greek goddess embodying destiny and the natural order of things. She is also associated with fulfilling ones obligations.
+
+As with all my projects, Ananke is named after an ancient deity.
+Learn more about my naming scheme [here](https://blog.xqhare.net/posts/explaining_the_pantheon/).
+
+Ananke is the ancient Greek goddess embodying destiny and the natural order of things. She is also associated with fulfilling ones obligations.
 
 ### Ananke Never Abandons Needs Known Early
 The name is also a reverse acronym.
