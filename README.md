@@ -59,7 +59,7 @@ Keyboard shortcuts:
 This is the main screen:
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Xqhare/ananke/refs/heads/master/pictures/main_img.png" alt="Main screen of Ananke.", width=auto, height="250">
+<img src="https://raw.githubusercontent.com/Xqhare/ananke/refs/heads/master/pictures/main_img.png" alt="Main screen of Ananke.", width=auto, height="300">
 </p>
 
 On top, there are 4 Buttons:
@@ -86,7 +86,7 @@ Some UI elements are interactive.
 If you can enter text, the element is drawn with a double border.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Xqhare/ananke/refs/heads/master/pictures/interact_img.png" alt="Example of interactivity within Ananke.", width=auto, height="250">
+<img src="https://raw.githubusercontent.com/Xqhare/ananke/refs/heads/master/pictures/interact_img.png" alt="Example of interactivity within Ananke.", width=auto, height="300">
 </p>
 
 ## Name
