@@ -2,12 +2,13 @@ use anansi::Task;
 use talos::codex::Codex;
 
 use crate::{
+    input::creator::update_render_list,
     keys::{
         CREATOR_CLEAR_BUTTON, CREATOR_INCEPTION_ENTRY_TEXTBOX, CREATOR_PRIO_ENTRY_TEXTBOX,
         CREATOR_SAVE_BUTTON, CREATOR_TASK_ENTRY_TEXTBOX,
     },
     startup::Environment,
-    state::{CreatorFocus, Focus},
+    state::{CreatorFocus, Focus, list::make_single_task_state},
 };
 
 pub fn handle_creator_mouse(env: &mut Environment, name: &str, codex: &Codex) -> Focus {
@@ -37,6 +38,9 @@ pub fn handle_creator_mouse(env: &mut Environment, name: &str, codex: &Codex) ->
             update_creator_task(env);
             env.list.push_task(env.new_task.clone());
             env.list.save().unwrap();
+            env.render_tasks = env.list.tasks();
+            make_single_task_state(&env.new_task, codex, &mut env.ui_state.dynamic_states);
+            update_render_list(env);
             reset_creator(env, codex);
             Focus::None
         }
