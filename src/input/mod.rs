@@ -86,7 +86,7 @@ pub fn process_input(
                     if key_event.code == KeyCode::Esc {
                         return Some(Focus::None);
                     }
-                    
+
                     // Focus-based routing for keyboard input.
                     match focus {
                         Focus::None => {
@@ -123,7 +123,7 @@ pub fn process_input(
                     }
                 }
                 Event::MouseEvent(mouse_event) => {
-                    // Mouse events are handled via Hit Testing against the regions registered 
+                    // Mouse events are handled via Hit Testing against the regions registered
                     // during the previous Render phase.
                     return Some(handle_mouse(
                         mouse_event,
@@ -181,7 +181,7 @@ fn handle_mouse(
                     } else if name.contains("menu") {
                         return handle_menu_mouse(env, name, codex);
                     } else if name.contains("list") {
-                        return handle_list_mouse(env, name);
+                        return handle_list_mouse(env, name, codex);
                     }
                 }
                 _ => {}

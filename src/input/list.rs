@@ -17,18 +17,32 @@ use crate::{
     state::{Focus, ListFocus},
 };
 
-pub fn handle_list_mouse(env: &mut Environment, name: &str) -> Focus {
+pub fn handle_list_mouse(env: &mut Environment, name: &str, codex: &Codex) -> Focus {
     let id = name.split("_").last().unwrap().parse::<usize>().unwrap();
     if name.starts_with(LIST_ROW_DONE_BUTTON_BASE) {
         let mut task = env.list.get(id).unwrap().clone();
         if task.is_done() {
             task = task.undone();
+            env.ui_state
+                .dynamic_states
+                .get_mut(&id)
+                .unwrap()
+                .completion_textbox
+                .text
+                .set_content("", codex);
         } else {
             let mut date = Utc::now();
             date.with_auto_offset();
             task = task
                 .done(Some(Date::from(date.date().to_string())))
                 .unwrap();
+            env.ui_state
+                .dynamic_states
+                .get_mut(&id)
+                .unwrap()
+                .completion_textbox
+                .text
+                .set_content(date.date().to_string(), codex);
         }
 
         env.list.update_task(task, id).unwrap();
