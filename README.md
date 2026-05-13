@@ -3,7 +3,7 @@
 Ananke is a fully featured to-do app written in Rust for all UNIX platforms.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/Xqhare/ananke/refs/heads/master/pictures/logo.jpeg" alt="preview">
+<img src="https://raw.githubusercontent.com/Xqhare/ananke/refs/heads/master/pictures/logo.jpeg" alt="Ananke logo. Golden symbols, loosely ressembling hyroglyphs.", width=auto, height="450">
 </p>
 
 It follows my "All code written by me or part of rust's standard library and libc" philosophy.
